@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Link, useNavigate, useLocation } from "react-router-dom";
-import { Search, ShoppingBag, User, Menu, X, Heart } from "lucide-react";
+import { Search, ShoppingBag, User, Menu, X, ShoppingCart } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useAuth } from "../context/AuthContext";
@@ -44,10 +44,12 @@ const Header = () => {
         <div className="flex items-center justify-between h-16">
           {/* Logo */}
           <Link to="/" className="flex items-center space-x-2">
-            <div className="w-8 h-8 bg-gradient-to-br from-rose-400 to-pink-500 rounded-full flex items-center justify-center">
-              <span className="text-white font-bold text-sm">B</span>
-            </div>
-            <span className="text-xl font-bold bg-gradient-to-r from-rose-500 to-pink-600 bg-clip-text text-transparent">
+            <img
+              src="/beauty.svg"
+              alt="The Beauty Logo"
+              className="w-12 h-12 rounded-full object-cover"
+            />
+            <span className="text-xl font-bold bg-gradient-to-r from-red-400 to-red-600 bg-clip-text text-transparent">
               The Beauty
             </span>
           </Link>
@@ -140,14 +142,17 @@ const Header = () => {
                 </div>
               </div>
             ) : (
-              <div className="flex items-center space-x-2">
+              <div className="flex items-center space-x-2 ">
                 <Link to="/login">
-                  <Button variant="ghost" size="sm">
+                  <Button variant="ghost" size="sm" className="cursor-pointer">
                     Sign In
                   </Button>
                 </Link>
                 <Link to="/register">
-                  <Button size="sm" className="bg-rose-500 hover:bg-rose-600">
+                  <Button
+                    size="sm"
+                    className="bg-red-500 hover:bg-pink-600 cursor-pointer"
+                  >
                     Sign Up
                   </Button>
                 </Link>
