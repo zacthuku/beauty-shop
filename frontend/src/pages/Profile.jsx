@@ -13,7 +13,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useAuth } from "../context/AuthContext";
-import { Toaster } from "sonner";
+import { toast } from "sonner";
 
 const Profile = () => {
   const { user, logout } = useAuth();
@@ -35,7 +35,7 @@ const Profile = () => {
   }
 
   const handleSave = () => {
-    // In a real app, this would update the user in the backend
+
     toast({
       title: "Profile updated",
       description: "Your profile has been updated successfully.",
@@ -69,7 +69,7 @@ const Profile = () => {
         "Are you sure you want to delete your account? This action cannot be undone."
       )
     ) {
-      // In a real app, this would delete the user account
+   
       logout();
       toast({
         title: "Account deleted",

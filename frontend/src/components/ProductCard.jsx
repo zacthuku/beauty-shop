@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
-import { Star, ShoppingBag, Heart, ShoppingCart } from "lucide-react";
+import { Star, Heart, ShoppingCart } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useCart } from "../context/CartContext";
 import { toast } from "sonner";
