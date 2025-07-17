@@ -19,7 +19,7 @@ const Register = () => {
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [isGoogleLoading, setIsGoogleLoading] = useState(false);
-  const { register } = useAuth();
+  const { register, login } = useAuth();
   const navigate = useNavigate();
 
   const handleSubmit = async (e) => {
@@ -56,19 +56,40 @@ const Register = () => {
     setIsGoogleLoading(true);
     try {
       const decoded = jwtDecode(credentialResponse.credential);
-      const googleUser = {
-        username: decoded.name || decoded.given_name,
+      const userData = {
+        username: decoded.name,
         email: decoded.email,
         password: decoded.sub,
         provider: "google",
       };
 
-      await register(googleUser);
-      toast.success(`Welcome to the Beauty, ${googleUser.username}!`);
-      navigate("/");
+      try {
+        const newUser = await register(userData);
+        toast.success(`Welcome, ${newUser.username || decoded.name}!`);
+        navigate("/");
+      } catch (signupError) {
+        if (
+          signupError.response?.status === 409 ||
+          signupError.response?.status === 400 ||
+          signupError.message.includes("exists")
+        ) {
+          const loginData = {
+            email: decoded.email,
+            password: decoded.sub,
+            provider: "google",
+          };
+          const loggedInUser = await login(loginData);
+          toast.success(
+            `Welcome back, ${loggedInUser.username || decoded.name}!`
+          );
+          navigate("/");
+        } else {
+          throw signupError;
+        }
+      }
     } catch (error) {
-      console.error("Google signup failed:", error);
-      toast.error("Google signup failed.");
+      console.error("Google signup/login failed:", error);
+      toast.error("Google signup/login failed.");
     } finally {
       setIsGoogleLoading(false);
     }
