@@ -59,7 +59,7 @@ const Register = () => {
       const googleUser = {
         username: decoded.name || decoded.given_name,
         email: decoded.email,
-        password: decoded.sub, // Use Google ID as a placeholder password
+        password: decoded.sub,
         provider: "google",
       };
 
