@@ -5,6 +5,8 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useAuth } from "../context/AuthContext";
 import { toast } from "sonner";
+import { GoogleLogin } from "@react-oauth/google";
+import { jwtDecode } from "jwt-decode";
 
 const Register = () => {
   const [formData, setFormData] = useState({
@@ -16,6 +18,7 @@ const Register = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const [isGoogleLoading, setIsGoogleLoading] = useState(false);
   const { register } = useAuth();
   const navigate = useNavigate();
 
@@ -23,61 +26,51 @@ const Register = () => {
     e.preventDefault();
     setIsLoading(true);
 
-    // Validation
     if (formData.password !== formData.confirmPassword) {
-      toast({
-        title: "Password mismatch",
-        description: "Passwords do not match. Please try again.",
-        variant: "destructive",
-      });
+      toast.error("Passwords do not match.");
       setIsLoading(false);
       return;
     }
 
     if (formData.password.length < 6) {
-      toast({
-        title: "Password too short",
-        description: "Password must be at least 6 characters long.",
-        variant: "destructive",
-      });
+      toast.error("Password must be at least 6 characters.");
       setIsLoading(false);
       return;
     }
 
     try {
-      // Check if user already exists
-      const existingUsers = JSON.parse(
-        localStorage.getItem("beautyApp_users") || "[]"
-      );
-      const userExists = existingUsers.some(
-        (user) =>
-          user.username === formData.username || user.email === formData.email
-      );
+      const result = await register(formData);
 
-      if (userExists) {
-        toast({
-          title: "User already exists",
-          description: "A user with this username or email already exists.",
-          variant: "destructive",
-        });
-        setIsLoading(false);
-        return;
-      }
-
-      const user = register(formData);
-      toast({
-        title: "Account created!",
-        description: `Welcome to the Beauty, ${user.username}!`,
-      });
+      toast.success(
+        result.message || `Welcome to the Beauty, ${formData.username}!`
+      );
       navigate("/");
     } catch (error) {
-      toast({
-        title: "Registration failed",
-        description: "An error occurred while creating your account.",
-        variant: "destructive",
-      });
+      toast.error(error.message || "Registration failed.");
     } finally {
       setIsLoading(false);
+    }
+  };
+
+  const handleGoogleSignup = async (credentialResponse) => {
+    setIsGoogleLoading(true);
+    try {
+      const decoded = jwtDecode(credentialResponse.credential);
+      const googleUser = {
+        username: decoded.name || decoded.given_name,
+        email: decoded.email,
+        password: decoded.sub, // Use Google ID as a placeholder password
+        provider: "google",
+      };
+
+      await register(googleUser);
+      toast.success(`Welcome to the Beauty, ${googleUser.username}!`);
+      navigate("/");
+    } catch (error) {
+      console.error("Google signup failed:", error);
+      toast.error("Google signup failed.");
+    } finally {
+      setIsGoogleLoading(false);
     }
   };
 
@@ -103,6 +96,27 @@ const Register = () => {
               Create Account
             </h1>
             <p className="text-sm text-gray-600">Join our lovely community</p>
+          </div>
+
+          {/* Google Signup Button */}
+          <div className="flex justify-center mb-4">
+            <GoogleLogin
+              onSuccess={handleGoogleSignup}
+              onError={() => toast.error("Google login failed")}
+              theme="outline"
+              text="signup_with"
+              size="medium"
+            />
+          </div>
+
+          {/* Divider */}
+          <div className="relative mb-4">
+            <div className="absolute inset-0 flex items-center">
+              <div className="w-full border-t border-gray-300"></div>
+            </div>
+            <div className="relative flex justify-center text-xs uppercase">
+              <span className="bg-white px-2 text-gray-500">Or</span>
+            </div>
           </div>
 
           {/* Registration Form */}
@@ -241,7 +255,6 @@ const Register = () => {
             </Button>
           </form>
 
-          {/* Sign In Link */}
           <div className="mt-4 text-center">
             <p className="text-xs text-gray-600">
               Already have an account?{" "}
