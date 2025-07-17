@@ -1,7 +1,11 @@
 from flask import Blueprint, request, jsonify
 from flask_jwt_extended import jwt_required, get_jwt_identity
-from models import db, CartItem, Product, Order, OrderItem, Invoice
+from models import db, CartItem, Product, Order, OrderItem, Invoice, User
 from datetime import datetime
+from flask_mail import Message
+from mail_config import mail
+from flask import current_app
+import os
 import uuid
 
 order_bp = Blueprint('order', __name__, url_prefix='/orders')
@@ -47,7 +51,7 @@ def checkout():
     total_price = sum(item.product.price * item.quantity for item in cart_items)
     order = Order(
         user_id=user_id,
-        status='Processing',
+        status='Pending Payment',
         total_price=total_price,
         delivery_address=data.get('delivery_address'),
         billing_info=data.get('billing_info')
@@ -65,12 +69,57 @@ def checkout():
         db.session.add(order_item)
         db.session.delete(item)
 
-    
+    invoice_number = str(uuid.uuid4())[:8]
+    pdf_url = f"/invoices/{order.id}.pdf"  
     invoice = Invoice(
-        invoice_number=str(uuid.uuid4())[:8],
+        invoice_number=invoice_number,
         order_id=order.id,
-        pdf_url=f"/invoices/{order.id}.pdf"
+        pdf_url=pdf_url
     )
     db.session.add(invoice)
     db.session.commit()
+
+    items_details = "\n".join(
+        f"- {item.product.name} × {item.quantity} @ Ksh {item.product.price:.2f}"
+        for item in cart_items)
+
+    user = User.query.get(user_id)
+    msg = Message(
+    subject=f" Order Confirmation - Order #{order.id} | Beauty Shop",
+    recipients=[user.email],
+    body=f"""Hello {user.username},
+
+Thank you for your order with Beauty Shop! 
+
+ Order ID: {order.id}  
+ Status: {order.status}  
+ Total Amount: Ksh {total_price:.2f}
+
+ Items in your order:
+{items_details}
+
+Your order is currently marked as *Pending Payment*.
+
+To complete your order, please make payment via M-Pesa:
+
+📲 M-Pesa Payment Instructions:
+- Go to M-Pesa > Lipa na M-Pesa > Paybill
+- Paybill Number: 123456
+- Account Number: ORDER{order.id}
+- Amount: Ksh {total_price:.2f}
+
+Once payment is confirmed, we will begin processing your order.
+
+If you have any questions or need assistance, contact us at support@beautyshop.co.ke.
+
+We truly appreciate your business!
+
+Warm regards,  
+Beauty Shop Team  
+www.beautyshop.co.ke
+"""
+)
+
+    mail.send(msg)
+
     return jsonify(order.to_dict()), 201
