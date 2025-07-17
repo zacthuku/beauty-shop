@@ -60,7 +60,7 @@ export const AuthProvider = ({ children }) => {
     setUser(null);
     localStorage.removeItem("beautyApp_user");
     localStorage.removeItem("beautyApp_token");
-    localStorage.removeItem("beautyApp_cart"); // if you use cart
+    localStorage.removeItem("beautyApp_cart");
   };
 
   const register = async (userData) => {
@@ -76,10 +76,11 @@ export const AuthProvider = ({ children }) => {
       throw new Error(data.error || "Registration failed");
     }
 
-    localStorage.setItem("token", data.token);
-    setUser(data.user); // you need to define this in your AuthContext
+    localStorage.setItem("beautyApp_user", JSON.stringify(data.user));
+    localStorage.setItem("beautyApp_token", data.access_token);
+    setUser(data.user);
 
-    return data;
+    return data.user;
   };
 
   const value = {
