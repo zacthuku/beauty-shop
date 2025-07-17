@@ -14,7 +14,7 @@ class User(db.Model):
     username = db.Column(db.String(80), unique=True, nullable=False)
     email = db.Column(db.String(120), unique=True, nullable=False)
     password_hash = db.Column(db.Text, nullable=False)
-    role = db.Column(db.String(10), nullable=False)
+    role = db.Column(db.String(10), nullable=False, default='customer')
     blocked= db.Column(db.Boolean, default=False)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
 
