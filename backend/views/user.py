@@ -1,8 +1,12 @@
 from flask import Blueprint, jsonify, request
 from flask_jwt_extended import jwt_required, get_jwt_identity
 from flask_mail import Message
+from werkzeug.security import generate_password_hash
+import random
+import string
+
 from mail_config import mail
-from models import User
+from models import db, User
 
 user_bp = Blueprint('user', __name__, url_prefix='/users')
 
@@ -45,3 +49,47 @@ def send_email_to_user(user_id):
         return jsonify({"message": f"Email sent to {user.email}"}), 200
     except Exception as e:
         return jsonify({"error": f"Failed to send email: {str(e)}"}), 500
+
+# ✅ New route: register order_manager (admin only)
+@user_bp.route('/register/order_manager', methods=['POST'])
+@jwt_required()
+def register_order_manager():
+    identity = get_jwt_identity()
+    
+    # Check admin privileges
+    if identity['role'] != 'admin':
+        return jsonify({"error": "Only admin can register order managers"}), 403
+
+    data = request.get_json()
+    email = data.get('email')
+
+    if not email:
+        return jsonify({"error": "Email is required"}), 400
+
+    existing = User.query.filter_by(email=email).first()
+    if existing:
+        return jsonify({"error": "User with this email already exists"}), 409
+
+    # Generate a one-time password
+    otp = ''.join(random.choices(string.ascii_letters + string.digits, k=10))
+    hashed_password = generate_password_hash(otp)
+
+    # Create user with role "order_manager"
+    new_user = User(email=email, password=hashed_password, role='order_manager')
+    db.session.add(new_user)
+    db.session.commit()
+
+    # Send OTP to email
+    try:
+        msg = Message(
+            subject="Welcome to Beauty Shop - Order Manager Access",
+            recipients=[email],
+            body=f"Hello,\n\nYou have been registered as an Order Manager.\nYour temporary password is: {otp}\n\nPlease log in and change your password immediately."
+        )
+        mail.send(msg)
+        return jsonify({
+            "message": f"Order Manager registered and email sent to {email}",
+            "email": email
+        }), 201
+    except Exception as e:
+        return jsonify({"error": f"User created but failed to send email: {str(e)}"}), 500
