@@ -5,7 +5,8 @@ from models import db, User, TokenBlocklist
 from datetime import timedelta, datetime
 import uuid
 
-auth_bp = Blueprint('auth', __name__, url_prefix='/auth')
+auth_bp = Blueprint('auth', __name__)
+
 
 @auth_bp.route('/register', methods=['POST'])
 def register():
