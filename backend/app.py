@@ -18,6 +18,7 @@ app.register_blueprint(user_bp)
 app.register_blueprint(product_bp)
 app.register_blueprint(order_bp)
 app.register_blueprint(category_bp)
+app.register_blueprint(cart_bp)
 
 @app.route('/')
 def index():
