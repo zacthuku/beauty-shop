@@ -1,6 +1,6 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { CreditCard, Lock, MapPin, User, Mail, Phone } from "lucide-react";
+import { CreditCard, Lock, MapPin } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
@@ -27,10 +27,15 @@ const Checkout = () => {
     phone: "",
     address: "",
     city: "",
-    state: "",
-    zipCode: "",
-    country: "US",
+    town: "",
+    country: "Kenya",
   });
+
+  useEffect(() => {
+    if (!user) {
+      navigate("/login");
+    }
+  }, [user, navigate]);
 
   const [paymentInfo, setPaymentInfo] = useState({
     cardNumber: "",
@@ -39,12 +44,9 @@ const Checkout = () => {
     nameOnCard: "",
   });
 
-  const [billingAddressSame, setBillingAddressSame] = useState(true);
-
   const subtotal = getCartTotal();
-  const shipping = subtotal >= 75 ? 0 : 7.99;
-  const tax = subtotal * 0.08;
-  const total = subtotal + shipping + tax;
+  const shipping = subtotal >= 1500 ? 0 : 150;
+  const total = subtotal + shipping;
 
   const handleShippingChange = (e) => {
     setShippingInfo({
@@ -56,7 +58,6 @@ const Checkout = () => {
   const handlePaymentChange = (e) => {
     let value = e.target.value;
 
-    // Format card number
     if (e.target.name === "cardNumber") {
       value = value
         .replace(/\s/g, "")
@@ -65,13 +66,11 @@ const Checkout = () => {
       if (value.length > 19) return;
     }
 
-    // Format expiry date
     if (e.target.name === "expiryDate") {
       value = value.replace(/\D/g, "").replace(/(\d{2})(\d)/, "$1/$2");
       if (value.length > 5) return;
     }
 
-    // Format CVV
     if (e.target.name === "cvv") {
       value = value.replace(/\D/g, "");
       if (value.length > 4) return;
@@ -87,18 +86,15 @@ const Checkout = () => {
     e.preventDefault();
     setIsProcessing(true);
 
-    // Simulate payment processing
     try {
       await new Promise((resolve) => setTimeout(resolve, 2000));
 
-      // Create order
       const order = {
         id: Date.now(),
         userId: user?.id || null,
         items: cartItems,
         subtotal,
         shipping,
-        tax,
         total,
         shippingInfo,
         paymentInfo: {
@@ -109,14 +105,12 @@ const Checkout = () => {
         createdAt: new Date().toISOString(),
       };
 
-      // Save order to localStorage
       const existingOrders = JSON.parse(
         localStorage.getItem("beautyApp_orders") || "[]"
       );
       existingOrders.push(order);
       localStorage.setItem("beautyApp_orders", JSON.stringify(existingOrders));
 
-      // Clear cart
       clearCart();
 
       toast({
@@ -143,6 +137,56 @@ const Checkout = () => {
     return null;
   }
 
+  const counties = [
+    "Baringo",
+    "Bomet",
+    "Bungoma",
+    "Busia",
+    "Elgeyo Marakwet",
+    "Embu",
+    "Garissa",
+    "Homa Bay",
+    "Isiolo",
+    "Kajiado",
+    "Kakamega",
+    "Kericho",
+    "Kiambu",
+    "Kilifi",
+    "Kirinyaga",
+    "Kisii",
+    "Kisumu",
+    "Kitui",
+    "Kwale",
+    "Laikipia",
+    "Lamu",
+    "Machakos",
+    "Makueni",
+    "Mandera",
+    "Marsabit",
+    "Meru",
+    "Migori",
+    "Mombasa",
+    "Murang'a",
+    "Nairobi",
+    "Nakuru",
+    "Nandi",
+    "Narok",
+    "Nyamira",
+    "Nyandarua",
+    "Nyeri",
+    "Samburu",
+    "Siaya",
+    "Taita Taveta",
+    "Tana River",
+    "Tharaka Nithi",
+    "Trans Nzoia",
+    "Turkana",
+    "Uasin Gishu",
+    "Vihiga",
+    "Wajir",
+    "West Pokot",
+  ];
+
   return (
     <div className="min-h-screen bg-gray-50">
       <div className="container mx-auto px-4 py-8">
@@ -150,9 +194,7 @@ const Checkout = () => {
 
         <form onSubmit={handleSubmit}>
           <div className="grid lg:grid-cols-2 gap-8">
-            {/* Left Column - Forms */}
             <div className="space-y-8">
-              {/* Shipping Information */}
               <div className="bg-white rounded-lg p-6 shadow-sm">
                 <h2 className="text-xl font-semibold text-gray-900 mb-6 flex items-center">
                   <MapPin className="h-5 w-5 mr-2 text-rose-500" />
@@ -169,7 +211,6 @@ const Checkout = () => {
                       required
                       value={shippingInfo.firstName}
                       onChange={handleShippingChange}
-                      placeholder="John"
                     />
                   </div>
                   <div>
@@ -181,7 +222,6 @@ const Checkout = () => {
                       required
                       value={shippingInfo.lastName}
                       onChange={handleShippingChange}
-                      placeholder="Doe"
                     />
                   </div>
                 </div>
@@ -197,7 +237,6 @@ const Checkout = () => {
                       required
                       value={shippingInfo.email}
                       onChange={handleShippingChange}
-                      placeholder="john@example.com"
                     />
                   </div>
                   <div>
@@ -209,7 +248,7 @@ const Checkout = () => {
                       required
                       value={shippingInfo.phone}
                       onChange={handleShippingChange}
-                      placeholder="(555) 123-4567"
+                      placeholder="+2547..."
                     />
                   </div>
                 </div>
@@ -223,63 +262,48 @@ const Checkout = () => {
                     required
                     value={shippingInfo.address}
                     onChange={handleShippingChange}
-                    placeholder="123 Main Street"
                   />
                 </div>
 
                 <div className="grid grid-cols-3 gap-4 mt-4">
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-2">
-                      City
-                    </label>
-                    <Input
-                      name="city"
-                      required
-                      value={shippingInfo.city}
-                      onChange={handleShippingChange}
-                      placeholder="New York"
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
-                      State
+                      County
                     </label>
                     <Select
-                      value={shippingInfo.state}
+                      value={shippingInfo.city}
                       onValueChange={(value) =>
-                        setShippingInfo({ ...shippingInfo, state: value })
+                        setShippingInfo({ ...shippingInfo, city: value })
                       }
                     >
                       <SelectTrigger>
-                        <SelectValue placeholder="Select state" />
+                        <SelectValue placeholder="Select county" />
                       </SelectTrigger>
                       <SelectContent>
-                        <SelectItem value="AL">Alabama</SelectItem>
-                        <SelectItem value="AK">Alaska</SelectItem>
-                        <SelectItem value="AZ">Arizona</SelectItem>
-                        <SelectItem value="CA">California</SelectItem>
-                        <SelectItem value="FL">Florida</SelectItem>
-                        <SelectItem value="NY">New York</SelectItem>
-                        <SelectItem value="TX">Texas</SelectItem>
+                        {counties.map((county) => (
+                          <SelectItem key={county} value={county}>
+                            {county}
+                          </SelectItem>
+                        ))}
                       </SelectContent>
                     </Select>
                   </div>
-                  <div>
+
+                  <div className="col-span-2">
                     <label className="block text-sm font-medium text-gray-700 mb-2">
-                      ZIP Code
+                      Town
                     </label>
                     <Input
-                      name="zipCode"
+                      name="town"
                       required
-                      value={shippingInfo.zipCode}
+                      value={shippingInfo.town}
                       onChange={handleShippingChange}
-                      placeholder="10001"
+                      placeholder=""
                     />
                   </div>
                 </div>
               </div>
 
-              {/* Payment Information */}
               <div className="bg-white rounded-lg p-6 shadow-sm">
                 <h2 className="text-xl font-semibold text-gray-900 mb-6 flex items-center">
                   <CreditCard className="h-5 w-5 mr-2 text-rose-500" />
@@ -296,7 +320,6 @@ const Checkout = () => {
                       required
                       value={paymentInfo.cardNumber}
                       onChange={handlePaymentChange}
-                      placeholder="1234 5678 9012 3456"
                     />
                   </div>
 
@@ -310,7 +333,6 @@ const Checkout = () => {
                         required
                         value={paymentInfo.expiryDate}
                         onChange={handlePaymentChange}
-                        placeholder="MM/YY"
                       />
                     </div>
                     <div>
@@ -322,7 +344,6 @@ const Checkout = () => {
                         required
                         value={paymentInfo.cvv}
                         onChange={handlePaymentChange}
-                        placeholder="123"
                       />
                     </div>
                   </div>
@@ -336,7 +357,6 @@ const Checkout = () => {
                       required
                       value={paymentInfo.nameOnCard}
                       onChange={handlePaymentChange}
-                      placeholder="John Doe"
                     />
                   </div>
                 </div>
@@ -350,14 +370,12 @@ const Checkout = () => {
               </div>
             </div>
 
-            {/* Right Column - Order Summary */}
             <div>
               <div className="bg-white rounded-lg p-6 shadow-sm sticky top-4">
                 <h2 className="text-xl font-semibold text-gray-900 mb-6">
                   Order Summary
                 </h2>
 
-                {/* Cart Items */}
                 <div className="space-y-4 mb-6">
                   {cartItems.map((item) => (
                     <div key={item.id} className="flex items-center space-x-3">
@@ -375,35 +393,31 @@ const Checkout = () => {
                         </p>
                       </div>
                       <span className="text-sm font-medium text-gray-900">
-                        Kes{item.price * item.quantity}
+                        Kes {item.price * item.quantity}
                       </span>
                     </div>
                   ))}
                 </div>
 
-                {/* Order Totals */}
                 <div className="space-y-3 border-t pt-4">
                   <div className="flex justify-between">
                     <span className="text-gray-600">Subtotal</span>
-                    <span className="font-medium">${subtotal.toFixed(2)}</span>
+                    <span className="font-medium">
+                      Kes&nbsp;{subtotal.toFixed(2)}
+                    </span>
                   </div>
                   <div className="flex justify-between">
                     <span className="text-gray-600">Shipping</span>
                     <span className="font-medium">
-                      {shipping === 0 ? "FREE" : `$${shipping.toFixed(2)}`}
+                      {shipping === 0 ? "FREE" : `Kes ${shipping.toFixed(2)}`}
                     </span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-gray-600">Tax</span>
-                    <span className="font-medium">${tax.toFixed(2)}</span>
                   </div>
                   <div className="flex justify-between text-lg font-bold border-t pt-3">
                     <span>Total</span>
-                    <span>${total.toFixed(2)}</span>
+                    <span>Kes&nbsp;{total.toFixed(2)}</span>
                   </div>
                 </div>
 
-                {/* Place Order Button */}
                 <Button
                   type="submit"
                   disabled={isProcessing}
@@ -411,12 +425,11 @@ const Checkout = () => {
                 >
                   {isProcessing
                     ? "Processing..."
-                    : `Place Order - $${total.toFixed(2)}`}
+                    : `Place Order - Ksh ${total.toFixed(2)}`}
                 </Button>
 
                 <p className="text-xs text-gray-500 text-center mt-4">
-                  By placing your order, you agree to our Terms of Service and
-                  Privacy Policy
+                  By placing your order, you agree to our Terms of Service
                 </p>
               </div>
             </div>
