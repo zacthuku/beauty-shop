@@ -5,7 +5,7 @@ from models import db, User, TokenBlocklist
 from datetime import timedelta, datetime
 import uuid
 
-auth_bp = Blueprint('auth', __name__)
+auth_bp = Blueprint('auth', __name__,url_prefix='/auth')
 
 
 @auth_bp.route('/register', methods=['POST'])
@@ -13,7 +13,8 @@ def register():
     data = request.get_json()
     if User.query.filter_by(email=data['email']).first():
         return jsonify({"error": "Email already exists"}), 400
-
+    if User.query.filter_by(username=data['username']).first():
+        return jsonify({"error": "Username already exists"}), 400
     user = User(
         username=data['username'],
         email=data['email'],
