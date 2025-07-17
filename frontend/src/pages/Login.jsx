@@ -4,16 +4,17 @@ import { Eye, EyeOff, Mail, Lock } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useAuth } from "../context/AuthContext";
-import { Toaster, toast } from "sonner";
+import { toast } from "sonner";
+import { GoogleLogin } from "@react-oauth/google";
+import { jwtDecode } from "jwt-decode";
 
 const Login = () => {
-  const [formData, setFormData] = useState({
-    username: "",
-    password: "",
-  });
+  const [formData, setFormData] = useState({ email: "", password: "" });
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
-  const { authenticateUser } = useAuth();
+  const [isGoogleLoading, setIsGoogleLoading] = useState(false);
+
+  const { login } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
 
@@ -22,45 +23,48 @@ const Login = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     setIsLoading(true);
-
     try {
-      const user = authenticateUser(formData.username, formData.password);
+      const user = await login(formData);
 
-      if (user) {
-        toast({
-          title: "Welcome back!",
-          description: ` ${user.username}`,
-        });
-        navigate(from, { replace: true });
-      } else {
-        toast({
-          title: "Login failed",
-          description: "Invalid username or password. Please try again.",
-          variant: "destructive",
-        });
-      }
+      toast.success(`Welcome back, ${user.username}!`);
+      navigate(from, { replace: true });
     } catch (error) {
-      toast({
-        title: "Error",
-        description: "An error occurred. Please try again.",
-        variant: "destructive",
-      });
+      toast.error(error.message || "Invalid email or password");
     } finally {
       setIsLoading(false);
     }
   };
 
+  const handleGoogleLogin = async (credentialResponse) => {
+    setIsGoogleLoading(true);
+    try {
+      const decoded = jwtDecode(credentialResponse.credential);
+      const googleUser = {
+        email: decoded.email,
+        password: decoded.sub, // Use Google ID as password
+        provider: "google",
+      };
+
+      const user = await login(googleUser);
+      toast.success(`Welcome back, ${user.username || decoded.name}!`);
+      navigate(from, { replace: true });
+    } catch (error) {
+      console.error("Google login failed:", error);
+      toast.error("Google login failed.");
+    } finally {
+      setIsGoogleLoading(false);
+    }
+  };
+
   const handleChange = (e) => {
-    setFormData({
-      ...formData,
-      [e.target.name]: e.target.value,
-    });
+    setFormData((prev) => ({ ...prev, [e.target.name]: e.target.value }));
   };
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-rose-50 to-pink-50 flex items-center justify-center p-4">
       <div className="w-full max-w-sm">
         <div className="bg-white rounded-xl shadow-lg p-6">
+          {/* Header */}
           <div className="text-center mb-6">
             <Link to="/" className="inline-flex items-center space-x-2 mb-3">
               <span className="text-xl font-bold bg-gradient-to-r from-rose-500 to-pink-600 bg-clip-text text-transparent">
@@ -73,26 +77,47 @@ const Login = () => {
             <p className="text-sm text-gray-600">Sign in to your account</p>
           </div>
 
-          {/* Login Form */}
+          {/* Google Login Button */}
+          <div className="flex justify-center mb-4">
+            <GoogleLogin
+              onSuccess={handleGoogleLogin}
+              onError={() => toast.error("Google login failed")}
+              theme="outline"
+              text="signin_with"
+              size="medium"
+            />
+          </div>
+
+          {/* Divider */}
+          <div className="relative mb-4">
+            <div className="absolute inset-0 flex items-center">
+              <div className="w-full border-t border-gray-300"></div>
+            </div>
+            <div className="relative flex justify-center text-xs uppercase">
+              <span className="bg-white px-2 text-gray-500">Or</span>
+            </div>
+          </div>
+
+          {/* Form */}
           <form onSubmit={handleSubmit} className="space-y-4">
             <div>
               <label
-                htmlFor="username"
+                htmlFor="email"
                 className="block text-xs font-medium text-gray-700 mb-1"
               >
-                Username
+                Email
               </label>
               <div className="relative">
                 <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
                 <Input
-                  id="username"
-                  name="username"
-                  type="text"
+                  id="email"
+                  name="email"
+                  type="email"
                   required
-                  value={formData.username}
+                  value={formData.email}
                   onChange={handleChange}
                   className="pl-9 h-9 text-sm"
-                  placeholder="Enter your username"
+                  placeholder="Enter your email"
                 />
               </div>
             </div>

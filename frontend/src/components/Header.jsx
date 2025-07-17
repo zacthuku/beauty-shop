@@ -1,27 +1,17 @@
 import { useState } from "react";
 import { Link, useNavigate, useLocation } from "react-router-dom";
-import { Search, ShoppingBag, User, Menu, X, ShoppingCart } from "lucide-react";
+import { ShoppingBag, User, Menu, X, ShoppingCart } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import { useAuth } from "../context/AuthContext";
 import { useCart } from "../context/CartContext";
 import { categories } from "../data/products";
 
 const Header = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
-  const [searchQuery, setSearchQuery] = useState("");
   const { user, logout } = useAuth();
   const { getCartItemsCount } = useCart();
   const navigate = useNavigate();
   const location = useLocation();
-
-  const handleSearch = (e) => {
-    e.preventDefault();
-    if (searchQuery.trim()) {
-      navigate(`/products?search=${encodeURIComponent(searchQuery.trim())}`);
-      setSearchQuery("");
-    }
-  };
 
   const handleLogout = () => {
     logout();
@@ -81,23 +71,6 @@ const Header = () => {
             ))}
           </nav>
 
-          {/* Search Bar */}
-          <form
-            onSubmit={handleSearch}
-            className="hidden md:flex items-center space-x-2 flex-1 max-w-md mx-8"
-          >
-            <div className="relative flex-1">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
-              <Input
-                type="text"
-                placeholder="Search products..."
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                className="pl-10 border-gray-200 focus:border-rose-300 focus:ring-rose-200"
-              />
-            </div>
-          </form>
-
           {/* Actions */}
           <div className="flex items-center space-x-4">
             {/* Cart */}
@@ -105,7 +78,7 @@ const Header = () => {
               to="/cart"
               className="relative p-2 text-gray-700 hover:text-rose-600 transition-colors"
             >
-              <ShoppingBag className="h-6 w-6" />
+              <ShoppingCart className="h-6 w-6" />
               {getCartItemsCount() > 0 && (
                 <span className="absolute -top-1 -right-1 bg-rose-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center">
                   {getCartItemsCount()}
@@ -173,20 +146,6 @@ const Header = () => {
               )}
             </Button>
           </div>
-        </div>
-
-        {/* Mobile Search */}
-        <div className="md:hidden pb-4">
-          <form onSubmit={handleSearch} className="relative">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
-            <Input
-              type="text"
-              placeholder="Search products..."
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              className="pl-10 border-gray-200 focus:border-rose-300 focus:ring-rose-200"
-            />
-          </form>
         </div>
 
         {/* Mobile Menu */}

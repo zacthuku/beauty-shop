@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import {
   User,
@@ -16,26 +16,48 @@ import { useAuth } from "../context/AuthContext";
 import { toast } from "sonner";
 
 const Profile = () => {
-  const { user, logout } = useAuth();
+  const { user, logout, loading } = useAuth();
   const navigate = useNavigate();
   const [isEditing, setIsEditing] = useState(false);
   const [formData, setFormData] = useState({
-    username: user?.username || "",
-    email: user?.email || "",
+    username: "",
+    email: "",
     phone: "",
     address: "",
     city: "",
     state: "",
-    zipCode: "",
   });
 
-  if (!user) {
-    navigate("/login");
-    return null;
+  useEffect(() => {
+    if (!loading && !user) {
+      navigate("/login");
+    }
+  }, [user, navigate, loading]);
+
+  useEffect(() => {
+    if (user) {
+      setFormData({
+        username: user.username || "",
+        email: user.email || "",
+        phone: user.phone || "",
+        address: user.address || "",
+        city: user.city || "",
+        state: user.state || "",
+      });
+    }
+  }, [user]);
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-rose-500"></div>
+      </div>
+    );
   }
 
-  const handleSave = () => {
+  if (!user) return null;
 
+  const handleSave = () => {
     toast({
       title: "Profile updated",
       description: "Your profile has been updated successfully.",
@@ -45,13 +67,12 @@ const Profile = () => {
 
   const handleCancel = () => {
     setFormData({
-      username: user?.username || "",
-      email: user?.email || "",
-      phone: "",
-      address: "",
-      city: "",
-      state: "",
-      zipCode: "",
+      username: user.username || "",
+      email: user.email || "",
+      phone: user.phone || "",
+      address: user.address || "",
+      city: user.city || "",
+      state: user.state || "",
     });
     setIsEditing(false);
   };
@@ -69,13 +90,27 @@ const Profile = () => {
         "Are you sure you want to delete your account? This action cannot be undone."
       )
     ) {
-   
       logout();
       toast({
         title: "Account deleted",
         description: "Your account has been deleted successfully.",
       });
       navigate("/");
+    }
+  };
+
+  const getFormattedDate = () => {
+    const date = user.created_at;
+    try {
+      const parsedDate = new Date(date);
+      if (isNaN(parsedDate.getTime())) return "Unknown Date";
+      return parsedDate.toLocaleDateString("en-UK", {
+        month: "long",
+        day: "numeric",
+        year: "numeric",
+      });
+    } catch {
+      return "Unknown Date";
     }
   };
 
@@ -96,11 +131,10 @@ const Profile = () => {
                   </h1>
                   <p className="text-gray-600">{user.email}</p>
                   <p className="text-sm text-gray-500">
-                    Member since {new Date(user.createdAt).toLocaleDateString()}
+                    Member since {getFormattedDate()}
                   </p>
                 </div>
               </div>
-
               <div className="flex items-center space-x-3">
                 {isEditing ? (
                   <>
@@ -185,7 +219,7 @@ const Profile = () => {
                   ) : (
                     <div className="flex items-center space-x-3">
                       <Phone className="h-5 w-5 text-gray-400" />
-                      <span className="text-gray-500">Not provided</span>
+                      <span>{user.phone || "Not provided"}</span>
                     </div>
                   )}
                 </div>
@@ -196,7 +230,7 @@ const Profile = () => {
                   </label>
                   <div className="flex items-center space-x-3">
                     <Calendar className="h-5 w-5 text-gray-400" />
-                    <span>{new Date(user.createdAt).toLocaleDateString()}</span>
+                    <span>{getFormattedDate()}</span>
                   </div>
                 </div>
               </div>
@@ -211,19 +245,19 @@ const Profile = () => {
               <div className="space-y-4">
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Street Address
+                    Postal Address
                   </label>
                   {isEditing ? (
                     <Input
                       name="address"
                       value={formData.address}
                       onChange={handleChange}
-                      placeholder="Enter street address"
+                      placeholder="Enter postal address"
                     />
                   ) : (
                     <div className="flex items-center space-x-3">
                       <MapPin className="h-5 w-5 text-gray-400" />
-                      <span className="text-gray-500">Not provided</span>
+                      <span>{user.address || "Not provided"}</span>
                     </div>
                   )}
                 </div>
@@ -231,51 +265,35 @@ const Profile = () => {
                 <div className="grid grid-cols-2 gap-4">
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-2">
-                      City
+                      County
                     </label>
                     {isEditing ? (
                       <Input
                         name="city"
                         value={formData.city}
                         onChange={handleChange}
-                        placeholder="City"
+                        placeholder="County"
                       />
                     ) : (
-                      <span className="text-gray-500">Not provided</span>
+                      <span>{user.city || "Not provided"}</span>
                     )}
                   </div>
 
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-2">
-                      State
+                      Town
                     </label>
                     {isEditing ? (
                       <Input
                         name="state"
                         value={formData.state}
                         onChange={handleChange}
-                        placeholder="State"
+                        placeholder="Town"
                       />
                     ) : (
-                      <span className="text-gray-500">Not provided</span>
+                      <span>{user.state || "Not provided"}</span>
                     )}
                   </div>
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    ZIP Code
-                  </label>
-                  {isEditing ? (
-                    <Input
-                      name="zipCode"
-                      value={formData.zipCode}
-                      onChange={handleChange}
-                      placeholder="ZIP Code"
-                    />
-                  ) : (
-                    <span className="text-gray-500">Not provided</span>
-                  )}
                 </div>
               </div>
             </div>
@@ -296,16 +314,6 @@ const Profile = () => {
                   </p>
                 </div>
                 <Button variant="outline">Change Password</Button>
-              </div>
-
-              <div className="flex items-center justify-between p-4 border rounded-lg">
-                <div>
-                  <h3 className="font-medium text-gray-900">Download Data</h3>
-                  <p className="text-sm text-gray-500">
-                    Download a copy of your account data
-                  </p>
-                </div>
-                <Button variant="outline">Download</Button>
               </div>
 
               <div className="flex items-center justify-between p-4 border border-red-200 rounded-lg bg-red-50">

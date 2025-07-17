@@ -14,6 +14,12 @@ const OrderConfirmation = () => {
   const [order, setOrder] = useState(null);
 
   useEffect(() => {
+    if (!user) {
+      navigate("/login");
+    }
+  }, [user, navigate]);
+
+  useEffect(() => {
     // Get order from localStorage
     const orders = JSON.parse(localStorage.getItem("beautyApp_orders") || "[]");
     const foundOrder = orders.find((o) => o.id === parseInt(orderId));
