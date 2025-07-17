@@ -18,7 +18,7 @@ def register():
         username=data['username'],
         email=data['email'],
         role=data.get('role', 'customer'),
-        password_hash=generate_password_hash(data['password'])
+        password_hash=generate_password_hash(data['password_hash'])
     )
     db.session.add(user)
     db.session.commit()
@@ -28,8 +28,10 @@ def register():
 def login():
     data = request.get_json()
     user = User.query.filter_by(email=data['email']).first()
-    if not user or not check_password_hash(user.password_hash, data['password']):
+    if not user or not check_password_hash(user.password_hash, data['password_hash']):
         return jsonify({"error": "Invalid credentials"}), 401
+    if user.blocked is True:
+        return jsonify({"error": "User is blocked. contact help desk."}), 403
 
     access_token = create_access_token(identity={"id": user.id, "role": user.role}, expires_delta=timedelta(days=1))
     return jsonify(access_token=access_token, user=user.to_dict())
