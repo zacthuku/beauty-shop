@@ -41,7 +41,7 @@ const Login = () => {
       const decoded = jwtDecode(credentialResponse.credential);
       const googleUser = {
         email: decoded.email,
-        password: decoded.sub, // Use Google ID as password
+        password: decoded.sub,
         provider: "google",
       };
 
