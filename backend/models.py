@@ -15,6 +15,7 @@ class User(db.Model):
     email = db.Column(db.String(120), unique=True, nullable=False)
     password_hash = db.Column(db.Text, nullable=False)
     role = db.Column(db.String(10), nullable=False)
+    blocked= db.Column(db.Boolean, default=False)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
 
     # Relationships
@@ -27,6 +28,7 @@ class User(db.Model):
             "username": self.username,
             "email": self.email,
             "role": self.role,
+            "blocked": self.blocked,
             "created_at": self.created_at.isoformat()
         }
 
@@ -70,7 +72,7 @@ class Product(db.Model):
             "image_url": self.image_url,
             "stock_quantity": self.stock_quantity,
             "category_id": self.category_id,
-            "category": self.category.to_dict() if self.category else None
+            "category_name": self.category.name if self.category else None
         }
 
 
@@ -166,7 +168,7 @@ class Invoice(db.Model):
             "issued_at": self.issued_at.isoformat(),
             "pdf_url": self.pdf_url,
             "order_id": self.order_id,
-            "order": self.order.to_dict() if self.order else None
+            
         }
 
 
