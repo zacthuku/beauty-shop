@@ -1,76 +1,58 @@
 from flask import Blueprint, jsonify, request, abort
 from models import db, Invoice, Order, OrderItem, Product, User
 from datetime import datetime
+from flask_mail import Message
+from mail_config import mail
 
 invoice_bp = Blueprint('invoices', __name__)
 
-# Get invoice by ID
-@invoice_bp.route('/invoices/<int:invoice_id>', methods=['GET'])
-def get_invoice(invoice_id):
+# ✉️ Email invoice to user
+@invoice_bp.route('/invoices/<int:invoice_id>/email', methods=['POST'])
+def email_invoice(invoice_id):
     invoice = Invoice.query.get(invoice_id)
     if not invoice:
         abort(404, description="Invoice not found")
 
     order = invoice.order
     user = order.user
-    items = []
 
+    # Build the invoice content
+    items = []
     for item in order.order_items:
         product = item.product
-        items.append({
-            "product_name": product.name,
-            "quantity": item.quantity,
-            "unit_price": product.price,
-            "total": product.price * item.quantity
-        })
+        items.append(
+            f"{product.name} - {item.quantity} x ${product.price:.2f} = ${product.price * item.quantity:.2f}"
+        )
 
-    invoice_data = {
-        "invoice_id": invoice.id,
-        "order_id": order.id,
-        "customer": {
-            "name": user.name,
-            "email": user.email
-        },
-        "order_date": order.created_at.strftime("%Y-%m-%d"),
-        "items": items,
-        "total_amount": invoice.total_amount,
-        "status": invoice.status,
-    }
+    item_lines = "\n".join(items)
 
-    return jsonify(invoice_data), 200
+    subject = f"Your Invoice #{invoice.id} - Beauty Shop"
+    body = f"""
+Hello {user.name},
 
-# Generate invoice for an order
-@invoice_bp.route('/invoices', methods=['POST'])
-def create_invoice():
-    data = request.get_json()
-    order_id = data.get("order_id")
+Thank you for your order!
 
-    order = Order.query.get(order_id)
-    if not order:
-        abort(404, description="Order not found")
+Here are your invoice details:
 
-    # Prevent duplicate invoices for the same order
-    existing = Invoice.query.filter_by(order_id=order.id).first()
-    if existing:
-        abort(400, description="Invoice already exists for this order")
+Invoice ID: {invoice.id}
+Order ID: {order.id}
+Order Date: {order.created_at.strftime('%Y-%m-%d')}
 
-    # Calculate total
-    total_amount = sum(
-        item.product.price * item.quantity for item in order.order_items
-    )
+Items:
+{item_lines}
 
-    new_invoice = Invoice(
-        order_id=order.id,
-        total_amount=total_amount,
-        status="Pending",
-        created_at=datetime.utcnow()
-    )
+Total Amount: ${invoice.total_amount:.2f}
+Status: {invoice.status}
 
-    db.session.add(new_invoice)
-    db.session.commit()
+We appreciate your business!
 
-    return jsonify({
-        "message": "Invoice created successfully",
-        "invoice_id": new_invoice.id,
-        "total": total_amount
-    }), 201
+Regards,
+Beauty Shop Team
+    """
+
+    msg = Message(subject, recipients=[user.email], body=body)
+    try:
+        mail.send(msg)
+        return jsonify({"message": f"Invoice emailed to {user.email}"}), 200
+    except Exception as e:
+        return jsonify({"error": f"Failed to send email: {str(e)}"}), 500
