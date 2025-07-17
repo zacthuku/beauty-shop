@@ -4,3 +4,4 @@ from .order import *
 from .product import *
 from .user import *
 from .cart import *
+from .invoice import *
