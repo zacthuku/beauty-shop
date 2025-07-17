@@ -65,7 +65,7 @@ def checkout():
         db.session.add(order_item)
         db.session.delete(item)
 
-    # Simulate invoice generation
+    
     invoice = Invoice(
         invoice_number=str(uuid.uuid4())[:8],
         order_id=order.id,
