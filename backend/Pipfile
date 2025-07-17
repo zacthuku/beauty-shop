@@ -8,7 +8,9 @@ flask = "*"
 flask-sqlalchemy = "*"
 flask-migrate = "*"
 flask-jwt-extended = "*"
+faker="*"
 flask-mail = "*"
+
 
 [dev-packages]
 

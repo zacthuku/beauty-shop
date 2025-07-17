@@ -17,6 +17,8 @@ def get_product(id):
 @product_bp.route('/', methods=['POST'])
 @jwt_required()
 def add_product():
+    if get_jwt_identity()['role'] != 'admin'and get_jwt_identity()['role'] != 'order_manager':
+        return jsonify({"error": "Permission denied"}), 403
     data = request.get_json()
     product = Product(**data)
     db.session.add(product)
@@ -26,6 +28,8 @@ def add_product():
 @product_bp.route('/<int:id>', methods=['PUT'])
 @jwt_required()
 def update_product(id):
+    if get_jwt_identity()['role'] != 'admin' and get_jwt_identity()['role'] != 'order_manager':
+        return jsonify({"error": "Permission denied"}), 403
     product = Product.query.get_or_404(id)
     data = request.get_json()
     for field in ['name', 'description', 'price', 'stock_quantity', 'category_id']:
@@ -37,6 +41,8 @@ def update_product(id):
 @product_bp.route('/<int:id>', methods=['DELETE'])
 @jwt_required()
 def delete_product(id):
+    if get_jwt_identity()['role'] != 'admin' and get_jwt_identity()['role'] != 'order_manager':
+        return jsonify({"error": "Permission denied"}), 403
     product = Product.query.get_or_404(id)
     db.session.delete(product)
     db.session.commit()
