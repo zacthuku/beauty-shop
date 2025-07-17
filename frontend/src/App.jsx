@@ -2,12 +2,8 @@ import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { useState, useEffect } from "react";
 import { Toaster } from "sonner";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-
-// Components
 import Header from "./components/Header";
 import Footer from "./components/Footer";
-
-// Pages
 import Home from "./pages/Home";
 import Products from "./pages/Products";
 import ProductDetail from "./pages/ProductDetail";
@@ -18,10 +14,9 @@ import Register from "./pages/Register";
 import OrderConfirmation from "./pages/OrderConfirmation";
 import OrderHistory from "./pages/OrderHistory";
 import Profile from "./pages/Profile";
-
-// Context
 import { AuthProvider } from "./context/AuthContext";
 import { CartProvider } from "./context/CartContext";
+import { GoogleLogin } from "@react-oauth/google";
 
 // Optional: Stub TooltipProvider if you haven’t built one yet
 const TooltipProvider = ({ children }) => <>{children}</>;

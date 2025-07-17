@@ -15,59 +15,71 @@ export const AuthProvider = ({ children }) => {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    // Check if user is logged in on app start
     const storedUser = localStorage.getItem("beautyApp_user");
-    if (storedUser) {
-      setUser(JSON.parse(storedUser));
+    if (storedUser && storedUser !== "undefined") {
+      try {
+        setUser(JSON.parse(storedUser));
+      } catch (error) {
+        console.warn("Failed to parse stored user:", error);
+        localStorage.removeItem("beautyApp_user");
+        setUser(null);
+      }
     }
     setLoading(false);
   }, []);
 
-  const login = (userData) => {
-    setUser(userData);
-    localStorage.setItem("beautyApp_user", JSON.stringify(userData));
+  const login = async ({ email, password }) => {
+    setLoading(true);
+    try {
+      const response = await fetch("http://localhost:5000/login", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email, password }),
+      });
+
+      if (!response.ok) {
+        const err = await response.json();
+        throw new Error(err.error || "Login failed");
+      }
+
+      const data = await response.json();
+
+      setUser(data.user);
+      localStorage.setItem("beautyApp_user", JSON.stringify(data.user));
+      localStorage.setItem("beautyApp_token", data.access_token);
+
+      return data.user;
+    } catch (error) {
+      throw error;
+    } finally {
+      setLoading(false);
+    }
   };
 
   const logout = () => {
     setUser(null);
     localStorage.removeItem("beautyApp_user");
-    localStorage.removeItem("beautyApp_cart");
+    localStorage.removeItem("beautyApp_token");
+    localStorage.removeItem("beautyApp_cart"); // if you use cart
   };
 
-  const register = (userData) => {
-    // In a real app, this would be an API call
-    const newUser = {
-      id: Date.now(),
-      username: userData.username,
-      email: userData.email,
-      createdAt: new Date().toISOString(),
-    };
+  const register = async (userData) => {
+    const response = await fetch("http://localhost:5000/register", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(userData),
+    });
 
-    // Store user in localStorage (simulating backend storage)
-    const existingUsers = JSON.parse(
-      localStorage.getItem("beautyApp_users") || "[]"
-    );
-    existingUsers.push({ ...newUser, password: userData.password });
-    localStorage.setItem("beautyApp_users", JSON.stringify(existingUsers));
+    const data = await response.json();
 
-    login(newUser);
-    return newUser;
-  };
-
-  const authenticateUser = (username, password) => {
-    const existingUsers = JSON.parse(
-      localStorage.getItem("beautyApp_users") || "[]"
-    );
-    const user = existingUsers.find(
-      (u) => u.username === username && u.password === password
-    );
-
-    if (user) {
-      const { password: _, ...userWithoutPassword } = user;
-      login(userWithoutPassword);
-      return userWithoutPassword;
+    if (!response.ok) {
+      throw new Error(data.error || "Registration failed");
     }
-    return null;
+
+    localStorage.setItem("token", data.token);
+    setUser(data.user); // you need to define this in your AuthContext
+
+    return data;
   };
 
   const value = {
@@ -75,7 +87,6 @@ export const AuthProvider = ({ children }) => {
     login,
     logout,
     register,
-    authenticateUser,
     loading,
     isAuthenticated: !!user,
   };

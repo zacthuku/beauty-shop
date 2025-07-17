@@ -84,7 +84,7 @@ const Cart = () => {
                       {item.category}
                     </p>
                     <div className="text-lg font-bold text-gray-900 mt-1">
-                      ${item.price.toFixed(2)}
+                      Ksh {item.price.toFixed(2)}
                     </div>
                   </div>
 
@@ -125,7 +125,7 @@ const Cart = () => {
                   {/* Item Total */}
                   <div className="text-right">
                     <div className="font-bold text-gray-900">
-                      ${(item.price * item.quantity).toFixed(2)}
+                      Ksh {(item.price * item.quantity).toFixed(2)}
                     </div>
                   </div>
                 </div>
