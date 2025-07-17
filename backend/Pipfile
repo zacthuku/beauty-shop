@@ -9,6 +9,10 @@ flask-migrate = "*"
 flask-jwt-extended = "*"
 faker="*"
 flask-mail = "*"
+<<<<<<< HEAD
+=======
+flask-cors = "*"
+>>>>>>> 656ec18 (login/logout/google working)
 
 [dev-packages]
 
