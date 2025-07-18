@@ -1,15 +1,13 @@
-from flask import Flask
+from flask import Flask, jsonify
 from flask_migrate import Migrate
 from flask_cors import CORS
 from flask_jwt_extended import JWTManager
 from models import db, TokenBlocklist
 from views import auth_bp, user_bp, product_bp, order_bp, category_bp
-
 import os
-from flask_mail import Mail
-from mail_config import mail
 from flask_cors import CORS
 from datetime import timedelta
+from views.mailserver import email
 
 app = Flask(__name__)
 CORS(app)
@@ -20,20 +18,14 @@ app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 app.config['JWT_SECRET_KEY'] = '467755778'
 app.config['JWT_ACCESS_TOKEN_EXPIRES'] = timedelta(days=1)
 
-app.config['MAIL_SERVER'] = 'smtp.gmail.com'
-app.config['MAIL_PORT'] = 587
-app.config['MAIL_USE_TLS'] = True
-app.config['MAIL_USE_SSL'] = False
-app.config['MAIL_USERNAME'] = 'zacthuku7@gmail.com'
-app.config['MAIL_PASSWORD'] = 'tekp wehh wjyw dada'
-app.config['MAIL_DEFAULT_SENDER'] = 'zacthuku7@gmail.com'
-
 
 db.init_app(app)
 migrate = Migrate(app, db)
 CORS(app)
 
 jwt = JWTManager(app)
+
+email(app)
 
 @jwt.token_in_blocklist_loader
 def check_if_token_revoked(jwt_header, jwt_payload):
