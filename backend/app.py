@@ -9,6 +9,8 @@ from flask_cors import CORS
 from datetime import timedelta
 from views.mailserver import email
 
+
+
 app = Flask(__name__)
 CORS(app)
 
@@ -42,6 +44,7 @@ app.register_blueprint(user_bp)
 app.register_blueprint(product_bp)
 app.register_blueprint(order_bp)
 app.register_blueprint(category_bp)
+
 
 
 @app.route('/')
