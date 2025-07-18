@@ -3,7 +3,6 @@ from flask_jwt_extended import jwt_required, get_jwt_identity
 from models import db, CartItem, Product, Order, OrderItem, Invoice, User
 from datetime import datetime
 from flask_mail import Message
-from mail_config import mail
 from flask import current_app
 import os
 import uuid
