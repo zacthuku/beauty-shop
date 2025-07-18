@@ -10,6 +10,8 @@ flask-jwt-extended = "*"
 faker="*"
 flask-mail = "*"
 flask-cors = "*"
+python-dotenv = "*"
+requests = "*"
 
 [dev-packages]
 

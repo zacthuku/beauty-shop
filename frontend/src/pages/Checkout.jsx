@@ -35,7 +35,10 @@ const Checkout = () => {
     if (!user) {
       navigate("/login");
     }
-  }, [user, navigate]);
+    if (cartItems.length === 0) {
+      navigate("/cart");
+    }
+  }, [user, navigate, cartItems]);
 
   const [paymentInfo, setPaymentInfo] = useState({
     cardNumber: "",
@@ -105,6 +108,7 @@ const Checkout = () => {
         createdAt: new Date().toISOString(),
       };
 
+      // Save order to localStorage
       const existingOrders = JSON.parse(
         localStorage.getItem("beautyApp_orders") || "[]"
       );
@@ -113,29 +117,24 @@ const Checkout = () => {
 
       clearCart();
 
-      toast({
-        title: "Order placed successfully!",
+      toast.success("Order placed successfully!", {
         description:
           "Thank you for your purchase. You will receive an email confirmation shortly.",
       });
 
-      navigate(`/order-confirmation/${order.id}`);
+      // Small delay to allow toast to render before navigation
+      setTimeout(() => {
+        navigate(`/order-confirmation/${order.id}`);
+      }, 500);
     } catch (error) {
-      toast({
-        title: "Payment failed",
+      toast.error("Payment failed", {
         description:
           "There was an error processing your payment. Please try again.",
-        variant: "destructive",
       });
     } finally {
       setIsProcessing(false);
     }
   };
-
-  if (cartItems.length === 0) {
-    navigate("/cart");
-    return null;
-  }
 
   const counties = [
     "Baringo",
@@ -191,85 +190,62 @@ const Checkout = () => {
     <div className="min-h-screen bg-gray-50">
       <div className="container mx-auto px-4 py-8">
         <h1 className="text-3xl font-bold text-gray-900 mb-8">Checkout</h1>
-
         <form onSubmit={handleSubmit}>
           <div className="grid lg:grid-cols-2 gap-8">
+            {/* Shipping Info */}
             <div className="space-y-8">
               <div className="bg-white rounded-lg p-6 shadow-sm">
-                <h2 className="text-xl font-semibold text-gray-900 mb-6 flex items-center">
+                <h2 className="text-xl font-semibold mb-6 flex items-center">
                   <MapPin className="h-5 w-5 mr-2 text-rose-500" />
                   Shipping Information
                 </h2>
 
                 <div className="grid grid-cols-2 gap-4">
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
-                      First Name
-                    </label>
-                    <Input
-                      name="firstName"
-                      required
-                      value={shippingInfo.firstName}
-                      onChange={handleShippingChange}
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
-                      Last Name
-                    </label>
-                    <Input
-                      name="lastName"
-                      required
-                      value={shippingInfo.lastName}
-                      onChange={handleShippingChange}
-                    />
-                  </div>
-                </div>
-
-                <div className="grid grid-cols-2 gap-4 mt-4">
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
-                      Email
-                    </label>
-                    <Input
-                      name="email"
-                      type="email"
-                      required
-                      value={shippingInfo.email}
-                      onChange={handleShippingChange}
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
-                      Phone
-                    </label>
-                    <Input
-                      name="phone"
-                      required
-                      value={shippingInfo.phone}
-                      onChange={handleShippingChange}
-                      placeholder="+2547..."
-                    />
-                  </div>
-                </div>
-
-                <div className="mt-4">
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Address
-                  </label>
                   <Input
-                    name="address"
+                    name="firstName"
                     required
-                    value={shippingInfo.address}
+                    value={shippingInfo.firstName}
                     onChange={handleShippingChange}
+                    placeholder="First Name"
+                  />
+                  <Input
+                    name="lastName"
+                    required
+                    value={shippingInfo.lastName}
+                    onChange={handleShippingChange}
+                    placeholder="Last Name"
                   />
                 </div>
 
+                <div className="grid grid-cols-2 gap-4 mt-4">
+                  <Input
+                    name="email"
+                    type="email"
+                    required
+                    value={shippingInfo.email}
+                    onChange={handleShippingChange}
+                    placeholder="Email"
+                  />
+                  <Input
+                    name="phone"
+                    required
+                    value={shippingInfo.phone}
+                    onChange={handleShippingChange}
+                    placeholder="+2547..."
+                  />
+                </div>
+
+                <Input
+                  name="address"
+                  required
+                  value={shippingInfo.address}
+                  onChange={handleShippingChange}
+                  placeholder="Address"
+                  className="mt-4"
+                />
+
                 <div className="grid grid-cols-3 gap-4 mt-4">
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
-                      County
-                    </label>
                     <Select
                       value={shippingInfo.city}
                       onValueChange={(value) =>
@@ -277,7 +253,7 @@ const Checkout = () => {
                       }
                     >
                       <SelectTrigger>
-                        <SelectValue placeholder="Select county" />
+                        <SelectValue placeholder="Select County" />
                       </SelectTrigger>
                       <SelectContent>
                         {counties.map((county) => (
@@ -288,78 +264,56 @@ const Checkout = () => {
                       </SelectContent>
                     </Select>
                   </div>
-
                   <div className="col-span-2">
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
-                      Town
-                    </label>
                     <Input
                       name="town"
                       required
                       value={shippingInfo.town}
                       onChange={handleShippingChange}
-                      placeholder=""
+                      placeholder="Town"
                     />
                   </div>
                 </div>
               </div>
 
+              {/* Payment Info */}
               <div className="bg-white rounded-lg p-6 shadow-sm">
-                <h2 className="text-xl font-semibold text-gray-900 mb-6 flex items-center">
+                <h2 className="text-xl font-semibold mb-6 flex items-center">
                   <CreditCard className="h-5 w-5 mr-2 text-rose-500" />
                   Payment Information
                 </h2>
 
-                <div className="space-y-4">
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
-                      Card Number
-                    </label>
-                    <Input
-                      name="cardNumber"
-                      required
-                      value={paymentInfo.cardNumber}
-                      onChange={handlePaymentChange}
-                    />
-                  </div>
-
-                  <div className="grid grid-cols-2 gap-4">
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-2">
-                        Expiry Date
-                      </label>
-                      <Input
-                        name="expiryDate"
-                        required
-                        value={paymentInfo.expiryDate}
-                        onChange={handlePaymentChange}
-                      />
-                    </div>
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-2">
-                        CVV
-                      </label>
-                      <Input
-                        name="cvv"
-                        required
-                        value={paymentInfo.cvv}
-                        onChange={handlePaymentChange}
-                      />
-                    </div>
-                  </div>
-
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
-                      Name on Card
-                    </label>
-                    <Input
-                      name="nameOnCard"
-                      required
-                      value={paymentInfo.nameOnCard}
-                      onChange={handlePaymentChange}
-                    />
-                  </div>
+                <Input
+                  name="cardNumber"
+                  required
+                  value={paymentInfo.cardNumber}
+                  onChange={handlePaymentChange}
+                  placeholder="Card Number"
+                />
+                <div className="grid grid-cols-2 gap-4 mt-4">
+                  <Input
+                    name="expiryDate"
+                    required
+                    value={paymentInfo.expiryDate}
+                    onChange={handlePaymentChange}
+                    placeholder="MM/YY"
+                  />
+                  <Input
+                    name="cvv"
+                    required
+                    value={paymentInfo.cvv}
+                    onChange={handlePaymentChange}
+                    placeholder="CVV"
+                  />
                 </div>
+                <Input
+                  name="nameOnCard"
+                  required
+                  value={paymentInfo.nameOnCard}
+                  onChange={handlePaymentChange}
+                  placeholder="Name on Card"
+                  className="mt-4"
+                />
 
                 <div className="mt-4 p-3 bg-gray-50 rounded-lg flex items-center">
                   <Lock className="h-4 w-4 text-green-600 mr-2" />
@@ -370,6 +324,7 @@ const Checkout = () => {
               </div>
             </div>
 
+            {/* Order Summary */}
             <div>
               <div className="bg-white rounded-lg p-6 shadow-sm sticky top-4">
                 <h2 className="text-xl font-semibold text-gray-900 mb-6">
@@ -403,7 +358,7 @@ const Checkout = () => {
                   <div className="flex justify-between">
                     <span className="text-gray-600">Subtotal</span>
                     <span className="font-medium">
-                      Kes&nbsp;{subtotal.toFixed(2)}
+                      Kes {subtotal.toFixed(2)}
                     </span>
                   </div>
                   <div className="flex justify-between">
@@ -414,7 +369,7 @@ const Checkout = () => {
                   </div>
                   <div className="flex justify-between text-lg font-bold border-t pt-3">
                     <span>Total</span>
-                    <span>Kes&nbsp;{total.toFixed(2)}</span>
+                    <span>Kes {total.toFixed(2)}</span>
                   </div>
                 </div>
 

@@ -7,24 +7,26 @@ import { useAuth } from "../context/AuthContext";
 
 const OrderHistory = () => {
   const [orders, setOrders] = useState([]);
-  const { user } = useAuth();
+  const { user, loading } = useAuth();
   const navigate = useNavigate();
 
   useEffect(() => {
-    if (!user) {
+    if (!loading && !user) {
       navigate("/login");
-      return;
     }
+  }, [user, loading, navigate]);
 
-    // Get orders from localStorage
-    const allOrders = JSON.parse(
-      localStorage.getItem("beautyApp_orders") || "[]"
-    );
-    const userOrders = allOrders.filter((order) => order.userId === user.id);
-    setOrders(
-      userOrders.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))
-    );
-  }, [user, navigate]);
+  useEffect(() => {
+    if (user) {
+      const allOrders = JSON.parse(
+        localStorage.getItem("beautyApp_orders") || "[]"
+      );
+      const userOrders = allOrders.filter((order) => order.userId === user.id);
+      setOrders(
+        userOrders.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))
+      );
+    }
+  }, [user]);
 
   const downloadInvoice = (order) => {
     const invoiceData = {
@@ -55,7 +57,6 @@ const OrderHistory = () => {
       case "processing":
         return "bg-yellow-100 text-yellow-800";
       case "shipped":
-        return "bg-green-100 text-green-800";
       case "delivered":
         return "bg-green-100 text-green-800";
       default:
@@ -63,7 +64,15 @@ const OrderHistory = () => {
     }
   };
 
-  if (orders.length === 0) {
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-rose-500"></div>
+      </div>
+    );
+  }
+
+  if (!user || orders.length === 0) {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
         <div className="text-center max-w-md mx-auto px-4">
@@ -126,7 +135,7 @@ const OrderHistory = () => {
                         {order.items.length !== 1 ? "s" : ""}
                       </span>
                       <span className="font-medium text-gray-900">
-                        ${order.total.toFixed(2)}
+                        kes {order.total.toFixed(2)}
                       </span>
                     </div>
                   </div>

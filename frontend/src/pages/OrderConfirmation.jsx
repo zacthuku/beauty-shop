@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { useParams, Link } from "react-router-dom";
+import { useParams, Link, useNavigate } from "react-router-dom";
 import {
   CheckCircle,
   Download,
@@ -8,16 +8,19 @@ import {
   CreditCard,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { useAuth } from "../context/AuthContext";
 
 const OrderConfirmation = () => {
   const { orderId } = useParams();
   const [order, setOrder] = useState(null);
+  const { user, loading } = useAuth();
+  const navigate = useNavigate();
 
   useEffect(() => {
-    if (!user) {
+    if (!loading && !user) {
       navigate("/login");
     }
-  }, [user, navigate]);
+  }, [user, loading, navigate]);
 
   useEffect(() => {
     // Get order from localStorage
@@ -25,6 +28,14 @@ const OrderConfirmation = () => {
     const foundOrder = orders.find((o) => o.id === parseInt(orderId));
     setOrder(foundOrder);
   }, [orderId]);
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-rose-500"></div>
+      </div>
+    );
+  }
 
   if (!order) {
     return (
@@ -51,7 +62,6 @@ const OrderConfirmation = () => {
       items: order.items,
       subtotal: order.subtotal,
       shipping: order.shipping,
-      tax: order.tax,
       total: order.total,
     };
 
@@ -114,7 +124,7 @@ const OrderConfirmation = () => {
                       </p>
                     </div>
                     <span className="font-medium text-gray-900">
-                      ${(item.price * item.quantity).toFixed(2)}
+                      Kes {item.price * item.quantity}
                     </span>
                   </div>
                 ))}
@@ -169,25 +179,18 @@ const OrderConfirmation = () => {
               <div className="space-y-3">
                 <div className="flex justify-between">
                   <span className="text-gray-600">Subtotal</span>
-                  <span className="font-medium">
-                    ${order.subtotal.toFixed(2)}
-                  </span>
+                  <span className="font-medium">Kes {order.subtotal}</span>
                 </div>
                 <div className="flex justify-between">
                   <span className="text-gray-600">Shipping</span>
                   <span className="font-medium">
-                    {order.shipping === 0
-                      ? "FREE"
-                      : `$${order.shipping.toFixed(2)}`}
+                    {order.shipping === 0 ? "FREE" : `kes ${order.shipping}`}
                   </span>
                 </div>
-                <div className="flex justify-between">
-                  <span className="text-gray-600">Tax</span>
-                  <span className="font-medium">${order.tax.toFixed(2)}</span>
-                </div>
+
                 <div className="flex justify-between text-lg font-bold border-t pt-3">
                   <span>Total</span>
-                  <span>${order.total.toFixed(2)}</span>
+                  <span>Ksh {order.total}</span>
                 </div>
               </div>
             </div>
