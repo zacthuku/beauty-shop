@@ -6,24 +6,48 @@ product_bp = Blueprint('product', __name__, url_prefix='/products')
 
 @product_bp.route('/', methods=['GET'])
 def get_products():
-    products = Product.query.all()
+    search = request.args.get("search", "", type=str).lower()
+    category_name = request.args.get("category", "all", type=str).lower()
+    sort = request.args.get("sort", "name", type=str).lower()
+
+    query = Product.query.join(Category)
+
+    if category_name != "all":
+        query = query.filter(Category.name.ilike(category_name))
+
+    if search:
+        query = query.filter(
+            (Product.name.ilike(f"%{search}%")) |
+            (Product.description.ilike(f"%{search}%"))
+        )
+
+    sort_map = {
+        "price-low": Product.price.asc(),
+        "price-high": Product.price.desc(),
+        "rating": Product.rating.desc(),
+        "newest": Product.id.desc(),
+        "name": Product.name.asc(),
+    }
+    sort_criteria = sort_map.get(sort, Product.name.asc())
+    query = query.order_by(sort_criteria)
+
+    products = query.all()
     return jsonify([p.to_dict() for p in products])
 
-@product_bp.route('/<int:id>', methods=['GET'])
-def get_product(id):
-    product = Product.query.get_or_404(id)
-    return jsonify(product.to_dict())
 
-@product_bp.route('/', methods=['POST'])
-@jwt_required()
-def add_product():
-    if get_jwt_identity()['role'] != 'admin'and get_jwt_identity()['role'] != 'order_manager':
-        return jsonify({"error": "Permission denied"}), 403
-    data = request.get_json()
-    product = Product(**data)
-    db.session.add(product)
-    db.session.commit()
-    return jsonify(product.to_dict()), 201
+@product_bp.route('/categories', methods=['GET'])
+def get_categories():
+    categories = Category.query.all()
+    return jsonify([
+        {
+            "id": c.id,
+            "name": c.name,
+            "label": c.label,
+            "icon": c.icon
+        }
+        for c in categories
+    ])
+
 
 @product_bp.route('/<int:id>', methods=['PUT'])
 @jwt_required()
@@ -37,6 +61,8 @@ def update_product(id):
             setattr(product, field, data[field])
     db.session.commit()
     return jsonify(product.to_dict())
+
+
 
 @product_bp.route('/<int:id>', methods=['DELETE'])
 @jwt_required()

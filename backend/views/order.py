@@ -13,7 +13,8 @@ order_bp = Blueprint('order', __name__, url_prefix='/orders')
 @jwt_required()
 def view_cart():
     user_id = get_jwt_identity()['id']
-    cart_items = CartItem.query.filter_by(user_id=user_id).all()
+    cart_items = CartItem.query.filter_by(user_id=user_id).join(Product).all()
+
     return jsonify([item.to_dict() for item in cart_items])
 
 @order_bp.route('/cart', methods=['POST'])
@@ -42,8 +43,14 @@ def remove_from_cart(item_id):
 @jwt_required()
 def checkout():
     user_id = get_jwt_identity()['id']
-    data = request.get_json()
-    cart_items = CartItem.query.filter_by(user_id=user_id).all()
+    data = request.get_json() or {}
+    
+    # Set default values if fields are missing
+    delivery_address = data.get('delivery_address', '')
+    billing_info = data.get('billing_info', {})
+    
+    cart_items = CartItem.query.filter_by(user_id=user_id).join(Product).all()
+
     if not cart_items:
         return jsonify({"error": "Cart is empty"}), 400
 

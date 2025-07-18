@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useContext } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import {
   Star,
@@ -15,11 +15,12 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useCart } from "../context/CartContext";
-import { getProductById, products } from "../data/products";
+import { useProducts } from "../context/ProductsContext";
 import { toast } from "sonner";
 import ProductCard from "../components/ProductCard";
 
 const ProductDetail = () => {
+  const { products, categories, getProductById } = useProducts();
   const { id } = useParams();
   const navigate = useNavigate();
   const [product, setProduct] = useState(null);

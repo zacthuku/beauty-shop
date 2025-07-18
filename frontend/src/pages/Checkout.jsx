@@ -90,30 +90,28 @@ const Checkout = () => {
     setIsProcessing(true);
 
     try {
-      await new Promise((resolve) => setTimeout(resolve, 2000));
-
-      const order = {
-        id: Date.now(),
-        userId: user?.id || null,
-        items: cartItems,
-        subtotal,
-        shipping,
-        total,
-        shippingInfo,
-        paymentInfo: {
-          ...paymentInfo,
-          cardNumber: "**** **** **** " + paymentInfo.cardNumber.slice(-4),
+      const res = await fetch("http://localhost:5000/orders/checkout", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${user?.token}`,
         },
-        status: "confirmed",
-        createdAt: new Date().toISOString(),
-      };
+        body: JSON.stringify({
+          delivery_address: `${shippingInfo.address}, ${shippingInfo.town}, ${shippingInfo.city}, ${shippingInfo.country}`,
+          billing_info: {
+            name: paymentInfo.nameOnCard,
+            card_last4: paymentInfo.cardNumber.replace(/\s/g, "").slice(-4),
+            expiry: paymentInfo.expiryDate,
+          },
+        }),
+      });
 
-      // Save order to localStorage
-      const existingOrders = JSON.parse(
-        localStorage.getItem("beautyApp_orders") || "[]"
-      );
-      existingOrders.push(order);
-      localStorage.setItem("beautyApp_orders", JSON.stringify(existingOrders));
+      if (!res.ok) {
+        const errorData = await res.json();
+        throw new Error(errorData.error || "Order failed");
+      }
+
+      const order = await res.json(); // returned from Flask backend
 
       clearCart();
 
@@ -122,14 +120,13 @@ const Checkout = () => {
           "Thank you for your purchase. You will receive an email confirmation shortly.",
       });
 
-      // Small delay to allow toast to render before navigation
       setTimeout(() => {
-        navigate(`/order-confirmation/${order.id}`);
+        navigate(`/orders/${order.id}`, { state: order });
       }, 500);
     } catch (error) {
       toast.error("Payment failed", {
         description:
-          "There was an error processing your payment. Please try again.",
+          error.message || "There was an error processing your order.",
       });
     } finally {
       setIsProcessing(false);
