@@ -8,7 +8,6 @@ from werkzeug.security import generate_password_hash
 import random
 import string
 
-from mail_config import mail
 from models import db, User
 
 
