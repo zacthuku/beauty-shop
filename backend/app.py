@@ -3,7 +3,7 @@ from flask_migrate import Migrate
 from flask_cors import CORS
 from flask_jwt_extended import JWTManager
 from models import db, TokenBlocklist
-from views import auth_bp, user_bp, product_bp, order_bp, category_bp
+from views import auth_bp, user_bp, product_bp, order_bp, category_bp, cart_bp
 import os
 from flask_cors import CORS
 from datetime import timedelta
@@ -44,6 +44,7 @@ app.register_blueprint(user_bp)
 app.register_blueprint(product_bp)
 app.register_blueprint(order_bp)
 app.register_blueprint(category_bp)
+app.register_blueprint(cart_bp)
 
 
 

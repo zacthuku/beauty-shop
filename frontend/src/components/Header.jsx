@@ -4,12 +4,13 @@ import { ShoppingBag, User, Menu, X, ShoppingCart } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "../context/AuthContext";
 import { useCart } from "../context/CartContext";
-import { categories } from "../data/products";
+import { useProducts } from "../context/ProductsContext";
 
 const Header = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const { user, logout } = useAuth();
   const { getCartItemsCount } = useCart();
+  const { categories } = useProducts();
   const navigate = useNavigate();
   const location = useLocation();
 

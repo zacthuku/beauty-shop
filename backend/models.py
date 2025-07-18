@@ -35,44 +35,53 @@ class User(db.Model):
 class Category(db.Model):
     __tablename__ = "categories"
 
-    id       = db.Column(db.Integer, primary_key=True)
-    name     = db.Column(db.String(50), unique=True, nullable=False)
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String(50), unique=True, nullable=False)
+    label = db.Column(db.String(50), nullable=False)
+    icon = db.Column(db.String(20))
 
+    # Relationship
     products = db.relationship("Product", back_populates="category", cascade="all, delete-orphan")
 
     def to_dict(self):
         return {
             "id": self.id,
             "name": self.name,
+            "label": self.label,
+            "icon": self.icon,
             "products": [product.to_dict() for product in self.products]
         }
 
 class Product(db.Model):
-    __tablename__ = "products"
+    __tablename__ = 'products'
 
-    id             = db.Column(db.Integer, primary_key=True)
-    name           = db.Column(db.String(100), nullable=False)
-    description    = db.Column(db.Text)
-    price          = db.Column(db.Float, nullable=False)
-    image_url      = db.Column(db.String(255))
-    stock_quantity = db.Column(db.Integer, default=0)
-    category_id    = db.Column(db.Integer, db.ForeignKey('categories.id'), nullable=False)
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String(120), nullable=False)
+    price = db.Column(db.Float, nullable=False)
+    image = db.Column(db.String(255), nullable=True)
+    description = db.Column(db.Text, nullable=True)
+    in_stock = db.Column(db.Boolean, default=True)
+    rating = db.Column(db.Float, default=0.0)
+    reviews = db.Column(db.Integer, default=0)
 
-    # Relationships
-    category       = db.relationship("Category", back_populates="products")
-    cart_items     = db.relationship("CartItem",  back_populates="product", cascade="all, delete-orphan")
-    order_items    = db.relationship("OrderItem", back_populates="product")
+    
+    category_id = db.Column(db.Integer, db.ForeignKey('categories.id'), nullable=False)    # Relationship to access category info from product
+    category = db.relationship("Category", back_populates="products")
+    
+    cart_items = db.relationship("CartItem", back_populates="product", cascade="all, delete-orphan")
+    order_items = db.relationship("OrderItem", back_populates="product", cascade="all, delete-orphan")
 
     def to_dict(self):
         return {
             "id": self.id,
             "name": self.name,
-            "description": self.description,
+            "category": self.category.name if self.category else None,
             "price": self.price,
-            "image_url": self.image_url,
-            "stock_quantity": self.stock_quantity,
-            "category_id": self.category_id,
-            "category_name": self.category.name if self.category else None
+            "image": self.image,
+            "description": self.description,
+            "inStock": self.in_stock,
+            "rating": self.rating,
+            "reviews": self.reviews,
         }
 
 
@@ -105,7 +114,8 @@ class Order(db.Model):
     total_price     = db.Column(db.Float, nullable=False)
     created_at      = db.Column(db.DateTime, default=datetime.utcnow)
     delivery_address= db.Column(db.String(255))
-    billing_info    = db.Column(db.String(255))
+    billing_info    = db.Column(db.JSON)
+
     user_id         = db.Column(db.Integer, db.ForeignKey("users.id"))
 
     # Relationships
@@ -120,7 +130,7 @@ class Order(db.Model):
             "total_price": self.total_price,
             "created_at": self.created_at.isoformat(),
             "delivery_address": self.delivery_address,
-            "billing_info": self.billing_info,
+            "billing_info": self.billing_info or {},
             "user_id": self.user_id,
             "order_items": [item.to_dict() for item in self.order_items],
             "invoice": self.invoice.to_dict() if self.invoice else None

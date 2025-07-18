@@ -15,6 +15,7 @@ import OrderHistory from "./pages/OrderHistory";
 import Profile from "./pages/Profile";
 import { AuthProvider } from "./context/AuthContext";
 import { CartProvider } from "./context/CartContext";
+import { ProductsProvider } from "./context/ProductsContext";
 import Loader from "./components/Loader";
 
 const App = () => {
@@ -46,32 +47,34 @@ const App = () => {
   return (
     <AuthProvider>
       <CartProvider>
-        <BrowserRouter>
-          <div className="min-h-screen bg-rose-50">
-            <Header />
-            <main className="min-h-screen">
-              <Routes>
-                <Route path="/" element={<Home />} />
-                <Route path="/products" element={<Products />} />
-                <Route path="/products/:category" element={<Products />} />
-                <Route path="/product/:id" element={<ProductDetail />} />
-                <Route path="/cart" element={<Cart />} />
-                <Route path="/checkout" element={<Checkout />} />
-                <Route path="/login" element={<Login />} />
-                <Route path="/register" element={<Register />} />
-                <Route
-                  path="/order-confirmation/:orderId"
-                  element={<OrderConfirmation />}
-                />
-                <Route path="/orders" element={<OrderHistory />} />
-                <Route path="/profile" element={<Profile />} />
-                <Route path="*" element={<Navigate to="/" />} />
-              </Routes>
-            </main>
-            <Footer />
-          </div>
-        </BrowserRouter>
-        <Toaster position="bottom-right" richColors />
+        <ProductsProvider>
+          <BrowserRouter>
+            <div className="min-h-screen bg-rose-50">
+              <Header />
+              <main className="min-h-screen">
+                <Routes>
+                  <Route path="/" element={<Home />} />
+                  <Route path="/products" element={<Products />} />
+                  <Route path="/products/:category" element={<Products />} />
+                  <Route path="/product/:id" element={<ProductDetail />} />
+                  <Route path="/cart" element={<Cart />} />
+                  <Route path="/checkout" element={<Checkout />} />
+                  <Route path="/login" element={<Login />} />
+                  <Route path="/register" element={<Register />} />
+                  <Route
+                    path="/order-confirmation/:orderId"
+                    element={<OrderConfirmation />}
+                  />
+                  <Route path="/orders" element={<OrderHistory />} />
+                  <Route path="/profile" element={<Profile />} />
+                  <Route path="*" element={<Navigate to="/" />} />
+                </Routes>
+              </main>
+              <Footer />
+            </div>
+            <Toaster position="bottom-right" richColors />
+          </BrowserRouter>
+        </ProductsProvider>
       </CartProvider>
     </AuthProvider>
   );
