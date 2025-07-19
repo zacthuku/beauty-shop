@@ -51,7 +51,7 @@ def register():
         username=username,
         email=data['email'],
         role=data.get('role', 'customer'),
-        password_hash=generate_password_hash(data['password'])
+        password=generate_password_hash(data['password'])
     )
 
     db.session.add(user)
@@ -79,14 +79,14 @@ def login():
     try:
         data = request.get_json()
         email = data.get('email')
-        password = data.get('password_hash')
+        password = data.get('password')
 
         if not email or not password:
             return jsonify({"error": "Email or password is missing"}), 400
 
         user = User.query.filter_by(email=email).first()
 
-        if user and check_password_hash(user.password_hash, password):
+        if user and check_password_hash(user.password, password):
             access_token = create_access_token(identity=user.id)
             user_info = {
                 "id": user.id,
