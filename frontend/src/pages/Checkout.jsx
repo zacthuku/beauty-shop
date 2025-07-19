@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { CreditCard, Lock, MapPin } from "lucide-react";
+import { Smartphone, Lock, MapPin } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
@@ -19,6 +19,7 @@ const Checkout = () => {
   const { cartItems, getCartTotal, clearCart } = useCart();
   const { user } = useAuth();
   const [isProcessing, setIsProcessing] = useState(false);
+  const [mpesaPromptSent, setMpesaPromptSent] = useState(false);
 
   const [shippingInfo, setShippingInfo] = useState({
     firstName: "",
@@ -26,8 +27,8 @@ const Checkout = () => {
     email: user?.email || "",
     phone: "",
     address: "",
+    county: "",
     city: "",
-    town: "",
     country: "Kenya",
   });
 
@@ -40,11 +41,8 @@ const Checkout = () => {
     }
   }, [user, navigate, cartItems]);
 
-  const [paymentInfo, setPaymentInfo] = useState({
-    cardNumber: "",
-    expiryDate: "",
-    cvv: "",
-    nameOnCard: "",
+  const [mpesaInfo, setMpesaInfo] = useState({
+    phoneNumber: "",
   });
 
   const subtotal = getCartTotal();
@@ -58,38 +56,47 @@ const Checkout = () => {
     });
   };
 
-  const handlePaymentChange = (e) => {
+  const handleMpesaChange = (e) => {
     let value = e.target.value;
 
-    if (e.target.name === "cardNumber") {
-      value = value
-        .replace(/\s/g, "")
-        .replace(/(.{4})/g, "$1 ")
-        .trim();
-      if (value.length > 19) return;
-    }
-
-    if (e.target.name === "expiryDate") {
-      value = value.replace(/\D/g, "").replace(/(\d{2})(\d)/, "$1/$2");
-      if (value.length > 5) return;
-    }
-
-    if (e.target.name === "cvv") {
+    if (e.target.name === "phoneNumber") {
+      // Only allow digits
       value = value.replace(/\D/g, "");
-      if (value.length > 4) return;
+
+      // Limit to 10 digits for 07xxxxxxxx format
+      if (value.length > 10) return;
     }
 
-    setPaymentInfo({
-      ...paymentInfo,
+    setMpesaInfo({
+      ...mpesaInfo,
       [e.target.name]: value,
     });
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+
+    if (!mpesaInfo.phoneNumber.match(/^07\d{8}$/)) {
+      toast.error("Invalid phone number", {
+        description: "Please enter a valid phone number in format 07XXXXXXXX",
+      });
+      return;
+    }
+
     setIsProcessing(true);
+    setMpesaPromptSent(true);
 
     try {
+      const toastId = toast.loading("Processing M-Pesa payment...", {
+        description: "Please check your phone and enter your M-Pesa PIN.",
+      });
+
+      await new Promise((resolve) => setTimeout(resolve, 3000));
+
+      const mockTransactionId = `MPX${Date.now()}${Math.floor(
+        Math.random() * 1000
+      )}`;
+
       const res = await fetch("http://localhost:5000/orders/checkout", {
         method: "POST",
         headers: {
@@ -97,12 +104,9 @@ const Checkout = () => {
           Authorization: `Bearer ${user?.token}`,
         },
         body: JSON.stringify({
-          delivery_address: `${shippingInfo.address}, ${shippingInfo.town}, ${shippingInfo.city}, ${shippingInfo.country}`,
-          billing_info: {
-            name: paymentInfo.nameOnCard,
-            card_last4: paymentInfo.cardNumber.replace(/\s/g, "").slice(-4),
-            expiry: paymentInfo.expiryDate,
-          },
+          shipping_info: shippingInfo,
+          payment_method: "mpesa",
+          transaction_id: mockTransactionId,
         }),
       });
 
@@ -111,23 +115,28 @@ const Checkout = () => {
         throw new Error(errorData.error || "Order failed");
       }
 
-      const order = await res.json(); // returned from Flask backend
+      const order = await res.json();
+      const orderId = order.order?.id || order.id;
+
+      if (!orderId) {
+        throw new Error("Order ID not received from server");
+      }
 
       clearCart();
 
-      toast.success("Order placed successfully!", {
+      toast.dismiss(toastId);
+      toast.success("Payment successful!", {
         description:
-          "Thank you for your purchase. You will receive an email confirmation shortly.",
+          "Your order has been placed successfully. You will receive an SMS confirmation.",
       });
 
-      setTimeout(() => {
-        navigate(`/orders/${order.id}`, { state: order });
-      }, 500);
+      navigate(`/order-confirmation/${orderId}`);
     } catch (error) {
       toast.error("Payment failed", {
         description:
-          error.message || "There was an error processing your order.",
+          error.message || "There was an error processing your payment.",
       });
+      setMpesaPromptSent(false);
     } finally {
       setIsProcessing(false);
     }
@@ -193,7 +202,7 @@ const Checkout = () => {
             <div className="space-y-8">
               <div className="bg-white rounded-lg p-6 shadow-sm">
                 <h2 className="text-xl font-semibold mb-6 flex items-center">
-                  <MapPin className="h-5 w-5 mr-2 text-rose-500" />
+                  <MapPin className="h-5 w-5 mr-2 text-green-600" />
                   Shipping Information
                 </h2>
 
@@ -244,9 +253,9 @@ const Checkout = () => {
                 <div className="grid grid-cols-3 gap-4 mt-4">
                   <div>
                     <Select
-                      value={shippingInfo.city}
+                      value={shippingInfo.county}
                       onValueChange={(value) =>
-                        setShippingInfo({ ...shippingInfo, city: value })
+                        setShippingInfo({ ...shippingInfo, county: value })
                       }
                     >
                       <SelectTrigger>
@@ -263,9 +272,9 @@ const Checkout = () => {
                   </div>
                   <div className="col-span-2">
                     <Input
-                      name="town"
+                      name="city"
                       required
-                      value={shippingInfo.town}
+                      value={shippingInfo.city}
                       onChange={handleShippingChange}
                       placeholder="Town"
                     />
@@ -273,49 +282,49 @@ const Checkout = () => {
                 </div>
               </div>
 
-              {/* Payment Info */}
+              {/* M-Pesa Payment Info */}
               <div className="bg-white rounded-lg p-6 shadow-sm">
                 <h2 className="text-xl font-semibold mb-6 flex items-center">
-                  <CreditCard className="h-5 w-5 mr-2 text-rose-500" />
-                  Payment Information
+                  <Smartphone className="h-5 w-5 mr-2 text-green-600" />
+                  M-Pesa Payment
                 </h2>
 
-                <Input
-                  name="cardNumber"
-                  required
-                  value={paymentInfo.cardNumber}
-                  onChange={handlePaymentChange}
-                  placeholder="Card Number"
-                />
-                <div className="grid grid-cols-2 gap-4 mt-4">
+                <div className="mb-4">
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    M-Pesa Phone Number
+                  </label>
                   <Input
-                    name="expiryDate"
+                    name="phoneNumber"
                     required
-                    value={paymentInfo.expiryDate}
-                    onChange={handlePaymentChange}
-                    placeholder="MM/YY"
-                  />
-                  <Input
-                    name="cvv"
-                    required
-                    value={paymentInfo.cvv}
-                    onChange={handlePaymentChange}
-                    placeholder="CVV"
+                    value={mpesaInfo.phoneNumber}
+                    onChange={handleMpesaChange}
+                    placeholder="07XXXXXXXX"
+                    className="text-lg"
                   />
                 </div>
-                <Input
-                  name="nameOnCard"
-                  required
-                  value={paymentInfo.nameOnCard}
-                  onChange={handlePaymentChange}
-                  placeholder="Name on Card"
-                  className="mt-4"
-                />
+
+                <div className="bg-green-50 border border-green-200 rounded-lg p-4">
+                  <div className="flex items-center mb-2">
+                    <div className="bg-green-600 text-white rounded-full w-8 h-8 flex items-center justify-center text-sm font-bold mr-3">
+                      M
+                    </div>
+                    <span className="font-semibold text-green-800">M-PESA</span>
+                  </div>
+                  <p className="text-sm text-green-700">
+                    • Enter your Safaricom number (07XXXXXXXX format)
+                  </p>
+                  <p className="text-sm text-green-700">
+                    • You'll receive an STK push prompt on your phone
+                  </p>
+                  <p className="text-sm text-green-700">
+                    • Enter your M-Pesa PIN to complete payment
+                  </p>
+                </div>
 
                 <div className="mt-4 p-3 bg-gray-50 rounded-lg flex items-center">
                   <Lock className="h-4 w-4 text-green-600 mr-2" />
                   <span className="text-sm text-gray-600">
-                    Your payment information is secure and encrypted
+                    Your payment is secured by Safaricom M-Pesa
                   </span>
                 </div>
               </div>
@@ -345,7 +354,7 @@ const Checkout = () => {
                         </p>
                       </div>
                       <span className="text-sm font-medium text-gray-900">
-                        Kes {item.price * item.quantity}
+                        Ksh {item.price * item.quantity}
                       </span>
                     </div>
                   ))}
@@ -355,29 +364,31 @@ const Checkout = () => {
                   <div className="flex justify-between">
                     <span className="text-gray-600">Subtotal</span>
                     <span className="font-medium">
-                      Kes {subtotal.toFixed(2)}
+                      Ksh {subtotal.toFixed(2)}
                     </span>
                   </div>
                   <div className="flex justify-between">
                     <span className="text-gray-600">Shipping</span>
                     <span className="font-medium">
-                      {shipping === 0 ? "FREE" : `Kes ${shipping.toFixed(2)}`}
+                      {shipping === 0 ? "FREE" : `Ksh ${shipping.toFixed(2)}`}
                     </span>
                   </div>
                   <div className="flex justify-between text-lg font-bold border-t pt-3">
                     <span>Total</span>
-                    <span>Kes {total.toFixed(2)}</span>
+                    <span>Ksh {total.toFixed(2)}</span>
                   </div>
                 </div>
 
                 <Button
                   type="submit"
                   disabled={isProcessing}
-                  className="w-full mt-6 bg-rose-500 hover:bg-rose-600 text-white py-4 text-lg"
+                  className="w-full mt-6 bg-green-600 hover:bg-green-700 text-white py-4 text-lg cursor-pointer"
                 >
                   {isProcessing
-                    ? "Processing..."
-                    : `Place Order - Ksh ${total.toFixed(2)}`}
+                    ? mpesaPromptSent
+                      ? "Processing..."
+                      : "Successfull."
+                    : `Pay with M-Pesa - Ksh ${total.toFixed(2)}`}
                 </Button>
 
                 <p className="text-xs text-gray-500 text-center mt-4">
