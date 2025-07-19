@@ -1,243 +1,206 @@
-// CartContext.jsx
 import { createContext, useContext, useState, useEffect } from "react";
 import { useAuth } from "./AuthContext";
 
 const CartContext = createContext();
 
-export const useCart = () => {
-  const context = useContext(CartContext);
-  if (!context) {
-    throw new Error("useCart must be used within a CartProvider");
-  }
-  return context;
+// *************guest cart*******************
+
+const getGuestCart = () => {
+  const cart = localStorage.getItem("guest_cart");
+  return cart ? JSON.parse(cart) : [];
 };
 
+const saveGuestCart = (cart) => {
+  localStorage.setItem("guest_cart", JSON.stringify(cart));
+};
+
+export const useCart = () => useContext(CartContext);
+
 export const CartProvider = ({ children }) => {
+  const { user } = useAuth();
   const [cartItems, setCartItems] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
-  const { user } = useAuth();
 
   useEffect(() => {
-    if (user?.token) {
-      fetchCartFromServer();
-    } else {
-      setCartItems([]);
-      setError(null);
-    }
+    const initializeCart = async () => {
+      if (user?.token) {
+        await fetchCartFromServer();
+      } else {
+        setCartItems(getGuestCart());
+      }
+    };
+    initializeCart();
   }, [user]);
 
-  const fetchCartFromServer = async () => {
-    if (!user?.token) {
-      console.error("No user token available");
-      return;
+  const makeRequest = async (url, method = "GET", body = null) => {
+    const options = {
+      method,
+      headers: {
+        "Content-Type": "application/json",
+        ...(user?.token && { Authorization: `Bearer ${user.token}` }),
+      },
+      ...(body && { body: JSON.stringify(body) }),
+    };
+
+    const response = await fetch(`http://localhost:5000/cart${url}`, options);
+    if (!response.ok) {
+      const errorData = await response.json().catch(() => ({}));
+      throw new Error(
+        errorData.error || `Request failed with status ${response.status}`
+      );
     }
+    return await response.json();
+  };
+
+  //***************Fetch server cart*****************
+
+  const fetchCartFromServer = async () => {
+    if (!user?.token) return;
 
     setLoading(true);
-    setError(null);
-
     try {
-      const res = await fetch("http://localhost:5000/cart", {
-        headers: {
-          Authorization: `Bearer ${user.token}`,
-          "Content-Type": "application/json",
-        },
-      });
-
-      if (!res.ok) {
-        const errorData = await res.json().catch(() => ({}));
-        throw new Error(
-          errorData.error || `HTTP ${res.status}: ${res.statusText}`
-        );
-      }
-
-      const data = await res.json();
-
-      // Ensure data is an array
-      if (!Array.isArray(data)) {
-        console.error("Expected array but got:", typeof data, data);
-        throw new Error("Invalid response format from server");
-      }
-
-      // Transform server data to frontend format
-      const items = data.map((item) => ({
-        id: item.product?.id || item.product_id,
-        name: item.product?.name || "Unknown Product",
-        price: item.product?.price || 0,
-        image: item.product?.image_url || "",
-        category: item.product?.category_name || "Unknown",
-        quantity: item.quantity || 1,
-        cart_item_id: item.id,
-      }));
-
-      setCartItems(items);
+      const data = await makeRequest("");
+      setCartItems(
+        data.map((item) => ({
+          id: item.product.id,
+          name: item.product.name,
+          price: item.product.price,
+          image: item.product.image,
+          category: item.product.category,
+          quantity: item.quantity,
+          cart_item_id: item.id,
+          inStock: item.product.inStock,
+          rating: item.product.rating,
+          reviews: item.product.reviews,
+        }))
+      );
     } catch (err) {
-      console.error("Failed to load cart:", err.message);
       setError(err.message);
-      setCartItems([]); // Reset to empty array on error
     } finally {
       setLoading(false);
     }
   };
+
+  //***********Clear cart*************************
+  
+  const clearCart = async () => {
+    setLoading(true);
+    setError(null);
+
+    try {
+      if (user?.token) {
+
+        await makeRequest("/clear", "DELETE");
+        await fetchCartFromServer();
+      } else {
+        saveGuestCart([]);
+        setCartItems([]);
+      }
+    } catch (err) {
+      setError(err.message);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  //************Add to cart*************************
 
   const addToCart = async (product, quantity = 1) => {
-    if (!user?.token) {
-      setError("Please login to add items to cart");
-      return;
-    }
-
     setLoading(true);
     setError(null);
 
     try {
-      const res = await fetch("http://localhost:5000/cart", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${user.token}`,
-        },
-        body: JSON.stringify({ product_id: product.id, quantity }),
-      });
+      if (user?.token) {
+        await makeRequest("", "POST", {
+          product_id: product.id,
+          quantity,
+        });
+        await fetchCartFromServer();
+      } else {
+        const guestCart = getGuestCart();
+        const existingItem = guestCart.find((item) => item.id === product.id);
 
-      if (!res.ok) {
-        const errorData = await res.json().catch(() => ({}));
-        throw new Error(errorData.error || `Failed to add to cart`);
+        if (existingItem) {
+          existingItem.quantity += quantity;
+        } else {
+          guestCart.push({
+            ...product,
+            quantity,
+            cart_item_id: Date.now(),
+          });
+        }
+
+        setCartItems([...guestCart]);
+        saveGuestCart(guestCart);
       }
-
-      // Refresh cart after successful addition
-      await fetchCartFromServer();
+      return true;
     } catch (err) {
-      console.error("Add to cart failed:", err.message);
+      setError(err.message);
+      return false;
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  //***********Remove item from cart***************
+
+  const removeFromCart = async (productId) => {
+    setLoading(true);
+    setError(null);
+
+    try {
+      if (user?.token) {
+        const item = cartItems.find((i) => i.id === productId);
+        if (item) {
+          await makeRequest(`/${item.cart_item_id}`, "DELETE");
+          await fetchCartFromServer();
+        }
+      } else {
+        const guestCart = getGuestCart().filter(
+          (item) => item.id !== productId
+        );
+        setCartItems(guestCart);
+        saveGuestCart(guestCart);
+      }
+    } catch (err) {
       setError(err.message);
     } finally {
       setLoading(false);
     }
   };
+
+  //************Update item quantity*************
 
   const updateQuantity = async (productId, newQuantity) => {
     if (newQuantity < 1) return;
 
-    const item = cartItems.find((i) => i.id === productId);
-    if (!item) return;
-
-    if (!user?.token) {
-      setError("Please login to update cart");
-      return;
-    }
-
     setLoading(true);
     setError(null);
 
     try {
-      const res = await fetch(
-        `http://localhost:5000/cart/${item.cart_item_id}`,
-        {
-          method: "PUT",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${user.token}`,
-          },
-          body: JSON.stringify({ quantity: newQuantity }),
+      if (user?.token) {
+        const item = cartItems.find((i) => i.id === productId);
+        if (item) {
+          await makeRequest(`/${item.cart_item_id}`, "PUT", {
+            quantity: newQuantity,
+          });
+          await fetchCartFromServer();
         }
-      );
-
-      if (!res.ok) {
-        const errorData = await res.json().catch(() => ({}));
-        throw new Error(errorData.error || `Failed to update quantity`);
-      }
-
-      // Refresh cart after successful update
-      await fetchCartFromServer();
-    } catch (err) {
-      console.error("Update quantity failed:", err.message);
-      setError(err.message);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const removeFromCart = async (productId) => {
-    const item = cartItems.find((i) => i.id === productId);
-    if (!item) return;
-
-    if (!user?.token) {
-      setError("Please login to remove items from cart");
-      return;
-    }
-
-    setLoading(true);
-    setError(null);
-
-    try {
-      const res = await fetch(
-        `http://localhost:5000/cart/${item.cart_item_id}`,
-        {
-          method: "DELETE",
-          headers: {
-            Authorization: `Bearer ${user.token}`,
-          },
+      } else {
+        const guestCart = getGuestCart();
+        const item = guestCart.find((i) => i.id === productId);
+        if (item) {
+          item.quantity = newQuantity;
+          setCartItems([...guestCart]);
+          saveGuestCart(guestCart);
         }
-      );
-
-      if (!res.ok) {
-        const errorData = await res.json().catch(() => ({}));
-        throw new Error(errorData.error || `Failed to remove item`);
       }
-
-      // Refresh cart after successful removal
-      await fetchCartFromServer();
     } catch (err) {
-      console.error("Remove failed:", err.message);
       setError(err.message);
     } finally {
       setLoading(false);
     }
-  };
-
-  const clearCart = async () => {
-    if (!user?.token) {
-      setError("Please login to clear cart");
-      return;
-    }
-
-    setLoading(true);
-    setError(null);
-
-    try {
-      const res = await fetch("http://localhost:5000/cart/clear", {
-        method: "DELETE",
-        headers: {
-          Authorization: `Bearer ${user.token}`,
-        },
-      });
-
-      if (!res.ok) {
-        const errorData = await res.json().catch(() => ({}));
-        throw new Error(errorData.error || `Failed to clear cart`);
-      }
-
-      setCartItems([]);
-    } catch (err) {
-      console.error("Clear cart failed:", err.message);
-      setError(err.message);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const getCartTotal = () => {
-    return cartItems.reduce(
-      (total, item) => total + (item.price || 0) * (item.quantity || 0),
-      0
-    );
-  };
-
-  const getCartItemsCount = () => {
-    return cartItems.reduce((total, item) => total + (item.quantity || 0), 0);
-  };
-
-  const clearError = () => {
-    setError(null);
   };
 
   const value = {
@@ -248,10 +211,11 @@ export const CartProvider = ({ children }) => {
     removeFromCart,
     updateQuantity,
     clearCart,
-    getCartTotal,
-    getCartItemsCount,
-    clearError,
-    refreshCart: fetchCartFromServer,
+    getCartTotal: () =>
+      cartItems.reduce((total, item) => total + item.price * item.quantity, 0),
+    getCartItemsCount: () =>
+      cartItems.reduce((count, item) => count + item.quantity, 0),
+    clearError: () => setError(null),
   };
 
   return <CartContext.Provider value={value}>{children}</CartContext.Provider>;
