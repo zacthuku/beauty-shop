@@ -79,7 +79,7 @@ def login():
     try:
         data = request.get_json()
         email = data.get('email')
-        password = data.get('password')
+        password = data.get('password_hash')
 
         if not email or not password:
             return jsonify({"error": "Email or password is missing"}), 400
