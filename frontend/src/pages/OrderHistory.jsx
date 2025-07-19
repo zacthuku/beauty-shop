@@ -7,26 +7,45 @@ import { useAuth } from "../context/AuthContext";
 
 const OrderHistory = () => {
   const [orders, setOrders] = useState([]);
-  const { user, loading } = useAuth();
+  const { user, loading: authLoading } = useAuth();
   const navigate = useNavigate();
+  const [hasLoaded, setHasLoaded] = useState(false);
 
   useEffect(() => {
-    if (!loading && !user) {
+    if (!authLoading && !user) {
       navigate("/login");
     }
-  }, [user, loading, navigate]);
+  }, [user, authLoading, navigate]);
 
   useEffect(() => {
-    if (user) {
-      const allOrders = JSON.parse(
-        localStorage.getItem("beautyApp_orders") || "[]"
-      );
-      const userOrders = allOrders.filter((order) => order.userId === user.id);
-      setOrders(
-        userOrders.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))
-      );
+    const fetchOrders = async () => {
+      try {
+        const response = await fetch("http://127.0.0.1:5000/orders/", {
+          headers: {
+            Authorization: `Bearer ${user?.token}`,
+            "Content-Type": "application/json",
+          },
+        });
+
+        if (!response.ok) {
+          throw new Error(`Error ${response.status}`);
+        }
+
+        const data = await response.json();
+        setOrders(data.orders);
+      } catch (error) {
+        console.error("Failed to fetch orders:", error);
+      } finally {
+        setHasLoaded(true);
+      }
+    };
+
+    if (user?.token && !authLoading) {
+      fetchOrders();
+    } else if (!authLoading) {
+      setHasLoaded(true);
     }
-  }, [user]);
+  }, [user, authLoading]);
 
   const downloadInvoice = (order) => {
     const invoiceData = {
@@ -64,15 +83,17 @@ const OrderHistory = () => {
     }
   };
 
-  if (loading) {
-    return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-rose-500"></div>
-      </div>
-    );
+  // Don't show anything until all loading is complete
+  if (authLoading || !hasLoaded) {
+    return null;
   }
 
-  if (!user || orders.length === 0) {
+  // After loading complete, show appropriate content
+  if (!user) {
+    return null; // Already redirected to login
+  }
+
+  if (orders.length === 0) {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
         <div className="text-center max-w-md mx-auto px-4">
@@ -98,7 +119,6 @@ const OrderHistory = () => {
   return (
     <div className="min-h-screen bg-gray-50">
       <div className="container mx-auto px-4 py-8">
-        {/* Header */}
         <div className="mb-8">
           <h1 className="text-3xl font-bold text-gray-900 mb-2">
             Order History
@@ -108,14 +128,12 @@ const OrderHistory = () => {
           </p>
         </div>
 
-        {/* Orders List */}
         <div className="space-y-6">
           {orders.map((order) => (
             <div
               key={order.id}
               className="bg-white rounded-lg shadow-sm border p-6"
             >
-              {/* Order Header */}
               <div className="flex flex-col md:flex-row md:items-center justify-between mb-6">
                 <div className="flex items-center space-x-4 mb-4 md:mb-0">
                   <div className="w-12 h-12 bg-rose-100 rounded-full flex items-center justify-center">
@@ -167,7 +185,6 @@ const OrderHistory = () => {
                 </div>
               </div>
 
-              {/* Order Items */}
               <div className="border-t pt-4">
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                   {order.items.slice(0, 3).map((item) => (
@@ -196,19 +213,17 @@ const OrderHistory = () => {
                 </div>
               </div>
 
-              {/* Shipping Info */}
               <div className="border-t pt-4 mt-4">
                 <div className="text-sm text-gray-600">
                   <span className="font-medium">Shipping to:</span>{" "}
                   {order.shippingInfo.firstName} {order.shippingInfo.lastName},{" "}
-                  {order.shippingInfo.city}, {order.shippingInfo.state}
+                  {order.shippingInfo.city}, {order.shippingInfo.state || ""}
                 </div>
               </div>
             </div>
           ))}
         </div>
 
-        {/* Continue Shopping */}
         <div className="text-center mt-12">
           <Link to="/products">
             <Button size="lg" className="bg-rose-500 hover:bg-rose-600">
