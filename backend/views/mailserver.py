@@ -138,3 +138,76 @@ def send_reset_email(email, reset_url):
     )
     
     mail.send(msg)
+
+def send_order_confirmation_email(name, email, order):
+    subject = f"Order Confirmation - #{order['id']} | The Beauty"
+
+    # Create the order items lists separately to avoid backslash in f-string
+    html_items = ''.join(f"<li>{item['quantity']} x {item['name']} - Ksh {item['price']:.2f}</li>" for item in order['items'])
+    
+    newline = '\n'  # Define newline character separately
+    text_items = ''.join(f"- {item['quantity']} x {item['name']} - Ksh {item['price']:.2f}{newline}" for item in order['items'])
+
+    html_body = f"""
+    <html>
+        <body style="font-family: Arial, sans-serif; background-color: #fff0f5; color: #3a0c1a; padding: 20px; line-height: 1.6;">
+            <h2 style="color: #d6336c;">Hi {name}, your order is confirmed! 🎉</h2>
+            
+            <p>Thank you for shopping with <strong>The Beauty</strong>. We're thrilled to get started on your order.</p>
+            
+            <p><strong>Order ID:</strong> {order['id']}<br/>
+               <strong>Invoice:</strong> {order.get('invoice_number', f"INV-{order['id']}")}<br/>
+               <strong>Total:</strong> Ksh {order['total']:.2f}</p>
+            
+            <p><strong>Shipping to:</strong><br/>
+               {order['shippingInfo'].get('firstName', '')} {order['shippingInfo'].get('lastName', '')}<br/>
+               {order['shippingInfo'].get('city', '')}
+            </p>
+            
+            <h3 style="margin-top: 30px;">Order Items:</h3>
+            <ul>
+                {html_items}
+            </ul>
+
+            <p style="margin-top: 30px;">We'll notify you once it ships. Meanwhile, you can track your order anytime from your account.</p>
+
+            <div style="margin-top: 40px;">
+                <a href="https://thebeauty.vercel.app/orders/{order['id']}" 
+                   style="background-color: #e11d48; color: white; padding: 12px 25px; text-decoration: none; border-radius: 6px; font-weight: bold;">
+                   View Order
+                </a>
+            </div>
+
+            <p style="margin-top: 40px;">With love,<br/>The Beauty Team </p>
+        </body>
+    </html>
+    """
+
+    text_body = f"""Hi {name},
+
+Thanks for your order with The Beauty!
+
+Order ID: {order['id']}
+Invoice: {order.get('invoice_number', f"INV-{order['id']}")}
+Total: Ksh {order['total']:.2f}
+
+Shipping to:
+{order['shippingInfo'].get('firstName', '')} {order['shippingInfo'].get('lastName', '')}
+{order['shippingInfo'].get('city', '')}
+
+Items:
+{text_items}
+You can view your order here:
+https://thebeauty.vercel.app/orders/{order['id']}
+
+With love,
+The Beauty Team 💖"""
+
+    msg = Message(
+        subject=subject,
+        recipients=[email],
+        html=html_body,
+        body=text_body
+    )
+
+    mail.send(msg)
