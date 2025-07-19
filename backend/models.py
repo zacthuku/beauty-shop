@@ -37,6 +37,8 @@ class Category(db.Model):
 
     id       = db.Column(db.Integer, primary_key=True)
     name     = db.Column(db.String(50), unique=True, nullable=False)
+    label = db.Column(db.String(50), nullable=False)
+    icon = db.Column(db.String(10), nullable=True)
 
     products = db.relationship("Product", back_populates="category", cascade="all, delete-orphan")
 
@@ -44,6 +46,8 @@ class Category(db.Model):
         return {
             "id": self.id,
             "name": self.name,
+            "label": self.label,
+            "icon": self.icon,
             "products": [product.to_dict() for product in self.products]
         }
 
@@ -57,6 +61,9 @@ class Product(db.Model):
     image_url      = db.Column(db.String(255))
     stock_quantity = db.Column(db.Integer, default=0)
     category_id    = db.Column(db.Integer, db.ForeignKey('categories.id'), nullable=False)
+    in_stock = db.Column(db.Boolean)
+    rating = db.Column(db.Float)
+    reviews = db.Column(db.Integer)
 
     # Relationships
     category       = db.relationship("Category", back_populates="products")
@@ -72,6 +79,9 @@ class Product(db.Model):
             "image_url": self.image_url,
             "stock_quantity": self.stock_quantity,
             "category_id": self.category_id,
+            "in_stock": self.in_stock,
+            "rating": self.rating,
+            "reviews": self.reviews,
             "category_name": self.category.name if self.category else None
         }
 
