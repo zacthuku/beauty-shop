@@ -16,17 +16,30 @@ export const AuthProvider = ({ children }) => {
 
   useEffect(() => {
     const storedUser = localStorage.getItem("beautyApp_user");
-    if (storedUser && storedUser !== "undefined") {
+    const storedToken = localStorage.getItem("beautyApp_token");
+
+    if (storedUser && storedUser !== "undefined" && storedToken) {
       try {
-        setUser(JSON.parse(storedUser));
+        const parsedUser = JSON.parse(storedUser);
+
+        setUser({
+          ...parsedUser,
+          token: storedToken,
+        });
       } catch (error) {
         console.warn("Failed to parse stored user:", error);
-        localStorage.removeItem("beautyApp_user");
+        clearStorage();
         setUser(null);
       }
     }
     setLoading(false);
   }, []);
+
+  const clearStorage = () => {
+    localStorage.removeItem("beautyApp_user");
+    localStorage.removeItem("beautyApp_token");
+    localStorage.removeItem("beautyApp_cart");
+  };
 
   const login = async ({ email, password }) => {
     setLoading(true);
@@ -44,11 +57,16 @@ export const AuthProvider = ({ children }) => {
 
       const data = await response.json();
 
-      setUser(data.user);
+      const userWithToken = {
+        ...data.user,
+        token: data.access_token,
+      };
+
+      setUser(userWithToken);
       localStorage.setItem("beautyApp_user", JSON.stringify(data.user));
       localStorage.setItem("beautyApp_token", data.access_token);
 
-      return data.user;
+      return userWithToken;
     } catch (error) {
       throw error;
     } finally {
@@ -58,29 +76,40 @@ export const AuthProvider = ({ children }) => {
 
   const logout = () => {
     setUser(null);
-    localStorage.removeItem("beautyApp_user");
-    localStorage.removeItem("beautyApp_token");
-    localStorage.removeItem("beautyApp_cart");
+    clearStorage();
   };
 
   const register = async (userData) => {
-    const response = await fetch("http://localhost:5000/register", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(userData),
-    });
+    setLoading(true);
+    try {
+      const response = await fetch("http://localhost:5000/register", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(userData),
+      });
 
-    const data = await response.json();
+      const data = await response.json();
 
-    if (!response.ok) {
-      throw new Error(data.error || "Registration failed");
+      if (!response.ok) {
+        throw new Error(data.error || "Registration failed");
+      }
+
+      // Combine user data with token
+      const userWithToken = {
+        ...data.user,
+        token: data.access_token,
+      };
+
+      setUser(userWithToken);
+      localStorage.setItem("beautyApp_user", JSON.stringify(data.user));
+      localStorage.setItem("beautyApp_token", data.access_token);
+
+      return userWithToken;
+    } catch (error) {
+      throw error;
+    } finally {
+      setLoading(false);
     }
-
-    localStorage.setItem("beautyApp_user", JSON.stringify(data.user));
-    localStorage.setItem("beautyApp_token", data.access_token);
-    setUser(data.user);
-
-    return data.user;
   };
 
   const value = {
@@ -89,7 +118,7 @@ export const AuthProvider = ({ children }) => {
     logout,
     register,
     loading,
-    isAuthenticated: !!user,
+    isAuthenticated: !!user?.token,
   };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
