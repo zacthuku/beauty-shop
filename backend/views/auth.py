@@ -9,6 +9,7 @@ from flask_jwt_extended import (
 )
 from models import db, User, TokenBlocklist
 from datetime import datetime, timezone
+from views.mailserver import send_email
 
 auth_bp = Blueprint('auth', __name__)
 jwt = JWTManager()
@@ -55,6 +56,7 @@ def register():
 
     db.session.add(user)
     db.session.commit()
+    send_email(user.username, user.email)
 
     access_token = create_access_token(identity=user.id)
     user_info = {
