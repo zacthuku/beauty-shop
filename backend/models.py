@@ -32,6 +32,7 @@ class User(db.Model):
             "created_at": self.created_at.isoformat()
         }
 
+
 class Category(db.Model):
     __tablename__ = "categories"
 

@@ -1,13 +1,20 @@
-from flask import Blueprint, request, jsonify
+from flask import Blueprint, request, jsonify, current_app
 from flask_jwt_extended import jwt_required, get_jwt_identity
+from flask_mail import Message
 from models import db, CartItem, Product, Order, OrderItem, Invoice, User
 from datetime import datetime
-from flask_mail import Message
-from flask import current_app
-import os
 import uuid
+import os
 
 order_bp = Blueprint('order', __name__, url_prefix='/orders')
+
+
+def is_admin():
+    identity = get_jwt_identity()
+    user_id = identity['id'] if isinstance(identity, dict) else identity
+    user = User.query.get(user_id)
+    return user and user.role == "admin"
+
 
 @order_bp.route('/cart', methods=['GET'])
 @jwt_required()
@@ -15,6 +22,7 @@ def view_cart():
     user_id = get_jwt_identity()['id']
     cart_items = CartItem.query.filter_by(user_id=user_id).all()
     return jsonify([item.to_dict() for item in cart_items])
+
 
 @order_bp.route('/cart', methods=['POST'])
 @jwt_required()
@@ -30,6 +38,7 @@ def add_to_cart():
     db.session.commit()
     return jsonify(item.to_dict()), 201
 
+
 @order_bp.route('/cart/<int:item_id>', methods=['DELETE'])
 @jwt_required()
 def remove_from_cart(item_id):
@@ -37,6 +46,7 @@ def remove_from_cart(item_id):
     db.session.delete(item)
     db.session.commit()
     return jsonify({"message": "Item removed"})
+
 
 @order_bp.route('/checkout', methods=['POST'])
 @jwt_required()
@@ -48,6 +58,7 @@ def checkout():
         return jsonify({"error": "Cart is empty"}), 400
 
     total_price = sum(item.product.price * item.quantity for item in cart_items)
+
     order = Order(
         user_id=user_id,
         status='Pending Payment',
@@ -69,7 +80,7 @@ def checkout():
         db.session.delete(item)
 
     invoice_number = str(uuid.uuid4())[:8]
-    pdf_url = f"/invoices/{order.id}.pdf"  
+    pdf_url = f"/invoices/{order.id}.pdf"
     invoice = Invoice(
         invoice_number=invoice_number,
         order_id=order.id,
@@ -84,17 +95,17 @@ def checkout():
 
     user = User.query.get(user_id)
     msg = Message(
-    subject=f" Order Confirmation - Order #{order.id} | Beauty Shop",
-    recipients=[user.email],
-    body=f"""Hello {user.username},
+        subject=f"Order Confirmation - Order #{order.id} | Beauty Shop",
+        recipients=[user.email],
+        body=f"""Hello {user.username},
 
 Thank you for your order with Beauty Shop! 
 
- Order ID: {order.id}  
- Status: {order.status}  
- Total Amount: Ksh {total_price:.2f}
+Order ID: {order.id}  
+Status: {order.status}  
+Total Amount: Ksh {total_price:.2f}
 
- Items in your order:
+Items in your order:
 {items_details}
 
 Your order is currently marked as *Pending Payment*.
@@ -117,8 +128,21 @@ Warm regards,
 Beauty Shop Team  
 www.beautyshop.co.ke
 """
-)
-
+    )
     mail.send(msg)
 
     return jsonify(order.to_dict()), 201
+
+
+@order_bp.route('/history', methods=['GET'])
+@jwt_required()
+def view_purchase_history():
+    identity = get_jwt_identity()
+    user_id = identity['id'] if isinstance(identity, dict) else identity
+
+    if is_admin():
+        orders = Order.query.all()
+    else:
+        orders = Order.query.filter_by(user_id=user_id).all()
+
+    return jsonify([order.to_dict() for order in orders])

@@ -87,7 +87,9 @@ def login():
         user = User.query.filter_by(email=email).first()
 
         if user and check_password_hash(user.password, password):
-            access_token = create_access_token(identity=user.id)
+            access_token = create_access_token(identity=
+                user.id
+            )
             user_info = {
                 "id": user.id,
                 "username": user.username,
