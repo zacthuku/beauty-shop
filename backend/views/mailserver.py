@@ -63,7 +63,7 @@ def send_email(name, email):
     Start shopping now: https://thebeauty.vercel.app
     
     With love,
-    The Beauty Team 💖
+    The Beauty Team 
     """
     
     msg = Message(
@@ -139,75 +139,97 @@ def send_reset_email(email, reset_url):
     
     mail.send(msg)
 
-def send_order_confirmation_email(name, email, order):
-    subject = f"Order Confirmation - #{order['id']} | The Beauty"
-
-    # Create the order items lists separately to avoid backslash in f-string
-    html_items = ''.join(f"<li>{item['quantity']} x {item['name']} - Ksh {item['price']:.2f}</li>" for item in order['items'])
+def send_order_confirmation_email(name, email, order):     
+    subject = f"Order Confirmation - #{order['id']} | The Beauty"      
     
-    newline = '\n'  # Define newline character separately
-    text_items = ''.join(f"- {item['quantity']} x {item['name']} - Ksh {item['price']:.2f}{newline}" for item in order['items'])
 
-    html_body = f"""
-    <html>
-        <body style="font-family: Arial, sans-serif; background-color: #fff0f5; color: #3a0c1a; padding: 20px; line-height: 1.6;">
-            <h2 style="color: #d6336c;">Hi {name}, your order is confirmed! 🎉</h2>
+    html_items = ''.join(f"<li>{item['quantity']} x {item['name']} - Ksh {item['price']:.2f} each = Ksh {(item['price'] * item['quantity']):.2f}</li>" for item in order['items'])          
+    
+    newline = '\n'  
+    text_items = ''.join(f"- {item['quantity']} x {item['name']} - Ksh {item['price']:.2f} each = Ksh {(item['price'] * item['quantity']):.2f}{newline}" for item in order['items'])      
+
+
+    subtotal = sum(item['price'] * item['quantity'] for item in order['items'])
+    shipping_cost = order.get('shipping_cost', 0)
+    
+    html_body = f"""     
+    <html>         
+        <body style="font-family: Arial, sans-serif; background-color: #ffffff; color: #3a0c1a; padding: 20px; line-height: 1.6;">             
+            <h2 style="color: #d6336c;">Hi {name}, your order is confirmed! </h2>                          
             
-            <p>Thank you for shopping with <strong>The Beauty</strong>. We're thrilled to get started on your order.</p>
+            <p>Thank you for shopping with <strong>The Beauty</strong>. We're thrilled to get started on your order.</p>                          
             
-            <p><strong>Order ID:</strong> {order['id']}<br/>
-               <strong>Invoice:</strong> {order.get('invoice_number', f"INV-{order['id']}")}<br/>
-               <strong>Total:</strong> Ksh {order['total']:.2f}</p>
+            <p><strong>Order ID:</strong> {order['id']}<br/>                
+            <strong>Invoice:</strong> {order.get('invoice_number', f"INV-{order['id']}")}<br/>
+            <strong>Payment Method:</strong> {order.get('payment_method', 'M-Pesa').upper()}<br/>
+            <strong>Total:</strong> Ksh {order['total']:.2f}</p>                          
             
-            <p><strong>Shipping to:</strong><br/>
-               {order['shippingInfo'].get('firstName', '')} {order['shippingInfo'].get('lastName', '')}<br/>
-               {order['shippingInfo'].get('city', '')}
-            </p>
+                          
             
-            <h3 style="margin-top: 30px;">Order Items:</h3>
-            <ul>
-                {html_items}
+            <h3 style="margin-top: 30px;">Order Items:</h3>             
+            <ul>                 
+                {html_items}             
             </ul>
-
-            <p style="margin-top: 30px;">We'll notify you once it ships. Meanwhile, you can track your order anytime from your account.</p>
-
-            <div style="margin-top: 40px;">
-                <a href="https://thebeauty.vercel.app/orders/{order['id']}" 
-                   style="background-color: #e11d48; color: white; padding: 12px 25px; text-decoration: none; border-radius: 6px; font-weight: bold;">
-                   View Order
-                </a>
+            
+            <h3>Payment Summary:</h3>
+            <p><strong>Subtotal:</strong> Ksh {subtotal:.2f}<br/>
+            <strong>Shipping:</strong> {('FREE' if shipping_cost == 0 else f'Ksh {shipping_cost:.2f}')}<br/>
+            <strong>Total Paid:</strong> Ksh {order['total']:.2f}</p>              
+            
+            <p style="margin-top: 30px;">We'll notify you once it ships. Estimated delivery is 1-3 days. Meanwhile, you can track your order anytime from your account.</p>              
+            
+            <div style="margin-top: 40px;">                 
+                <a href="http://127.0.0.1:5000/{order['id']}"                     
+                style="background-color: #e11d48; color: white; padding: 12px 25px; text-decoration: none; border-radius: 6px; font-weight: bold;">                    
+                View Order                 
+                </a>             
             </div>
+            
+            <p style="margin-top: 30px; font-size: 14px; color: #666;">
+            Need help? Contact us:<br/>
+            Email: info@thebeauty.com<br/>
+            Phone: +254 721 400 997
+            </p>              
+            
+        </body>     
+    </html>     
+    """      
 
-            <p style="margin-top: 40px;">With love,<br/>The Beauty Team </p>
-        </body>
-    </html>
-    """
+    text_body = f"""Hi {name},  
 
-    text_body = f"""Hi {name},
+Thanks for your order with The Beauty!  
 
-Thanks for your order with The Beauty!
+Order ID: {order['id']} 
+Invoice: {order.get('invoice_number', f"INV-{order['id']}")} 
+Payment Method: {order.get('payment_method', 'M-Pesa').upper()}
+Total: Ksh {order['total']:.2f}  
 
-Order ID: {order['id']}
-Invoice: {order.get('invoice_number', f"INV-{order['id']}")}
-Total: Ksh {order['total']:.2f}
 
-Shipping to:
-{order['shippingInfo'].get('firstName', '')} {order['shippingInfo'].get('lastName', '')}
-{order['shippingInfo'].get('city', '')}
 
-Items:
+Items: 
 {text_items}
-You can view your order here:
-https://thebeauty.vercel.app/orders/{order['id']}
 
-With love,
-The Beauty Team 💖"""
+Payment Summary:
+Subtotal: Ksh {subtotal:.2f}
+Shipping: {('FREE' if shipping_cost == 0 else f'Ksh {shipping_cost:.2f}')}
+Total Paid: Ksh {order['total']:.2f}
 
-    msg = Message(
-        subject=subject,
-        recipients=[email],
-        html=html_body,
-        body=text_body
-    )
+Estimated delivery: 1-3 days
+
+You can view your order here: https://127.0.0.1:5000/{order['id']}  
+
+Need help? 
+Email: support@thebeauty.co.ke
+Phone: +254 700 000 000
+
+With love, 
+The Beauty Team 💖"""      
+
+    msg = Message(         
+        subject=subject,         
+        recipients=[email],         
+        html=html_body,        
+        body=text_body     
+    )      
 
     mail.send(msg)

@@ -23,7 +23,7 @@ app.config['JWT_ACCESS_TOKEN_EXPIRES'] = timedelta(days=1)
 
 db.init_app(app)
 migrate = Migrate(app, db)
-CORS(app)
+CORS(app, supports_credentials=True)
 
 jwt = JWTManager(app)
 

@@ -1,16 +1,17 @@
-"""Updated Product model 2.1
+"""update models
 
-Revision ID: b11dd5d81b60
+Revision ID: 6adb043886cb
 Revises: 
-Create Date: 2025-07-18 20:06:14.375642
+Create Date: 2025-07-21 23:18:12.984325
 
 """
 from alembic import op
 import sqlalchemy as sa
-
+from sqlalchemy.dialects import postgresql
+from sqlalchemy import Text
 
 # revision identifiers, used by Alembic.
-revision = 'b11dd5d81b60'
+revision = '6adb043886cb'
 down_revision = None
 branch_labels = None
 depends_on = None
@@ -47,12 +48,11 @@ def upgrade():
     )
     op.create_table('orders',
     sa.Column('id', sa.Integer(), nullable=False),
-    sa.Column('status', sa.String(length=50), nullable=False),
-    sa.Column('total_price', sa.Float(), nullable=False),
+    sa.Column('user_id', sa.Integer(), nullable=False),
     sa.Column('created_at', sa.DateTime(), nullable=True),
-    sa.Column('delivery_address', sa.String(length=255), nullable=True),
-    sa.Column('billing_info', sa.JSON(), nullable=True),
-    sa.Column('user_id', sa.Integer(), nullable=True),
+    sa.Column('status', sa.String(length=50), nullable=True),
+    sa.Column('shipping_info', postgresql.JSON(astext_type=Text()), nullable=True),
+    sa.Column('total_price', sa.Float(), nullable=False),
     sa.ForeignKeyConstraint(['user_id'], ['users.id'], ),
     sa.PrimaryKeyConstraint('id')
     )

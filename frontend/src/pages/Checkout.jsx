@@ -382,7 +382,7 @@ const Checkout = () => {
                 <Button
                   type="submit"
                   disabled={isProcessing}
-                  className="w-full mt-6 bg-green-600 hover:bg-green-700 text-white py-4 text-lg cursor-pointer"
+                  className="w-full mt-6 bg-rose-500 hover:bg-green-600 text-white py-4 text-lg cursor-pointer"
                 >
                   {isProcessing
                     ? mpesaPromptSent

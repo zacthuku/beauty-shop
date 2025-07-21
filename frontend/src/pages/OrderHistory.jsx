@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { Calendar, Package, Download, Eye, ShoppingBag } from "lucide-react";
+import { Calendar, Package, Eye, ShoppingBag } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { useAuth } from "../context/AuthContext";
@@ -32,7 +32,12 @@ const OrderHistory = () => {
         }
 
         const data = await response.json();
-        setOrders(data.orders);
+        // Update all orders to "shipped" status
+        const updatedOrders = data.orders.map((order) => ({
+          ...order,
+          status: "shipped",
+        }));
+        setOrders(updatedOrders);
       } catch (error) {
         console.error("Failed to fetch orders:", error);
       } finally {
@@ -46,28 +51,6 @@ const OrderHistory = () => {
       setHasLoaded(true);
     }
   }, [user, authLoading]);
-
-  const downloadInvoice = (order) => {
-    const invoiceData = {
-      orderId: order.id,
-      date: new Date(order.createdAt).toLocaleDateString(),
-      customer: `${order.shippingInfo.firstName} ${order.shippingInfo.lastName}`,
-      email: order.shippingInfo.email,
-      items: order.items,
-      subtotal: order.subtotal,
-      shipping: order.shipping,
-      tax: order.tax,
-      total: order.total,
-    };
-
-    const dataStr = JSON.stringify(invoiceData, null, 2);
-    const dataBlob = new Blob([dataStr], { type: "application/json" });
-    const url = URL.createObjectURL(dataBlob);
-    const link = document.createElement("a");
-    link.href = url;
-    link.download = `invoice-${order.id}.json`;
-    link.click();
-  };
 
   const getStatusColor = (status) => {
     switch (status) {
@@ -123,9 +106,7 @@ const OrderHistory = () => {
           <h1 className="text-3xl font-bold text-gray-900 mb-2">
             Order History
           </h1>
-          <p className="text-gray-600">
-            Track your orders and download invoices
-          </p>
+          <p className="text-gray-600">Track your orders</p>
         </div>
 
         <div className="space-y-6">
@@ -172,15 +153,6 @@ const OrderHistory = () => {
                         View
                       </Button>
                     </Link>
-
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={() => downloadInvoice(order)}
-                    >
-                      <Download className="h-4 w-4 mr-1" />
-                      Invoice
-                    </Button>
                   </div>
                 </div>
               </div>

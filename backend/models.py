@@ -1,6 +1,7 @@
 from flask_sqlalchemy import SQLAlchemy
 from datetime import datetime
-from sqlalchemy import MetaData
+from sqlalchemy import MetaData, Text
+from sqlalchemy.dialects.postgresql import JSON
 
 metadata = MetaData()
 db = SQLAlchemy(metadata=metadata)
@@ -109,32 +110,50 @@ class CartItem(db.Model):
 class Order(db.Model):
     __tablename__ = "orders"
 
-    id              = db.Column(db.Integer, primary_key=True)
-    status          = db.Column(db.String(50), default="Pending", nullable=False)
-    total_price     = db.Column(db.Float, nullable=False)
-    created_at      = db.Column(db.DateTime, default=datetime.utcnow)
-    delivery_address= db.Column(db.String(255))
-    billing_info    = db.Column(db.JSON)
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey("users.id"), nullable=False)
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    status = db.Column(db.String(50), default="pending")
+    shipping_info = db.Column(JSON, nullable=True)
+    total_price = db.Column(db.Float, nullable=False)
 
-    user_id         = db.Column(db.Integer, db.ForeignKey("users.id"))
-
-    # Relationships
-    user            = db.relationship("User", back_populates="orders")
-    order_items     = db.relationship("OrderItem", back_populates="order", cascade="all, delete-orphan")
-    invoice         = db.relationship("Invoice", back_populates="order", uselist=False, cascade="all, delete-orphan")
+    user = db.relationship("User", back_populates="orders")
+    order_items = db.relationship("OrderItem", back_populates="order", cascade="all, delete-orphan")
+    invoice = db.relationship("Invoice", back_populates="order", uselist=False)
 
     def to_dict(self):
+        shipping_info = self.shipping_info or {}
+        shipping_cost = shipping_info.get("shipping", 0)
+
         return {
             "id": self.id,
-            "status": self.status,
-            "total_price": self.total_price,
-            "created_at": self.created_at.isoformat(),
-            "delivery_address": self.delivery_address,
-            "billing_info": self.billing_info or {},
-            "user_id": self.user_id,
-            "order_items": [item.to_dict() for item in self.order_items],
-            "invoice": self.invoice.to_dict() if self.invoice else None
+            "userId": self.user_id,
+            "user": self.user.username if self.user else None,
+            "createdAt": self.created_at.isoformat(),
+            "status": self.status.lower(),
+            "subtotal": float(sum(item.price_at_order * item.quantity for item in self.order_items)),
+            "shipping": float(shipping_cost),
+            "total": float(self.total_price),
+            "shippingInfo": {
+                "firstName": shipping_info.get("firstName", ""),
+                "lastName": shipping_info.get("lastName", ""),
+                "email": shipping_info.get("email", ""),
+                "city": shipping_info.get("city", ""),
+                "county": shipping_info.get("county", ""),
+            },
+            "items": [
+                {
+                    "id": item.product_id,
+                    "name": item.product.name if item.product else "Unknown Product",
+                    "image": item.product.image if item.product else None,
+                    "quantity": item.quantity,
+                    "price": float(item.price_at_order),
+                }
+                for item in self.order_items
+            ]
         }
+
+
 
 class OrderItem(db.Model):
     __tablename__ = "order_items"
