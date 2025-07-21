@@ -6,9 +6,12 @@ export default function ManageInventory() {
   const { user, loading, isAuthenticated } = useAuth();
   const isAuthorized = user?.role === 'admin' || user?.role === 'order_manager';
 
+  const [categories, setCategories] = useState([]);
+  const [products, setProducts] = useState([]);
+  const [editingProductId, setEditingProductId] = useState(null);
+
   const [categoryData, setCategoryData] = useState({ name: '', label: '', icon: '' });
   const [categoryMessage, setCategoryMessage] = useState('');
-  const [categories, setCategories] = useState([]);
 
   const [productData, setProductData] = useState({
     name: '',
@@ -23,21 +26,32 @@ export default function ManageInventory() {
   });
   const [productMessage, setProductMessage] = useState('');
 
+  const [searchQuery, setSearchQuery] = useState('');
+
   useEffect(() => {
     fetchCategories();
+    fetchProducts();
   }, []);
 
   const fetchCategories = async () => {
     try {
       const response = await fetch('http://localhost:5000/categories/');
       const data = await response.json();
-      if (response.ok) {
-        setCategories(data);
-      } else {
-        console.error('Failed to fetch categories:', data.error);
-      }
+      if (response.ok) setCategories(data);
+      else console.error('Failed to fetch categories:', data.error);
     } catch (err) {
       console.error('Error fetching categories:', err);
+    }
+  };
+
+  const fetchProducts = async () => {
+    try {
+      const response = await fetch('http://localhost:5000/products/');
+      const data = await response.json();
+      if (response.ok) setProducts(data);
+      else console.error('Failed to fetch products:', data.error);
+    } catch (err) {
+      console.error('Error fetching products:', err);
     }
   };
 
@@ -60,7 +74,6 @@ export default function ManageInventory() {
       });
 
       const data = await response.json();
-
       if (response.ok) {
         setCategoryMessage(`Category "${data.name}" added.`);
         setCategoryData({ name: '', label: '', icon: '' });
@@ -81,21 +94,27 @@ export default function ManageInventory() {
     }));
   };
 
-  const handleAddProduct = async (e) => {
+  const handleAddOrUpdateProduct = async (e) => {
     e.preventDefault();
     setProductMessage('');
     const token = localStorage.getItem('beautyApp_token');
-    try {
-      const payload = {
-        ...productData,
-        price: parseFloat(productData.price),
-        stock_quantity: parseInt(productData.stock_quantity),
-        rating: parseFloat(productData.rating),
-        reviews: parseInt(productData.reviews)
-      };
 
-      const response = await fetch('http://localhost:5000/products/', {
-        method: 'POST',
+    const payload = {
+      ...productData,
+      price: parseFloat(productData.price),
+      stock_quantity: parseInt(productData.stock_quantity),
+      rating: parseFloat(productData.rating),
+      reviews: parseInt(productData.reviews),
+    };
+
+    try {
+      const url = editingProductId
+        ? `http://localhost:5000/products/${editingProductId}`
+        : 'http://localhost:5000/products/';
+      const method = editingProductId ? 'PUT' : 'POST';
+
+      const response = await fetch(url, {
+        method,
         headers: {
           'Content-Type': 'application/json',
           Authorization: `Bearer ${token}`,
@@ -106,7 +125,9 @@ export default function ManageInventory() {
       const data = await response.json();
 
       if (response.ok) {
-        setProductMessage(`Product "${data.name}" added.`);
+        setProductMessage(editingProductId
+          ? `Product "${data.name}" updated.`
+          : `Product "${data.name}" added.`);
         setProductData({
           name: '',
           description: '',
@@ -116,14 +137,61 @@ export default function ManageInventory() {
           in_stock: false,
           rating: '',
           reviews: '',
-          category_id: ''
+          category_id: '',
         });
+        setEditingProductId(null);
+        fetchProducts();
       } else {
-        setProductMessage(data.error || 'Failed to add product.');
+        setProductMessage(data.error || 'Operation failed.');
       }
     } catch (err) {
-      setProductMessage('Error adding product.');
+      setProductMessage('Error occurred while saving product.');
     }
+  };
+
+  const handleEditClick = (product) => {
+    setProductData({
+      name: product.name,
+      description: product.description,
+      price: product.price,
+      image_url: product.image_url,
+      stock_quantity: product.stock_quantity,
+      in_stock: product.in_stock,
+      rating: product.rating,
+      reviews: product.reviews,
+      category_id: product.category_id,
+    });
+    setEditingProductId(product.id);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
+  const handleDeleteProduct = async (id) => {
+    const token = localStorage.getItem('beautyApp_token');
+    if (!window.confirm('Are you sure you want to delete this product?')) return;
+
+    try {
+      const response = await fetch(`http://localhost:5000/products/${id}`, {
+        method: 'DELETE',
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      const data = await response.json();
+      if (response.ok) {
+        setProductMessage(data.message);
+        fetchProducts();
+      } else {
+        setProductMessage(data.error || 'Failed to delete product.');
+      }
+    } catch (err) {
+      setProductMessage('Error deleting product.');
+    }
+  };
+
+  const getCategoryName = (category_id) => {
+    const match = categories.find(cat => cat.id === category_id);
+    return match?.label || match?.name || category_id;
   };
 
   if (!loading && (!isAuthenticated || !isAuthorized)) {
@@ -152,8 +220,8 @@ export default function ManageInventory() {
 
       {/* Product Form */}
       <section>
-        <h2 className="text-xl font-semibold mb-2">Add Product</h2>
-        <form onSubmit={handleAddProduct} className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <h2 className="text-xl font-semibold mb-2">{editingProductId ? 'Edit Product' : 'Add Product'}</h2>
+        <form onSubmit={handleAddOrUpdateProduct} className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <input name="name" placeholder="Name" className="border p-2" value={productData.name} onChange={handleProductChange} required />
           <input name="image_url" placeholder="Image URL" className="border p-2" value={productData.image_url} onChange={handleProductChange} />
           <textarea name="description" placeholder="Description" className="border p-2 md:col-span-2" value={productData.description} onChange={handleProductChange} required />
@@ -172,10 +240,46 @@ export default function ManageInventory() {
             ))}
           </select>
           <button type="submit" className="bg-green-600 text-white px-4 py-2 rounded col-span-full md:col-auto">
-            Add Product
+            {editingProductId ? 'Update Product' : 'Add Product'}
           </button>
           {productMessage && <p className="text-green-600 text-sm col-span-full">{productMessage}</p>}
         </form>
+      </section>
+
+      {/* Product List */}
+      <section>
+        <h2 className="text-xl font-semibold mb-2">Existing Products</h2>
+
+        {/* Search Bar */}
+        <input
+          type="text"
+          placeholder="Search by product or category name"
+          value={searchQuery}
+          onChange={(e) => setSearchQuery(e.target.value.toLowerCase())}
+          className="border p-2 w-full md:w-1/2 mb-4 rounded"
+        />
+
+        <div className="space-y-2">
+          {products
+            .filter((product) =>
+              product.name.toLowerCase().includes(searchQuery) ||
+              getCategoryName(product.category_id).toLowerCase().includes(searchQuery)
+            )
+            .map((product) => (
+              <div key={product.id} className="border p-3 rounded flex justify-between items-center">
+                <div>
+                  <p className="font-bold">{product.name}</p>
+                  <p className="text-sm text-gray-600">
+                    Stock: {product.stock_quantity} | Category: {getCategoryName(product.category_id)}
+                  </p>
+                </div>
+                <div className="space-x-2">
+                  <button onClick={() => handleEditClick(product)} className="px-3 py-1 bg-yellow-500 text-white rounded">Edit</button>
+                  <button onClick={() => handleDeleteProduct(product.id)} className="px-3 py-1 bg-red-600 text-white rounded">Delete</button>
+                </div>
+              </div>
+            ))}
+        </div>
       </section>
     </div>
   );
