@@ -114,6 +114,20 @@ const Header = () => {
               </Link>
               </>
             )}
+            {/*order manager menu */}
+            {user && user.role === "order_manager" && (
+              <>
+              <Link
+                to="manage-inventory"
+                className={`font-medium transition-colors ${
+                  isActivePage("/manage-inventory")
+                    ? "text-rose-600"
+                    : "text-gray-700 hover:text-rose-600"
+                }`}
+              >
+                Manage Inventory
+              </Link>
+              </>)}
           </nav>
 
           {/* Actions */}
