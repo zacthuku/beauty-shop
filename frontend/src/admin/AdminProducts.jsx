@@ -188,8 +188,6 @@ const AdminProducts = () => {
         reviews: productToEdit.reviews || 0,
       };
 
-      console.log("Updating product with data:", productData);
-
       const response = await fetch(
         `http://localhost:5000/products/${productToEdit.id}`,
         {

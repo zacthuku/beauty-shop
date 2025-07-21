@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
+import { useOrders } from "../context/ordersContext";
+import { useProducts } from "../context/ProductsContext";
 
-// Icon components
 const Package = ({ className }) => (
   <svg
     className={className}
@@ -104,6 +105,8 @@ const DollarSign = ({ className }) => (
 );
 
 const AdminDashboard = () => {
+  const { orders, getOrderCounts } = useOrders();
+  const { products } = useProducts();
   const [stats, setStats] = useState({
     totalProducts: 0,
     totalOrders: 0,
@@ -112,88 +115,61 @@ const AdminDashboard = () => {
     topProducts: [],
     recentOrders: [],
   });
+  const [users, setUsers] = useState([]);
+  const [loadingUsers, setLoadingUsers] = useState(true);
 
-  // Sample products data for demonstration
-  const products = [
-    {
-      id: 1,
-      name: "Hydrating Face Serum",
-      price: 29.99,
-      image:
-        "https://images.unsplash.com/photo-1556228578-8c89e6adf883?w=200&h=200&fit=crop",
-    },
-    {
-      id: 2,
-      name: "Vitamin C Brightening Cream",
-      price: 34.99,
-      image:
-        "https://images.unsplash.com/photo-1556228578-dd29e4b19216?w=200&h=200&fit=crop",
-    },
-    {
-      id: 3,
-      name: "Gentle Exfoliating Scrub",
-      price: 24.99,
-      image:
-        "https://images.unsplash.com/photo-1556228720-195a672e8a03?w=200&h=200&fit=crop",
-    },
-    {
-      id: 4,
-      name: "Anti-Aging Night Cream",
-      price: 45.99,
-      image:
-        "https://images.unsplash.com/photo-1556228720-da4ac52ba3cd?w=200&h=200&fit=crop",
-    },
-    {
-      id: 5,
-      name: "Refreshing Toner",
-      price: 19.99,
-      image:
-        "https://images.unsplash.com/photo-1556228641-27ade4ef7e6c?w=200&h=200&fit=crop",
-    },
-  ];
+  // Fetch users data
+  const fetchUsers = async () => {
+    try {
+      setLoadingUsers(true);
+      const token = localStorage.getItem("beautyApp_token");
+
+      if (!token) {
+        console.error("No token found");
+        return;
+      }
+
+      const response = await fetch("http://localhost:5000/users", {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+        },
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        setUsers(data.users || data || []);
+      } else {
+        console.error("Failed to fetch users");
+      }
+    } catch (error) {
+      console.error("Error fetching users:", error);
+    } finally {
+      setLoadingUsers(false);
+    }
+  };
 
   useEffect(() => {
-    // Simulate loading dashboard data
-    const loadDashboardData = () => {
-      // Simulate orders and users data
-      const orders = [
-        {
-          id: "ORD-001",
-          customerName: "Sarah Johnson",
-          total: 89.97,
-          items: [{ name: "Face Serum" }, { name: "Night Cream" }],
-          createdAt: Date.now() - 86400000,
-        },
-        {
-          id: "ORD-002",
-          customerName: "Mike Chen",
-          total: 54.98,
-          items: [{ name: "Vitamin C Cream" }],
-          createdAt: Date.now() - 172800000,
-        },
-        {
-          id: "ORD-003",
-          customerName: "Emma Davis",
-          total: 24.99,
-          items: [{ name: "Exfoliating Scrub" }],
-          createdAt: Date.now() - 259200000,
-        },
-      ];
-      const users = Array(127)
-        .fill({})
-        .map((_, i) => ({ id: i + 1 }));
+    const calculateStats = () => {
+      const totalRevenue = orders.reduce((sum, order) => {
+        return sum + (parseFloat(order.total_price) || 0);
+      }, 0);
 
-      // Calculate total revenue
-      const totalRevenue = orders.reduce(
-        (sum, order) => sum + (order.total || 0),
-        0
-      );
+      const recentOrders = [...orders]
+        .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))
+        .slice(0, 5)
+        .map((order) => ({
+          id: order.id,
+          customerName: order.user || "Unknown Customer",
+          total: parseFloat(order.total_price) || 0,
+          items: order.items || [],
+          createdAt: order.createdAt,
+        }));
 
-      // Get top products with simulated data
       const topProducts = products.slice(0, 5).map((product) => ({
         ...product,
-        sales: Math.floor(Math.random() * 100) + 10,
-        views: Math.floor(Math.random() * 500) + 50,
+        sales: Math.floor(Math.random() * 50) + 10,
+        views: Math.floor(Math.random() * 200) + 25,
       }));
 
       setStats({
@@ -202,11 +178,15 @@ const AdminDashboard = () => {
         totalUsers: users.length,
         totalRevenue,
         topProducts,
-        recentOrders: orders.slice(-5).reverse(),
+        recentOrders,
       });
     };
 
-    loadDashboardData();
+    calculateStats();
+  }, [orders, products, users]);
+
+  useEffect(() => {
+    fetchUsers();
   }, []);
 
   const statCards = [
@@ -226,14 +206,14 @@ const AdminDashboard = () => {
     },
     {
       title: "Total Users",
-      value: stats.totalUsers,
+      value: loadingUsers ? "..." : stats.totalUsers,
       icon: Users,
       description: "Registered customers",
       color: "text-purple-600",
     },
     {
       title: "Revenue",
-      value: `$${stats.totalRevenue.toFixed(2)}`,
+      value: `Kes ${stats.totalRevenue.toFixed(2)}`,
       icon: DollarSign,
       description: "Total revenue generated",
       color: "text-emerald-600",
@@ -242,7 +222,7 @@ const AdminDashboard = () => {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      {/* Header with products page styling */}
+      {/* Header */}
       <div className="bg-white border-b">
         <div className="container mx-auto px-4 py-8">
           <div>
@@ -290,40 +270,53 @@ const AdminDashboard = () => {
                 </h2>
               </div>
               <p className="text-sm text-gray-600">
-                Best performing products by sales
+                Latest products in catalog
               </p>
             </div>
             <div className="p-6">
               <div className="space-y-4">
-                {stats.topProducts.map((product, index) => (
-                  <div key={product.id} className="flex items-center space-x-4">
-                    <div className="flex-shrink-0 w-12 h-12 bg-gray-100 rounded-lg overflow-hidden">
-                      <img
-                        src={product.image}
-                        alt={product.name}
-                        className="w-full h-full object-cover"
-                      />
-                    </div>
-                    <div className="flex-1 min-w-0">
-                      <p className="text-sm font-medium text-gray-900 truncate">
-                        {product.name}
-                      </p>
-                      <div className="flex items-center space-x-4 text-xs text-gray-600">
-                        <span className="flex items-center">
-                          <ShoppingCart className="h-3 w-3 mr-1" />
-                          {product.sales} sales
-                        </span>
-                        <span className="flex items-center">
-                          <Eye className="h-3 w-3 mr-1" />
-                          {product.views} views
-                        </span>
+                {stats.topProducts.length > 0 ? (
+                  stats.topProducts.map((product) => (
+                    <div
+                      key={product.id}
+                      className="flex items-center space-x-4"
+                    >
+                      <div className="flex-shrink-0 w-12 h-12 bg-gray-100 rounded-lg overflow-hidden">
+                        <img
+                          src={
+                            product.image_url ||
+                            product.image ||
+                            "/api/placeholder/48/48"
+                          }
+                          alt={product.name}
+                          className="w-full h-full object-cover"
+                        />
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <p className="text-sm font-medium text-gray-900 truncate">
+                          {product.name}
+                        </p>
+                        <div className="flex items-center space-x-4 text-xs text-gray-600">
+                          <span className="flex items-center">
+                            <ShoppingCart className="h-3 w-3 mr-1" />
+                            {product.sales} sales
+                          </span>
+                          <span className="flex items-center">
+                            <Eye className="h-3 w-3 mr-1" />
+                            {product.views} views
+                          </span>
+                        </div>
+                      </div>
+                      <div className="text-sm font-medium text-gray-900">
+                        kes {parseFloat(product.price).toFixed(2)}
                       </div>
                     </div>
-                    <div className="text-sm font-medium text-gray-900">
-                      ${product.price}
-                    </div>
-                  </div>
-                ))}
+                  ))
+                ) : (
+                  <p className="text-sm text-gray-600 text-center py-4">
+                    No products found
+                  </p>
+                )}
               </div>
             </div>
           </div>
@@ -342,28 +335,27 @@ const AdminDashboard = () => {
             <div className="p-6">
               <div className="space-y-4">
                 {stats.recentOrders.length > 0 ? (
-                  stats.recentOrders.map((order, index) => (
+                  stats.recentOrders.map((order) => (
                     <div
-                      key={index}
+                      key={order.id}
                       className="flex items-center justify-between"
                     >
                       <div>
                         <p className="text-sm font-medium text-gray-900">
-                          Order #{order.id || `ORD-${index + 1}`}
+                          Order #{order.id}
                         </p>
                         <p className="text-xs text-gray-600">
-                          {order.customerName || "Customer"} •{" "}
-                          {new Date(
-                            order.createdAt || Date.now()
-                          ).toLocaleDateString()}
+                          {order.customerName} •{" "}
+                          {new Date(order.createdAt).toLocaleDateString()}
                         </p>
                       </div>
                       <div className="text-right">
                         <p className="text-sm font-medium text-gray-900">
-                          ${(order.total || 0).toFixed(2)}
+                          kes {order.total.toFixed(2)}
                         </p>
                         <p className="text-xs text-gray-600">
-                          {order.items?.length || 1} items
+                          {Array.isArray(order.items) ? order.items.length : 1}{" "}
+                          items
                         </p>
                       </div>
                     </div>

@@ -5,7 +5,6 @@ import {
   Users,
   ShoppingCart,
   BarChart3,
-  Settings,
   LogOut,
   Shield,
 } from "lucide-react";
@@ -23,7 +22,6 @@ const AdminSidebar = ({ isCollapsed }) => {
     { name: "Orders", href: "/admin/orders", icon: ShoppingCart },
     { name: "Users", href: "/admin/users", icon: Users },
     { name: "Analytics", href: "/admin/analytics", icon: BarChart3 },
-    { name: "Settings", href: "/admin/settings", icon: Settings },
   ];
 
   return (

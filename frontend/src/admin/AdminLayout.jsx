@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import {
   Link,
   useLocation,
@@ -12,7 +12,6 @@ import {
   Users,
   ShoppingCart,
   BarChart3,
-  Settings,
   LogOut,
   Shield,
   Menu,
@@ -32,7 +31,6 @@ const AdminSidebar = ({ isCollapsed, onToggle }) => {
     { name: "Orders", href: "/admin/orders", icon: ShoppingCart },
     { name: "Users", href: "/admin/users", icon: Users },
     { name: "Analytics", href: "/admin/analytics", icon: BarChart3 },
-    { name: "Settings", href: "/admin/settings", icon: Settings },
   ];
 
   const isActive = (path) => location.pathname === path;
