@@ -16,6 +16,10 @@ import Profile from "./pages/Profile";
 import { AuthProvider } from "./context/AuthContext";
 import { CartProvider } from "./context/CartContext";
 import Loader from "./components/Loader";
+import AllUsers from "./pages/AllUsers";
+import RegisterOrderManager from "./pages/RegisterOrderManager";
+import PurchaseHistory from "./pages/PurchaseHistory";
+import ManageInventory from "./pages/ManageInventory";
 
 const App = () => {
   const [loading, setLoading] = useState(true);
@@ -66,6 +70,10 @@ const App = () => {
                 <Route path="/orders" element={<OrderHistory />} />
                 <Route path="/profile" element={<Profile />} />
                 <Route path="*" element={<Navigate to="/" />} />
+                <Route path="/admin/users" element={<AllUsers />} />
+                <Route path="/admin/register-order-manager" element={<RegisterOrderManager />} />
+                <Route path="/purchase-history" element={<PurchaseHistory />} />
+                <Route path="/manage-inventory" element={<ManageInventory />} />
               </Routes>
             </main>
             <Footer />

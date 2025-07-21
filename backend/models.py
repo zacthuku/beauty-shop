@@ -13,7 +13,7 @@ class User(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     username = db.Column(db.String(80), unique=True, nullable=False)
     email = db.Column(db.String(120), unique=True, nullable=False)
-    password_hash = db.Column(db.Text, nullable=False)
+    password = db.Column(db.Text, nullable=False)
     role = db.Column(db.String(10), nullable=False, default='customer')
     blocked= db.Column(db.Boolean, default=False)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
@@ -31,6 +31,7 @@ class User(db.Model):
             "blocked": self.blocked,
             "created_at": self.created_at.isoformat()
         }
+
 
 class Category(db.Model):
     __tablename__ = "categories"
