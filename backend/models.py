@@ -167,6 +167,7 @@ class Invoice(db.Model):
     invoice_number = db.Column(db.String(100), unique=True, nullable=False)
     issued_at      = db.Column(db.DateTime, default=datetime.utcnow)
     pdf_url        = db.Column(db.String(255))
+    amount         = db.Column(db.Float, nullable=False)
     order_id       = db.Column(db.Integer, db.ForeignKey("orders.id"), unique=True)
 
     # Relationships
@@ -179,6 +180,7 @@ class Invoice(db.Model):
             "issued_at": self.issued_at.isoformat(),
             "pdf_url": self.pdf_url,
             "order_id": self.order_id,
+            "amount": self.amount
             
         }
 

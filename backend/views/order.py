@@ -46,7 +46,14 @@ def remove_from_cart(item_id):
     db.session.delete(item)
     db.session.commit()
     return jsonify({"message": "Item removed"})
-
+#get order details and checkout
+@order_bp.route('/<int:order_id>', methods=['GET'])
+@jwt_required()
+def get_order_details(order_id):
+    order = Order.query.get_or_404(order_id)
+    if not is_admin() and order.user_id != get_jwt_identity()['id']:
+        return jsonify({"error": "Unauthorized access"}), 403
+    return jsonify(order.to_dict()) 
 
 @order_bp.route('/checkout', methods=['POST'])
 @jwt_required()
@@ -84,7 +91,8 @@ def checkout():
     invoice = Invoice(
         invoice_number=invoice_number,
         order_id=order.id,
-        pdf_url=pdf_url
+        pdf_url=pdf_url,
+        amount=total_price
     )
     db.session.add(invoice)
     db.session.commit()
