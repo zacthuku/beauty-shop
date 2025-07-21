@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { useParams, Link } from "react-router-dom";
+import { useParams, Link, useNavigate } from "react-router-dom";
 import {
   CheckCircle,
   Download,
@@ -8,19 +8,21 @@ import {
   CreditCard,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { useAuth } from "../context/AuthContext";
 
 const OrderConfirmation = () => {
   const { orderId } = useParams();
   const [order, setOrder] = useState(null);
+  const { user, loading } = useAuth();
+  const navigate = useNavigate();
 
   useEffect(() => {
-    if (!user) {
+    if (!loading && !user) {
       navigate("/login");
     }
-  }, [user, navigate]);
+  }, [user, loading, navigate]);
 
   useEffect(() => {
-    // Get order from localStorage
     const orders = JSON.parse(localStorage.getItem("beautyApp_orders") || "[]");
     const foundOrder = orders.find((o) => o.id === parseInt(orderId));
     setOrder(foundOrder);
@@ -42,17 +44,16 @@ const OrderConfirmation = () => {
   }
 
   const downloadInvoice = () => {
-    // Simulate invoice download
     const invoiceData = {
       orderId: order.id,
       date: new Date(order.createdAt).toLocaleDateString(),
-      customer: `${order.shippingInfo.firstName} ${order.shippingInfo.lastName}`,
-      email: order.shippingInfo.email,
-      items: order.items,
-      subtotal: order.subtotal,
-      shipping: order.shipping,
-      tax: order.tax,
-      total: order.total,
+      customer: `${order.shippingInfo?.firstName ?? ""} ${order.shippingInfo?.lastName ?? ""}`,
+      email: order.shippingInfo?.email ?? "N/A",
+      items: order.items ?? [],
+      subtotal: order.subtotal ?? 0,
+      shipping: order.shipping ?? 0,
+      tax: order.tax ?? 0,
+      total: order.total ?? 0,
     };
 
     const dataStr = JSON.stringify(invoiceData, null, 2);
@@ -67,7 +68,6 @@ const OrderConfirmation = () => {
   return (
     <div className="min-h-screen bg-gray-50">
       <div className="container mx-auto px-4 py-8">
-        {/* Success Header */}
         <div className="text-center mb-12">
           <div className="w-20 h-20 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-6">
             <CheckCircle className="h-12 w-12 text-green-600" />
@@ -88,13 +88,12 @@ const OrderConfirmation = () => {
         <div className="grid lg:grid-cols-3 gap-8">
           {/* Order Details */}
           <div className="lg:col-span-2 space-y-6">
-            {/* Order Items */}
             <div className="bg-white rounded-lg p-6 shadow-sm">
               <h2 className="text-xl font-semibold text-gray-900 mb-6">
                 Order Items
               </h2>
               <div className="space-y-4">
-                {order.items.map((item) => (
+                {(order.items ?? []).map((item) => (
                   <div
                     key={item.id}
                     className="flex items-center space-x-4 pb-4 border-b last:border-b-0"
@@ -128,15 +127,15 @@ const OrderConfirmation = () => {
               </h2>
               <div className="text-gray-600">
                 <p>
-                  {order.shippingInfo.firstName} {order.shippingInfo.lastName}
+                  {order.shippingInfo?.firstName} {order.shippingInfo?.lastName}
                 </p>
-                <p>{order.shippingInfo.address}</p>
+                <p>{order.shippingInfo?.address}</p>
                 <p>
-                  {order.shippingInfo.city}, {order.shippingInfo.state}{" "}
-                  {order.shippingInfo.zipCode}
+                  {order.shippingInfo?.city}, {order.shippingInfo?.state}{" "}
+                  {order.shippingInfo?.zipCode}
                 </p>
-                <p className="mt-2">Email: {order.shippingInfo.email}</p>
-                <p>Phone: {order.shippingInfo.phone}</p>
+                <p className="mt-2">Email: {order.shippingInfo?.email}</p>
+                <p>Phone: {order.shippingInfo?.phone}</p>
               </div>
             </div>
 
@@ -149,17 +148,17 @@ const OrderConfirmation = () => {
                 <CreditCard className="h-6 w-6 text-gray-400" />
                 <div>
                   <p className="font-medium text-gray-900">
-                    {order.paymentInfo.cardNumber}
+                    {order.paymentInfo?.cardNumber ?? "N/A"}
                   </p>
                   <p className="text-sm text-gray-500">
-                    {order.paymentInfo.nameOnCard}
+                    {order.paymentInfo?.nameOnCard ?? "N/A"}
                   </p>
                 </div>
               </div>
             </div>
           </div>
 
-          {/* Order Summary & Actions */}
+          {/* Sidebar */}
           <div className="space-y-6">
             {/* Order Summary */}
             <div className="bg-white rounded-lg p-6 shadow-sm">
@@ -170,7 +169,7 @@ const OrderConfirmation = () => {
                 <div className="flex justify-between">
                   <span className="text-gray-600">Subtotal</span>
                   <span className="font-medium">
-                    ${order.subtotal.toFixed(2)}
+                    ${order.subtotal?.toFixed(2) ?? "0.00"}
                   </span>
                 </div>
                 <div className="flex justify-between">
@@ -178,16 +177,18 @@ const OrderConfirmation = () => {
                   <span className="font-medium">
                     {order.shipping === 0
                       ? "FREE"
-                      : `$${order.shipping.toFixed(2)}`}
+                      : `$${order.shipping?.toFixed(2) ?? "0.00"}`}
                   </span>
                 </div>
                 <div className="flex justify-between">
                   <span className="text-gray-600">Tax</span>
-                  <span className="font-medium">${order.tax.toFixed(2)}</span>
+                  <span className="font-medium">
+                    ${order.tax?.toFixed(2) ?? "0.00"}
+                  </span>
                 </div>
                 <div className="flex justify-between text-lg font-bold border-t pt-3">
                   <span>Total</span>
-                  <span>${order.total.toFixed(2)}</span>
+                  <span>${order.total?.toFixed(2) ?? "0.00"}</span>
                 </div>
               </div>
             </div>
