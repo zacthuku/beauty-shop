@@ -34,9 +34,19 @@ export const ProductsProvider = ({ children }) => {
   };
 
   useEffect(() => {
-    fetchProducts();
-    fetchCategories();
-    setLoading(false);
+    const loadData = async () => {
+      try {
+        setLoading(true);
+        await fetchProducts();
+        await fetchCategories();
+      } catch (error) {
+        console.error("Failed to load products or categories", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    loadData();
   }, []);
 
   const getProductById = (id) => products.find((p) => p.id === Number(id));
