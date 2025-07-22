@@ -10,8 +10,9 @@ flask-jwt-extended = "*"
 faker="*"
 flask-mail = "*"
 flask-cors = "*"
-python-dotenv = "*"
 requests = "*"
+python-dotenv = "*"
+psycopg2-binary = "*"
 
 [dev-packages]
 

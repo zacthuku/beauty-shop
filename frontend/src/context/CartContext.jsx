@@ -1,6 +1,8 @@
 import { createContext, useContext, useState, useEffect } from "react";
 import { useAuth } from "./AuthContext";
 
+const API_BASE_URL = import.meta.env.VITE_SERVER_URL;
+
 const CartContext = createContext();
 
 // *************guest cart*******************
@@ -43,7 +45,7 @@ export const CartProvider = ({ children }) => {
       ...(body && { body: JSON.stringify(body) }),
     };
 
-    const response = await fetch(`http://localhost:5000/cart${url}`, options);
+    const response = await fetch(`${API_BASE_URL}/cart${url}`, options);
     if (!response.ok) {
       const errorData = await response.json().catch(() => ({}));
       throw new Error(
@@ -83,14 +85,13 @@ export const CartProvider = ({ children }) => {
   };
 
   //***********Clear cart*************************
-  
+
   const clearCart = async () => {
     setLoading(true);
     setError(null);
 
     try {
       if (user?.token) {
-
         await makeRequest("/clear", "DELETE");
         await fetchCartFromServer();
       } else {
