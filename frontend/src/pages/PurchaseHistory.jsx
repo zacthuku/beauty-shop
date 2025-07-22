@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { api_url } from "../config.json"; 
 
 function PurchaseHistory() {
   const [orders, setOrders] = useState([]);
@@ -10,7 +11,7 @@ function PurchaseHistory() {
   const [endDate, setEndDate] = useState("");
 
   useEffect(() => {
-    fetch("http://localhost:5000/orders/history", {
+    fetch(`${api_url}/orders/history`, {
       headers: {
         Authorization: `Bearer ${localStorage.getItem("beautyApp_token")}`,
       },

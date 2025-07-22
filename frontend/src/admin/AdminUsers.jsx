@@ -24,8 +24,8 @@ import {
 } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import { format } from "date-fns";
+import {api_url} from "../config.json";
 
-const API_BASE_URL = `${import.meta.env.VITE_SERVER_URL}/users`;
 
 const AdminUsers = () => {
   const { user: currentUser } = useAuth();
@@ -55,7 +55,7 @@ const AdminUsers = () => {
   useEffect(() => {
     const fetchUsers = async () => {
       try {
-        const res = await fetch(`${API_BASE_URL}`, {
+        const res = await fetch(`${api_url}/users`, {
           headers: { Authorization: `Bearer ${token}` },
         });
         const data = await res.json();
@@ -89,7 +89,7 @@ const AdminUsers = () => {
   const blockUser = async (id) => {
     setActionLoading(`block-${id}`);
     try {
-      const res = await fetch(`${API_BASE_URL}/${id}/block`, {
+      const res = await fetch(`${api_url}/${id}/block`, {
         method: "PATCH",
         headers: {
           "Content-Type": "application/json",
@@ -116,8 +116,9 @@ const AdminUsers = () => {
   const unblockUser = async (id) => {
     setActionLoading(`unblock-${id}`);
     try {
-      const res = await fetch(`${API_BASE_URL}/${id}/block`, {
+      const res = await fetch(`${api_url}/${id}/block`, {
         method: "PATCH",
+        credentials: "include",
         headers: {
           "Content-Type": "application/json",
           Authorization: `Bearer ${token}`,
@@ -143,7 +144,7 @@ const AdminUsers = () => {
   const deleteUser = async (id) => {
     setActionLoading(`delete-${id}`);
     try {
-      const res = await fetch(`${API_BASE_URL}/${id}`, {
+      const res = await fetch(`${api_url}/${id}`, {
         method: "DELETE",
         headers: { Authorization: `Bearer ${token}` },
       });
@@ -172,7 +173,7 @@ const AdminUsers = () => {
 
     setCreating(true);
     try {
-      const res = await fetch(`${API_BASE_URL}/register/order_manager`, {
+      const res = await fetch(`${api_url}/register/order_manager`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

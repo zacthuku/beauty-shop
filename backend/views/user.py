@@ -1,28 +1,25 @@
 from flask import Blueprint, jsonify, request
 from flask_jwt_extended import jwt_required, get_jwt_identity
-from flask_mail import Mail, Message
-from models import db,User
 from flask_mail import Message
 from werkzeug.security import generate_password_hash
+from models import db, User
 import random
 import string
-from models import db, User
-
-
-
 
 user_bp = Blueprint('user', __name__, url_prefix='/users')
 
-@user_bp.route('', methods=['GET']) 
+
+@user_bp.route('', methods=['GET'])
 @jwt_required()
 def get_all_users():
     identity = get_jwt_identity()
     if identity['role'] != 'admin':
         return jsonify({"error": "Admin only"}), 403
     users = User.query.all()
-    return jsonify({"users": [u.to_dict() for u in users]}) 
+    return jsonify({"users": [u.to_dict() for u in users]})
 
-@user_bp.route('/<int:id>/block', methods=['PATCH']) 
+
+@user_bp.route('/<int:id>/block', methods=['PATCH'])
 @jwt_required()
 def toggle_block_user(id):
     identity = get_jwt_identity()
@@ -30,7 +27,7 @@ def toggle_block_user(id):
         return jsonify({"error": "Admin only"}), 403
 
     user = User.query.get_or_404(id)
-    user.blocked = not user.blocked  
+    user.blocked = not user.blocked
     db.session.commit()
 
     status = "blocked" if user.blocked else "unblocked"
@@ -40,8 +37,24 @@ def toggle_block_user(id):
     }), 200
 
 
+@user_bp.route('/<int:id>', methods=['DELETE'])
+@jwt_required()
+def delete_user(id):
+    identity = get_jwt_identity()
+    if identity['role'] != 'admin':
+        return jsonify({"error": "Admin only"}), 403
 
-@user_bp.route('/create-manager', methods=['POST'])
+    user = User.query.get(id)
+    if not user:
+        return jsonify({"error": "User not found"}), 404
+
+    db.session.delete(user)
+    db.session.commit()
+
+    return jsonify({"message": f"User with ID {id} deleted successfully."}), 200
+
+
+@user_bp.route('/register/order_manager', methods=['POST'])
 @jwt_required()
 def create_manager():
     identity = get_jwt_identity()

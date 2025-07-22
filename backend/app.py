@@ -26,7 +26,11 @@ app.config['JWT_ACCESS_TOKEN_EXPIRES'] = timedelta(days=1)
 
 db.init_app(app)
 migrate = Migrate(app, db)
-CORS(app, supports_credentials=True)
+CORS(app, supports_credentials=True,  resources={r"/*": {"origins": [
+    "http://127.0.0.1:5173", 
+    "http://localhost:5173",
+    "https://beauty-shop-rho.vercel.app/"  
+]}})
 
 jwt = JWTManager(app)
 

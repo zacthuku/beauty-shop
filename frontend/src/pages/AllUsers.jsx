@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { useAuth } from "../context/AuthContext";
-
+import { api_url } from "../config.json"; 
 const AllUsers = () => {
   const { user } = useAuth();
   const [users, setUsers] = useState([]);
@@ -12,7 +12,7 @@ const AllUsers = () => {
   const fetchUsers = async () => {
     setLoading(true);
     try {
-      const response = await fetch("http://localhost:5000/users/", {
+      const response = await fetch(`${api_url}/users/`, {
         method: "GET",
         headers: {
           Authorization: `Bearer ${token}`,
@@ -49,7 +49,7 @@ const AllUsers = () => {
     if (!confirmToggle) return;
 
     try {
-      const res = await fetch(`http://localhost:5000/users/${userId}/block`, {
+      const res = await fetch(`${api_url}/users/${userId}/block`, {
         method: "PATCH",
         headers: {
           Authorization: `Bearer ${token}`,
@@ -80,7 +80,7 @@ const AllUsers = () => {
     if (!confirmed) return;
 
     try {
-      const response = await fetch(`http://localhost:5000/users/${userId}`, {
+      const response = await fetch(`${api_url}/users/${userId}`, {
         method: "DELETE",
         headers: {
           Authorization: `Bearer ${token}`,
