@@ -9,9 +9,10 @@ import string
 user_bp = Blueprint('user', __name__, url_prefix='/users')
 
 
-@user_bp.route('', methods=['GET'])
+@user_bp.route('', methods=['GET', 'OPTIONS'])
 @jwt_required()
 def get_all_users():
+    
     identity = get_jwt_identity()
     if identity['role'] != 'admin':
         return jsonify({"error": "Admin only"}), 403
@@ -22,6 +23,8 @@ def get_all_users():
 @user_bp.route('/<int:id>/block', methods=['PATCH','OPTIONS'])
 @jwt_required()
 def toggle_block_user(id):
+    if request.method == 'OPTIONS':
+        return jsonify({}), 200
     identity = get_jwt_identity()
     if identity['role'] != 'admin':
         return jsonify({"error": "Admin only"}), 403
@@ -37,9 +40,11 @@ def toggle_block_user(id):
     }), 200
 
 
-@user_bp.route('/<int:id>', methods=['DELETE'])
+@user_bp.route('/<int:id>', methods=['DELETE', 'OPTIONS'])
 @jwt_required()
 def delete_user(id):
+    if request.method == 'OPTIONS':
+        return jsonify({}), 200
     identity = get_jwt_identity()
     if identity['role'] != 'admin':
         return jsonify({"error": "Admin only"}), 403
@@ -54,9 +59,11 @@ def delete_user(id):
     return jsonify({"message": f"User with ID {id} deleted successfully."}), 200
 
 
-@user_bp.route('/register/order_manager', methods=['POST'])
+@user_bp.route('/register/order_manager', methods=['POST', 'OPTIONS'])
 @jwt_required()
 def create_manager():
+    if request.method == 'OPTIONS':
+        return jsonify({}), 200
     identity = get_jwt_identity()
     if identity['role'] != 'admin':
         return jsonify({"error": "Admin only"}), 403
