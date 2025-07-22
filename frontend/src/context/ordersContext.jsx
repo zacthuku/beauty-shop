@@ -1,7 +1,5 @@
 import { createContext, useContext, useState, useEffect } from "react";
 
-const API_BASE_URL = import.meta.env.VITE_SERVER_URL;
-
 const OrdersContext = createContext();
 
 export const OrdersProvider = ({ children }) => {
@@ -40,7 +38,7 @@ export const OrdersProvider = ({ children }) => {
       }
 
       const response = await fetch(
-        `${API_BASE_URL}/orders/all?status=${status}`,
+        `http://127.0.0.1:5000/orders/all?status=${status}`,
         {
           headers: {
             Authorization: `Bearer ${token}`,
@@ -70,7 +68,7 @@ export const OrdersProvider = ({ children }) => {
       setError(null);
 
       const token = localStorage.getItem("token");
-      const response = await fetch(`${API_BASE_URL}/orders/${orderId}`, {
+      const response = await fetch(`http://127.0.0.1:5000/orders/${orderId}`, {
         headers: {
           Authorization: `Bearer ${token}`,
           "Content-Type": "application/json",
@@ -99,16 +97,19 @@ export const OrdersProvider = ({ children }) => {
       setError(null);
 
       const token = localStorage.getItem("token");
-      const response = await fetch(`${API_BASE_URL}/orders/${orderId}/status`, {
-        method: "PUT",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
-        body: JSON.stringify({
-          status: newStatus.charAt(0).toUpperCase() + newStatus.slice(1),
-        }),
-      });
+      const response = await fetch(
+        `http://127.0.0.1:5000/orders/${orderId}/status`,
+        {
+          method: "PUT",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+          body: JSON.stringify({
+            status: newStatus.charAt(0).toUpperCase() + newStatus.slice(1),
+          }),
+        }
+      );
 
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);
@@ -161,7 +162,7 @@ export const OrdersProvider = ({ children }) => {
 
       const token = localStorage.getItem("token");
       const response = await fetch(
-        `${API_BASE_URL}/orders/${orderId}/invoice`,
+        `http://127.0.0.1:5000/orders/${orderId}/invoice`,
         {
           headers: {
             Authorization: `Bearer ${token}`,
@@ -190,7 +191,7 @@ export const OrdersProvider = ({ children }) => {
       setError(null);
 
       const token = localStorage.getItem("token");
-      const response = await fetch(`${API_BASE_URL}/orders/checkout`, {
+      const response = await fetch("http://127.0.0.1:5000/orders/checkout", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

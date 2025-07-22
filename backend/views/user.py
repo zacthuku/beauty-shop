@@ -1,10 +1,9 @@
-from flask import Blueprint, jsonify, request, current_app
+from flask import Blueprint, jsonify, request
 from flask_jwt_extended import jwt_required, get_jwt_identity
 from flask_mail import Mail, Message
 from models import db,User
 from flask_mail import Message
 from werkzeug.security import generate_password_hash
-from models import db, User
 import random
 import string
 from models import db, User
@@ -17,16 +16,17 @@ user_bp = Blueprint('user', __name__, url_prefix='/users')
 @user_bp.route('', methods=['GET']) 
 @jwt_required()
 def get_all_users():
-    if not is_admin():
+    identity = get_jwt_identity()
+    if identity['role'] != 'admin':
         return jsonify({"error": "Admin only"}), 403
-
     users = User.query.all()
     return jsonify({"users": [u.to_dict() for u in users]}) 
 
 @user_bp.route('/<int:id>/block', methods=['PATCH']) 
 @jwt_required()
 def toggle_block_user(id):
-    if not is_admin():
+    identity = get_jwt_identity()
+    if identity['role'] != 'admin':
         return jsonify({"error": "Admin only"}), 403
 
     user = User.query.get_or_404(id)
@@ -54,7 +54,8 @@ def create_manager():
     if not email:
         return jsonify({"error": "Email is required"}), 400
 
-    if User.query.filter_by(email=email).first():
+    existing = User.query.filter_by(email=email).first()
+    if existing:
         return jsonify({"error": "User with this email already exists"}), 409
 
     otp = ''.join(random.choices(string.ascii_letters + string.digits, k=10))
@@ -68,19 +69,6 @@ def create_manager():
     )
     db.session.add(new_user)
     db.session.commit()
-
-    msg = Message(
-        subject="Welcome to Beauty Shop - Order Manager Access",
-        recipients=[email],
-        body=f"""
-Hello {username},
-
-You have been registered as an Order Manager.
-Your temporary password is: {otp}
-
-Please log in and change your password immediately.
-        """.strip()
-    )
 
     try:
         msg = Message(

@@ -2,8 +2,6 @@ import { createContext, useContext, useState, useEffect } from "react";
 
 const AuthContext = createContext();
 
-const API_BASE_URL = import.meta.env.VITE_SERVER_URL;
-
 export const useAuth = () => {
   const context = useContext(AuthContext);
   if (!context) {
@@ -46,7 +44,7 @@ export const AuthProvider = ({ children }) => {
   const login = async ({ email, password }) => {
     setLoading(true);
     try {
-      const response = await fetch(`${API_BASE_URL}/login`, {
+      const response = await fetch("http://localhost:5000/login", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email, password }),
@@ -84,7 +82,7 @@ export const AuthProvider = ({ children }) => {
   const register = async (userData) => {
     setLoading(true);
     try {
-      const response = await fetch(`${API_BASE_URL}/register`, {
+      const response = await fetch("http://localhost:5000/register", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(userData),

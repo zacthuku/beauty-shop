@@ -14,7 +14,7 @@ class User(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     username = db.Column(db.String(80), unique=True, nullable=False)
     email = db.Column(db.String(120), unique=True, nullable=False)
-    password = db.Column(db.Text, nullable=False)
+    password_hash = db.Column(db.Text, nullable=False)
     role = db.Column(db.String(10), nullable=False, default='customer')
     blocked= db.Column(db.Boolean, default=False)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
@@ -32,7 +32,6 @@ class User(db.Model):
             "blocked": self.blocked,
             "created_at": self.created_at.isoformat()
         }
-
 
 class Category(db.Model):
     __tablename__ = "categories"
@@ -186,7 +185,6 @@ class Invoice(db.Model):
     invoice_number = db.Column(db.String(100), unique=True, nullable=False)
     issued_at      = db.Column(db.DateTime, default=datetime.utcnow)
     pdf_url        = db.Column(db.String(255))
-    amount         = db.Column(db.Float, nullable=False)
     order_id       = db.Column(db.Integer, db.ForeignKey("orders.id"), unique=True)
 
     # Relationships
@@ -199,7 +197,6 @@ class Invoice(db.Model):
             "issued_at": self.issued_at.isoformat(),
             "pdf_url": self.pdf_url,
             "order_id": self.order_id,
-            "amount": self.amount
             
         }
 

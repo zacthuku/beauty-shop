@@ -4,8 +4,6 @@ import { CheckCircle, Truck, CreditCard, AlertCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "../context/AuthContext";
 
-const VITE_SERVER_URL = import.meta.env.VITE_SERVER_URL;
-
 const OrderConfirmation = () => {
   const { orderId } = useParams();
   const [order, setOrder] = useState(null);
@@ -29,12 +27,15 @@ const OrderConfirmation = () => {
         setLoading(true);
         setError(null);
 
-        const response = await fetch(`${API_BASE_URL}/orders/${orderId}`, {
-          headers: {
-            Authorization: `Bearer ${token}`,
-            "Content-Type": "application/json",
-          },
-        });
+        const response = await fetch(
+          `http://127.0.0.1:5000/orders/${orderId}`,
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+              "Content-Type": "application/json",
+            },
+          }
+        );
 
         if (!response.ok) {
           if (response.status === 404) {
@@ -137,6 +138,7 @@ const OrderConfirmation = () => {
   return (
     <div className="min-h-screen bg-gray-50">
       <div className="container mx-auto px-4 py-8">
+        {/* Success Header */}
         <div className="text-center mb-12">
           <div className="w-20 h-20 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-6">
             <CheckCircle className="h-12 w-12 text-green-600" />
@@ -157,6 +159,7 @@ const OrderConfirmation = () => {
         <div className="grid lg:grid-cols-3 gap-8">
           {/* Order Details */}
           <div className="lg:col-span-2 space-y-6">
+            {/* Order Items */}
             <div className="bg-white rounded-lg p-6 shadow-sm">
               <h2 className="text-xl font-semibold text-gray-900 mb-6">
                 Order Items
@@ -239,7 +242,7 @@ const OrderConfirmation = () => {
             </div>
           </div>
 
-          {/* Sidebar */}
+          {/* Order Summary & Actions */}
           <div className="space-y-6">
             {/* Order Summary */}
             <div className="bg-white rounded-lg p-6 shadow-sm">
