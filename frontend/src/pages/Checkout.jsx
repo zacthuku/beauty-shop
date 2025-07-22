@@ -14,6 +14,8 @@ import { useCart } from "../context/CartContext";
 import { useAuth } from "../context/AuthContext";
 import { toast } from "sonner";
 
+const VITE_SERVER_URL = import.meta.env.VITE_SERVER_URL;
+
 const Checkout = () => {
   const navigate = useNavigate();
   const { cartItems, getCartTotal, clearCart } = useCart();
@@ -97,7 +99,7 @@ const Checkout = () => {
         Math.random() * 1000
       )}`;
 
-      const res = await fetch("http://localhost:5000/orders/checkout", {
+      const res = await fetch(`${API_BASE_URL}/orders/checkout`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
