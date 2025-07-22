@@ -1,7 +1,7 @@
 import { useState } from "react";
-import { useAuth } from "@/context/AuthContext"; // adjust the path if different
+import { useAuth } from "@/context/AuthContext"; 
 import { Button } from "@/components/ui/button";
-
+import {api_url} from "../config.json"; 
 const RegisterOrderManager = () => {
   const { user } = useAuth();
   const [email, setEmail] = useState("");
@@ -17,7 +17,7 @@ const RegisterOrderManager = () => {
     try {
       const token = localStorage.getItem("beautyApp_token");
 
-      const response = await fetch("http://localhost:5000/users/register/order_manager", {
+      const response = await fetch(`${api_url}/users/register/order_manager`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

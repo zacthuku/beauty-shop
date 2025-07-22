@@ -127,7 +127,7 @@ def seed():
                     db.session.commit()
                     print(f"  Order total: KES {total_price}")
 
-            print("✅ Done seeding successfully!")
+            print("Done seeding successfully!")
             
         except Exception as e:
             db.session.rollback()
