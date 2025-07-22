@@ -30,7 +30,9 @@ CORS(app, supports_credentials=True,  resources={r"/*": {"origins": [
     "http://127.0.0.1:5173", 
     "http://localhost:5173",
     "https://beauty-shop-rho.vercel.app"  
-]}})
+],
+"methods": ["GET", "POST", "PATCH", "DELETE", "OPTIONS"],
+"allow_headers": ["Content-Type", "Authorization"] }})
 
 jwt = JWTManager(app)
 
