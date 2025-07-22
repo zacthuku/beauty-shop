@@ -58,10 +58,8 @@ const Profile = () => {
   if (!user) return null;
 
   const handleSave = () => {
-    toast({
-      title: "Profile updated",
-      description: "Your profile has been updated successfully.",
-    });
+    toast.success("Profile updated successfully!");
+;
     setIsEditing(false);
   };
 
@@ -91,10 +89,8 @@ const Profile = () => {
       )
     ) {
       logout();
-      toast({
-        title: "Account deleted",
-        description: "Your account has been deleted successfully.",
-      });
+      toast.success("Your account has been deleted successfully.");
+;
       navigate("/");
     }
   };

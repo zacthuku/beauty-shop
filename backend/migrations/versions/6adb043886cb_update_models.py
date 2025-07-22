@@ -66,6 +66,9 @@ def upgrade():
     sa.Column('rating', sa.Float(), nullable=True),
     sa.Column('reviews', sa.Integer(), nullable=True),
     sa.Column('category_id', sa.Integer(), nullable=False),
+    sa.Column('in_stock', sa.Boolean(), nullable=True),
+    sa.Column('rating', sa.Float(), nullable=True),
+    sa.Column('reviews', sa.Integer(), nullable=True),
     sa.ForeignKeyConstraint(['category_id'], ['categories.id'], ),
     sa.PrimaryKeyConstraint('id')
     )

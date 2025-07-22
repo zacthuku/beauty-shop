@@ -12,7 +12,15 @@ from views.mailserver import email
 
 
 app = Flask(__name__)
-CORS(app)
+CORS(app, resources={
+    r"/*": {
+        "origins": ["http://127.0.0.1:5173", "http://localhost:5173"],
+        "methods": ["GET", "POST", "PUT", "DELETE", "OPTIONS","PATCH"],
+        "allow_headers": ["Content-Type", "Authorization"]
+    }
+})
+
+
 
 
 app.config['SQLALCHEMY_DATABASE_URI'] = os.getenv('DATABASE_URL', 'sqlite:///beauty.db')

@@ -70,6 +70,65 @@ const Header = () => {
                 {category.label}
               </Link>
             ))}
+            {/*admin menu */}
+            {user && user.role === "admin" && (
+              <>
+              <Link
+                to="/admin/users"
+                className={`font-medium transition-colors ${
+                  isActivePage("/admin/users")
+                    ? "text-rose-600"
+                    : "text-gray-700 hover:text-rose-600"
+                }`}
+              >
+                Users
+              </Link>
+              <Link
+                to="/admin/register-order-manager"
+                className={`font-medium transition-colors ${
+                  isActivePage("/admin/register-order-manager")
+                    ? "text-rose-600"
+                    : "text-gray-700 hover:text-rose-600"
+                }`}
+              >
+                Add Manager
+              </Link>
+              <Link
+                to="/purchase-history"
+                className={`font-medium transition-colors ${
+                  isActivePage("/purchase-history")
+                    ? "text-rose-600"
+                    : "text-gray-700 hover:text-rose-600"
+                }`}
+              >
+                Purchase History
+              </Link>
+              <Link
+                to="/manage-inventory"
+                className={`font-medium transition-colors ${
+                  isActivePage("/manage-inventory")
+                    ? "text-rose-600"
+                    : "text-gray-700 hover:text-rose-600"
+                }`}
+              >
+                Manage Inventory
+              </Link>
+              </>
+            )}
+            {/*order manager menu */}
+            {user && user.role === "order_manager" && (
+              <>
+              <Link
+                to="manage-inventory"
+                className={`font-medium transition-colors ${
+                  isActivePage("/manage-inventory")
+                    ? "text-rose-600"
+                    : "text-gray-700 hover:text-rose-600"
+                }`}
+              >
+                Manage Inventory
+              </Link>
+              </>)}
           </nav>
 
           {/* Actions */}
@@ -86,6 +145,7 @@ const Header = () => {
                 </span>
               )}
             </Link>
+            
 
             {/* User Menu */}
             {user ? (

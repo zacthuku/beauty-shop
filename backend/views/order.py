@@ -1,4 +1,4 @@
-from flask import Blueprint, request, jsonify
+from flask import Blueprint, request, jsonify, current_app
 from flask_jwt_extended import jwt_required, get_jwt_identity
 from models import db, User, Product, Category, CartItem, Order, OrderItem, Invoice
 from datetime import datetime
@@ -157,6 +157,7 @@ def get_order_details(order_id):
     except Exception as e:
         logger.error(f"Error fetching order details: {str(e)}")
         return jsonify({'error': 'Failed to fetch order details'}), 500
+
 
 
 @order_bp.route('/checkout', methods=['POST'])
