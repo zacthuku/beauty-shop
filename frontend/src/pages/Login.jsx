@@ -26,8 +26,13 @@ const Login = () => {
     try {
       const user = await login(formData);
 
-      toast.success(`Welcome back, ${user.username}!`);
-      navigate(from, { replace: true });
+      toast.success(`Welcome back, ${user.username || user.email}!`);
+
+      if (user?.role === "admin" || user?.role === "manager") {
+        navigate("/admin/dashboard", { replace: true });
+      } else {
+        navigate(from, { replace: true });
+      }
     } catch (error) {
       toast.error(error.message || "Invalid email or password");
     } finally {

@@ -1,5 +1,5 @@
-import { useState, useEffect } from "react";
-import { useParams, useLocation } from "react-router-dom";
+import { useState, useEffect, useContext } from "react";
+import { useParams, useLocation, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
@@ -10,15 +10,20 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import ProductCard from "../components/ProductCard";
-import { products, categories, searchProducts } from "../data/products";
+import { useProducts } from "../context/ProductsContext";
+import Loader from "../components/Loader";
 
 const Products = () => {
+  const [loading, setLoading] = useState(true);
+  const { products, categories, fetchProducts } = useProducts();
   const { category } = useParams();
   const location = useLocation();
+  const navigate = useNavigate();
+  const [selectedCategory, setSelectedCategory] = useState(category || "all");
 
   const [filteredProducts, setFilteredProducts] = useState(products);
   const [searchQuery, setSearchQuery] = useState("");
-  const [sortBy, setSortBy] = useState("name");
+  const [sortBy, setSortBy] = useState("newest");
   const [showFilters, setShowFilters] = useState(false);
   const [gridSize, setGridSize] = useState(4);
 
@@ -26,13 +31,19 @@ const Products = () => {
   const pageTitle = currentCategory ? currentCategory.label : "All Products";
 
   useEffect(() => {
-    const search = new URLSearchParams(location.search).get("search");
-    if (search) setSearchQuery(search);
-  }, [location.search]);
+    setLoading(true);
+    fetchProducts({
+      search: searchQuery,
+      category: selectedCategory,
+      sort: sortBy,
+    }).then(() => setLoading(false));
+  }, [searchQuery, selectedCategory, sortBy]);
 
   useEffect(() => {
-    let result = searchProducts(searchQuery, category || "all");
+    setSelectedCategory(category || "all");
+  }, [category]);
 
+  useEffect(() => {
     const sortFn = {
       "price-low": (a, b) => a.price - b.price,
       "price-high": (a, b) => b.price - a.price,
@@ -41,9 +52,9 @@ const Products = () => {
       name: (a, b) => a.name.localeCompare(b.name),
     };
 
-    result.sort(sortFn[sortBy]);
-    setFilteredProducts(result);
-  }, [searchQuery, category, sortBy]);
+    const sorted = [...products].sort(sortFn[sortBy]);
+    setFilteredProducts(sorted);
+  }, [products, sortBy]);
 
   const resetFilters = () => {
     setSearchQuery("");
@@ -125,9 +136,11 @@ const Products = () => {
                   <input
                     type="radio"
                     name="category"
-                    checked={!category}
-                    onChange={() => (window.location.href = "/products")}
-                    className="mr-2"
+                    checked={selectedCategory === "all"}
+                    onChange={() => {
+                      setSelectedCategory("all");
+                      navigate("/products");
+                    }}
                   />
                   All Products
                 </label>
@@ -136,10 +149,11 @@ const Products = () => {
                     <input
                       type="radio"
                       name="category"
-                      checked={category === cat.name}
-                      onChange={() =>
-                        (window.location.href = `/products/${cat.name}`)
-                      }
+                      checked={selectedCategory === cat.name}
+                      onChange={() => {
+                        setSelectedCategory(cat.name);
+                        navigate(`/products/${cat.name}`);
+                      }}
                       className="mr-2"
                     />
                     {cat.label}
@@ -152,7 +166,21 @@ const Products = () => {
 
         {/* Products Grid */}
         <main className="flex-1">
-          {filteredProducts.length === 0 ? (
+          {loading ? (
+            <div
+              className={`grid gap-6 ${
+                gridSize === 3
+                  ? "grid-cols-1 md:grid-cols-2 lg:grid-cols-3"
+                  : "grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4"
+              }`}
+            >
+              {Array(8)
+                .fill(0)
+                .map((_, i) => (
+                  <Loader key={i} />
+                ))}
+            </div>
+          ) : filteredProducts.length === 0 ? (
             <div className="text-center py-12">
               <div className="text-6xl mb-4">🔍</div>
               <h3 className="text-xl font-semibold text-gray-900 mb-2">

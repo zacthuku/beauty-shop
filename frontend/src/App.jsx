@@ -15,11 +15,16 @@ import OrderHistory from "./pages/OrderHistory";
 import Profile from "./pages/Profile";
 import { AuthProvider } from "./context/AuthContext";
 import { CartProvider } from "./context/CartContext";
+import { ProductsProvider } from "./context/ProductsContext";
+import { OrdersProvider } from "./context/ordersContext";
 import Loader from "./components/Loader";
-import AllUsers from "./pages/AllUsers";
-import RegisterOrderManager from "./pages/RegisterOrderManager";
-import PurchaseHistory from "./pages/PurchaseHistory";
-import ManageInventory from "./pages/ManageInventory";
+import AdminLayout from "./admin/AdminLayout";
+import AdminDashboard from "./admin/AdminDashboard";
+
+import AdminProducts from "./admin/AdminProducts";
+import AdminOrders from "./admin/AdminOrders";
+import AdminUsers from "./admin/AdminUsers";
+import AdminAnalytics from "./admin/AdminAnalytics";
 
 const App = () => {
   const [loading, setLoading] = useState(true);
@@ -50,36 +55,58 @@ const App = () => {
   return (
     <AuthProvider>
       <CartProvider>
-        <BrowserRouter>
-          <div className="min-h-screen bg-rose-50">
-            <Header />
-            <main className="min-h-screen">
-              <Routes>
-                <Route path="/" element={<Home />} />
-                <Route path="/products" element={<Products />} />
-                <Route path="/products/:category" element={<Products />} />
-                <Route path="/product/:id" element={<ProductDetail />} />
-                <Route path="/cart" element={<Cart />} />
-                <Route path="/checkout" element={<Checkout />} />
-                <Route path="/login" element={<Login />} />
-                <Route path="/register" element={<Register />} />
-                <Route
-                  path="/order-confirmation/:orderId"
-                  element={<OrderConfirmation />}
-                />
-                <Route path="/orders" element={<OrderHistory />} />
-                <Route path="/profile" element={<Profile />} />
-                <Route path="*" element={<Navigate to="/" />} />
-                <Route path="/admin/users" element={<AllUsers />} />
-                <Route path="/admin/register-order-manager" element={<RegisterOrderManager />} />
-                <Route path="/purchase-history" element={<PurchaseHistory />} />
-                <Route path="/manage-inventory" element={<ManageInventory />} />
-              </Routes>
-            </main>
-            <Footer />
-          </div>
-        </BrowserRouter>
-        <Toaster position="top-right" richColors />
+        <ProductsProvider>
+          <OrdersProvider>
+            <BrowserRouter>
+              <div className="min-h-screen bg-rose-50">
+                <Routes>
+                  <Route path="/admin/*" element={null} />
+                  <Route path="*" element={<Header />} />
+                </Routes>
+
+                <main className="min-h-screen">
+                  <Routes>
+                    <Route path="/" element={<Home />} />
+                    <Route path="/products" element={<Products />} />
+                    <Route path="/products/:category" element={<Products />} />
+                    <Route path="/product/:id" element={<ProductDetail />} />
+                    <Route path="/cart" element={<Cart />} />
+                    <Route path="/checkout" element={<Checkout />} />
+                    <Route path="/login" element={<Login />} />
+                    <Route path="/register" element={<Register />} />
+                    <Route
+                      path="/order-confirmation/:orderId"
+                      element={<OrderConfirmation />}
+                    />
+                    <Route path="/orders" element={<OrderHistory />} />
+                    <Route path="/profile" element={<Profile />} />
+
+                    {/* Admin routes */}
+                    <Route path="/admin" element={<AdminLayout />}>
+                      <Route
+                        index
+                        element={<Navigate to="/admin/dashboard" replace />}
+                      />
+                      <Route path="dashboard" element={<AdminDashboard />} />
+                      <Route path="products" element={<AdminProducts />} />
+                      <Route path="orders" element={<AdminOrders />} />
+                      <Route path="users" element={<AdminUsers />} />
+                      <Route path="analytics" element={<AdminAnalytics />} />
+                    </Route>
+
+                    <Route path="*" element={<Navigate to="/" />} />
+                  </Routes>
+                </main>
+
+                <Routes>
+                  <Route path="/admin/*" element={null} />
+                  <Route path="*" element={<Footer />} />
+                </Routes>
+              </div>
+              <Toaster position="bottom-right" richColors />
+            </BrowserRouter>
+          </OrdersProvider>
+        </ProductsProvider>
       </CartProvider>
     </AuthProvider>
   );

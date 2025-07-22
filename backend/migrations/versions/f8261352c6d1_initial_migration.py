@@ -1,16 +1,17 @@
-"""Initial migration
+"""initial migration
 
-Revision ID: 15b5cf71c047
+Revision ID: f8261352c6d1
 Revises: 
-Create Date: 2025-07-19 14:49:55.034402
+Create Date: 2025-07-22 11:52:27.516323
 
 """
 from alembic import op
 import sqlalchemy as sa
-
+from sqlalchemy.dialects import postgresql
+from sqlalchemy import Text
 
 # revision identifiers, used by Alembic.
-revision = '15b5cf71c047'
+revision = 'f8261352c6d1'
 down_revision = None
 branch_labels = None
 depends_on = None
@@ -22,7 +23,7 @@ def upgrade():
     sa.Column('id', sa.Integer(), nullable=False),
     sa.Column('name', sa.String(length=50), nullable=False),
     sa.Column('label', sa.String(length=50), nullable=False),
-    sa.Column('icon', sa.String(length=10), nullable=True),
+    sa.Column('icon', sa.String(length=20), nullable=True),
     sa.PrimaryKeyConstraint('id'),
     sa.UniqueConstraint('name')
     )
@@ -37,7 +38,7 @@ def upgrade():
     sa.Column('id', sa.Integer(), nullable=False),
     sa.Column('username', sa.String(length=80), nullable=False),
     sa.Column('email', sa.String(length=120), nullable=False),
-    sa.Column('password_hash', sa.Text(), nullable=False),
+    sa.Column('password', sa.Text(), nullable=False),
     sa.Column('role', sa.String(length=10), nullable=False),
     sa.Column('blocked', sa.Boolean(), nullable=True),
     sa.Column('created_at', sa.DateTime(), nullable=True),
@@ -47,26 +48,24 @@ def upgrade():
     )
     op.create_table('orders',
     sa.Column('id', sa.Integer(), nullable=False),
-    sa.Column('status', sa.String(length=50), nullable=False),
-    sa.Column('total_price', sa.Float(), nullable=False),
+    sa.Column('user_id', sa.Integer(), nullable=False),
     sa.Column('created_at', sa.DateTime(), nullable=True),
-    sa.Column('delivery_address', sa.String(length=255), nullable=True),
-    sa.Column('billing_info', sa.String(length=255), nullable=True),
-    sa.Column('user_id', sa.Integer(), nullable=True),
+    sa.Column('status', sa.String(length=50), nullable=True),
+    sa.Column('shipping_info', postgresql.JSON(astext_type=Text()), nullable=True),
+    sa.Column('total_price', sa.Float(), nullable=False),
     sa.ForeignKeyConstraint(['user_id'], ['users.id'], ),
     sa.PrimaryKeyConstraint('id')
     )
     op.create_table('products',
     sa.Column('id', sa.Integer(), nullable=False),
-    sa.Column('name', sa.String(length=100), nullable=False),
-    sa.Column('description', sa.Text(), nullable=True),
+    sa.Column('name', sa.String(length=120), nullable=False),
     sa.Column('price', sa.Float(), nullable=False),
-    sa.Column('image_url', sa.String(length=255), nullable=True),
-    sa.Column('stock_quantity', sa.Integer(), nullable=True),
-    sa.Column('category_id', sa.Integer(), nullable=False),
+    sa.Column('image', sa.String(length=255), nullable=True),
+    sa.Column('description', sa.Text(), nullable=True),
     sa.Column('in_stock', sa.Boolean(), nullable=True),
     sa.Column('rating', sa.Float(), nullable=True),
     sa.Column('reviews', sa.Integer(), nullable=True),
+    sa.Column('category_id', sa.Integer(), nullable=False),
     sa.ForeignKeyConstraint(['category_id'], ['categories.id'], ),
     sa.PrimaryKeyConstraint('id')
     )
