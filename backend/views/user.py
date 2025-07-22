@@ -19,7 +19,7 @@ def get_all_users():
     return jsonify({"users": [u.to_dict() for u in users]})
 
 
-@user_bp.route('/<int:id>/block', methods=['PATCH'])
+@user_bp.route('/<int:id>/block', methods=['PATCH','OPTIONS'])
 @jwt_required()
 def toggle_block_user(id):
     identity = get_jwt_identity()
