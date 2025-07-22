@@ -1,7 +1,6 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { CreditCard, Lock, MapPin } from "lucide-react";
-
+import { Smartphone, Lock, MapPin } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
@@ -21,6 +20,7 @@ const Checkout = () => {
   const { cartItems, getCartTotal, clearCart } = useCart();
   const { user } = useAuth();
   const [isProcessing, setIsProcessing] = useState(false);
+  const [mpesaPromptSent, setMpesaPromptSent] = useState(false);
 
   const [shippingInfo, setShippingInfo] = useState({
     firstName: "",
@@ -28,8 +28,8 @@ const Checkout = () => {
     email: user?.email || "",
     phone: "",
     address: "",
+    county: "",
     city: "",
-    town: "",
     country: "Kenya",
   });
 
@@ -37,19 +37,13 @@ const Checkout = () => {
     if (!user) {
       navigate("/login");
     }
-  }, [user, navigate]);
-
-  useEffect(() => {
     if (cartItems.length === 0) {
       navigate("/cart");
     }
-  }, [cartItems, navigate]);
+  }, [user, navigate, cartItems]);
 
-  const [paymentInfo, setPaymentInfo] = useState({
-    cardNumber: "",
-    expiryDate: "",
-    cvv: "",
-    nameOnCard: "",
+  const [mpesaInfo, setMpesaInfo] = useState({
+    phoneNumber: "",
   });
 
   const subtotal = getCartTotal();
@@ -63,78 +57,87 @@ const Checkout = () => {
     });
   };
 
-  const handlePaymentChange = (e) => {
+  const handleMpesaChange = (e) => {
     let value = e.target.value;
 
-    if (e.target.name === "cardNumber") {
-      value = value
-        .replace(/\s/g, "")
-        .replace(/(.{4})/g, "$1 ")
-        .trim();
-      if (value.length > 19) return;
-    }
-
-    if (e.target.name === "expiryDate") {
-      value = value.replace(/\D/g, "").replace(/(\d{2})(\d)/, "$1/$2");
-      if (value.length > 5) return;
-    }
-
-    if (e.target.name === "cvv") {
+    if (e.target.name === "phoneNumber") {
+      // Only allow digits
       value = value.replace(/\D/g, "");
-      if (value.length > 4) return;
+
+      // Limit to 10 digits for 07xxxxxxxx format
+      if (value.length > 10) return;
     }
 
-    setPaymentInfo({
-      ...paymentInfo,
+    setMpesaInfo({
+      ...mpesaInfo,
       [e.target.name]: value,
     });
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+
+    if (!mpesaInfo.phoneNumber.match(/^07\d{8}$/)) {
+      toast.error("Invalid phone number", {
+        description: "Please enter a valid phone number in format 07XXXXXXXX",
+      });
+      return;
+    }
+
     setIsProcessing(true);
+    setMpesaPromptSent(true);
 
     try {
-      await new Promise((resolve) => setTimeout(resolve, 2000));
+      const toastId = toast.loading("Processing M-Pesa payment...", {
+        description: "Please check your phone and enter your M-Pesa PIN.",
+      });
 
-      const order = {
-        id: Date.now(),
-        userId: user?.id || null,
-        items: cartItems,
-        subtotal,
-        shipping,
-        total,
-        shippingInfo,
-        paymentInfo: {
-          ...paymentInfo,
-          cardNumber: "**** **** **** " + paymentInfo.cardNumber.slice(-4),
+      await new Promise((resolve) => setTimeout(resolve, 3000));
+
+      const mockTransactionId = `MPX${Date.now()}${Math.floor(
+        Math.random() * 1000
+      )}`;
+
+      const res = await fetch("http://localhost:5000/orders/checkout", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${user?.token}`,
         },
-        status: "confirmed",
-        createdAt: new Date().toISOString(),
-      };
+        body: JSON.stringify({
+          shipping_info: shippingInfo,
+          payment_method: "mpesa",
+          transaction_id: mockTransactionId,
+        }),
+      });
 
-      const existingOrders = JSON.parse(
-        localStorage.getItem("beautyApp_orders") || "[]"
-      );
-      existingOrders.push(order);
-      localStorage.setItem("beautyApp_orders", JSON.stringify(existingOrders));
+      if (!res.ok) {
+        const errorData = await res.json();
+        throw new Error(errorData.error || "Order failed");
+      }
+
+      const order = await res.json();
+      const orderId = order.order?.id || order.id;
+
+      if (!orderId) {
+        throw new Error("Order ID not received from server");
+      }
 
       clearCart();
 
-      toast({
-        title: "Order placed successfully!",
+      toast.dismiss(toastId);
+      toast.success("Payment successful!", {
         description:
-          "Thank you for your purchase. You will receive an email confirmation shortly.",
+          "Your order has been placed successfully. You will receive an SMS confirmation.",
       });
 
-      navigate(`/order-confirmation/${order.id}`);
+      navigate(`/order-confirmation/${orderId}`);
     } catch (error) {
-      toast({
-        title: "Payment failed",
+      toast.error("Payment failed", {
         description:
-          "There was an error processing your payment. Please try again.",
-        variant: "destructive",
+          error.message || "There was an error processing your payment.",
       });
+      setMpesaPromptSent(false);
     } finally {
       setIsProcessing(false);
     }
@@ -154,73 +157,72 @@ const Checkout = () => {
     <div className="min-h-screen bg-gray-50">
       <div className="container mx-auto px-4 py-8">
         <h1 className="text-3xl font-bold text-gray-900 mb-8">Checkout</h1>
-
         <form onSubmit={handleSubmit}>
           <div className="grid lg:grid-cols-2 gap-8">
-            {/* Shipping & Payment Info */}
+            {/* Shipping Info */}
             <div className="space-y-8">
               {/* Shipping Info */}
               <div className="bg-white rounded-lg p-6 shadow-sm">
-                <h2 className="text-xl font-semibold text-gray-900 mb-6 flex items-center">
-                  <MapPin className="h-5 w-5 mr-2 text-rose-500" />
+                <h2 className="text-xl font-semibold mb-6 flex items-center">
+                  <MapPin className="h-5 w-5 mr-2 text-green-600" />
                   Shipping Information
                 </h2>
 
                 {/* Form fields */}
                 <div className="grid grid-cols-2 gap-4">
-                  <InputField
-                    label="First Name"
+                  <Input
                     name="firstName"
+                    required
                     value={shippingInfo.firstName}
                     onChange={handleShippingChange}
+                    placeholder="First Name"
                   />
-                  <InputField
-                    label="Last Name"
+                  <Input
                     name="lastName"
+                    required
                     value={shippingInfo.lastName}
                     onChange={handleShippingChange}
+                    placeholder="Last Name"
                   />
                 </div>
 
                 <div className="grid grid-cols-2 gap-4 mt-4">
-                  <InputField
-                    label="Email"
+                  <Input
                     name="email"
                     type="email"
+                    required
                     value={shippingInfo.email}
                     onChange={handleShippingChange}
+                    placeholder="Email"
                   />
-                  <InputField
-                    label="Phone"
+                  <Input
                     name="phone"
+                    required
                     value={shippingInfo.phone}
                     onChange={handleShippingChange}
                     placeholder="+2547..."
                   />
                 </div>
 
-                <div className="mt-4">
-                  <InputField
-                    label="Address"
-                    name="address"
-                    value={shippingInfo.address}
-                    onChange={handleShippingChange}
-                  />
-                </div>
+                <Input
+                  name="address"
+                  required
+                  value={shippingInfo.address}
+                  onChange={handleShippingChange}
+                  placeholder="Address"
+                  className="mt-4"
+                />
 
                 <div className="grid grid-cols-3 gap-4 mt-4">
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
-                      County
-                    </label>
                     <Select
-                      value={shippingInfo.city}
+                      value={shippingInfo.county}
                       onValueChange={(value) =>
-                        setShippingInfo({ ...shippingInfo, city: value })
+                        setShippingInfo({ ...shippingInfo, county: value })
                       }
                     >
                       <SelectTrigger>
-                        <SelectValue placeholder="Select county" />
+                        <SelectValue placeholder="Select County" />
                       </SelectTrigger>
                       <SelectContent>
                         {counties.map((county) => (
@@ -232,69 +234,131 @@ const Checkout = () => {
                     </Select>
                   </div>
                   <div className="col-span-2">
-                    <InputField
-                      label="Town"
-                      name="town"
-                      value={shippingInfo.town}
+                    <Input
+                      name="city"
+                      required
+                      value={shippingInfo.city}
                       onChange={handleShippingChange}
+                      placeholder="Town"
                     />
                   </div>
                 </div>
               </div>
 
-              {/* Payment Info */}
+              {/* M-Pesa Payment Info */}
               <div className="bg-white rounded-lg p-6 shadow-sm">
-                <h2 className="text-xl font-semibold text-gray-900 mb-6 flex items-center">
-                  <CreditCard className="h-5 w-5 mr-2 text-rose-500" />
-                  Payment Information
+                <h2 className="text-xl font-semibold mb-6 flex items-center">
+                  <Smartphone className="h-5 w-5 mr-2 text-green-600" />
+                  M-Pesa Payment
                 </h2>
 
-                <div className="space-y-4">
-                  <InputField
-                    label="Card Number"
-                    name="cardNumber"
-                    value={paymentInfo.cardNumber}
-                    onChange={handlePaymentChange}
+                <div className="mb-4">
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    M-Pesa Phone Number
+                  </label>
+                  <Input
+                    name="phoneNumber"
+                    required
+                    value={mpesaInfo.phoneNumber}
+                    onChange={handleMpesaChange}
+                    placeholder="07XXXXXXXX"
+                    className="text-lg"
                   />
-                  <div className="grid grid-cols-2 gap-4">
-                    <InputField
-                      label="Expiry Date"
-                      name="expiryDate"
-                      value={paymentInfo.expiryDate}
-                      onChange={handlePaymentChange}
-                    />
-                    <InputField
-                      label="CVV"
-                      name="cvv"
-                      value={paymentInfo.cvv}
-                      onChange={handlePaymentChange}
-                    />
+                </div>
+
+                <div className="bg-green-50 border border-green-200 rounded-lg p-4">
+                  <div className="flex items-center mb-2">
+                    <div className="bg-green-600 text-white rounded-full w-8 h-8 flex items-center justify-center text-sm font-bold mr-3">
+                      M
+                    </div>
+                    <span className="font-semibold text-green-800">M-PESA</span>
                   </div>
-                  <InputField
-                    label="Name on Card"
-                    name="nameOnCard"
-                    value={paymentInfo.nameOnCard}
-                    onChange={handlePaymentChange}
-                  />
+                  <p className="text-sm text-green-700">
+                    • Enter your Safaricom number (07XXXXXXXX format)
+                  </p>
+                  <p className="text-sm text-green-700">
+                    • You'll receive an STK push prompt on your phone
+                  </p>
+                  <p className="text-sm text-green-700">
+                    • Enter your M-Pesa PIN to complete payment
+                  </p>
                 </div>
 
                 <div className="mt-4 p-3 bg-gray-50 rounded-lg flex items-center">
                   <Lock className="h-4 w-4 text-green-600 mr-2" />
                   <span className="text-sm text-gray-600">
-                    Your payment information is secure and encrypted
+                    Your payment is secured by Safaricom M-Pesa
                   </span>
                 </div>
               </div>
             </div>
 
             {/* Order Summary */}
-            <OrderSummary
-              cartItems={cartItems}
-              subtotal={subtotal}
-              shipping={shipping}
-              total={total}
-              isProcessing={isProcessing}
-            />
+            <div>
+              <div className="bg-white rounded-lg p-6 shadow-sm sticky top-4">
+                <h2 className="text-xl font-semibold text-gray-900 mb-6">
+                  Order Summary
+                </h2>
+
+                <div className="space-y-4 mb-6">
+                  {cartItems.map((item) => (
+                    <div key={item.id} className="flex items-center space-x-3">
+                      <img
+                        src={item.image}
+                        alt={item.name}
+                        className="w-12 h-12 object-cover rounded-lg"
+                      />
+                      <div className="flex-1 min-w-0">
+                        <p className="text-sm font-medium text-gray-900 truncate">
+                          {item.name}
+                        </p>
+                        <p className="text-sm text-gray-500">
+                          Qty: {item.quantity}
+                        </p>
+                      </div>
+                      <span className="text-sm font-medium text-gray-900">
+                        Ksh {item.price * item.quantity}
+                      </span>
+                    </div>
+                  ))}
+                </div>
+
+                <div className="space-y-3 border-t pt-4">
+                  <div className="flex justify-between">
+                    <span className="text-gray-600">Subtotal</span>
+                    <span className="font-medium">
+                      Ksh {subtotal.toFixed(2)}
+                    </span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-gray-600">Shipping</span>
+                    <span className="font-medium">
+                      {shipping === 0 ? "FREE" : `Ksh ${shipping.toFixed(2)}`}
+                    </span>
+                  </div>
+                  <div className="flex justify-between text-lg font-bold border-t pt-3">
+                    <span>Total</span>
+                    <span>Ksh {total.toFixed(2)}</span>
+                  </div>
+                </div>
+
+                <Button
+                  type="submit"
+                  disabled={isProcessing}
+                  className="w-full mt-6 bg-rose-500 hover:bg-green-600 text-white py-4 text-lg cursor-pointer"
+                >
+                  {isProcessing
+                    ? mpesaPromptSent
+                      ? "Processing..."
+                      : "Successfull."
+                    : `Pay with M-Pesa - Ksh ${total.toFixed(2)}`}
+                </Button>
+
+                <p className="text-xs text-gray-500 text-center mt-4">
+                  By placing your order, you agree to our Terms of Service
+                </p>
+              </div>
+            </div>
           </div>
         </form>
       </div>

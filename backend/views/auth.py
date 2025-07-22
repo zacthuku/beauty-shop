@@ -5,21 +5,37 @@ from flask_jwt_extended import (
     jwt_required,
     get_jwt_identity,
     get_jwt,
-    JWTManager
+    JWTManager,
+    verify_jwt_in_request
 )
-from models import db, User, TokenBlocklist
 from datetime import datetime, timezone
+from functools import wraps
+from models import db, User, TokenBlocklist
 from views.mailserver import send_email
 
 auth_bp = Blueprint('auth', __name__)
 jwt = JWTManager()
 
-
+# Initialize JWT with app
 def init_jwt(app):
     jwt.init_app(app)
 
+def roles_required(*roles):
+    def wrapper(fn):
+        @wraps(fn)
+        def decorator(*args, **kwargs):
+            verify_jwt_in_request()
+            claims = get_jwt()
+            user_role = claims.get('role')
+
+            if user_role not in roles:
+                return jsonify({"error": "You are not authorized to access this resource"}), 403
+            return fn(*args, **kwargs)
+        return decorator
+    return wrapper
+
 @jwt.token_in_blocklist_loader
-def check_if_token_revoked(jwt_header, jwt_payload: dict) -> bool:
+def check_if_token_revoked(jwt_header, jwt_payload):
     jti = jwt_payload["jti"]
     token = db.session.query(TokenBlocklist.id).filter_by(jti=jti).scalar()
     return token is not None
@@ -27,7 +43,6 @@ def check_if_token_revoked(jwt_header, jwt_payload: dict) -> bool:
 @jwt.revoked_token_loader
 def revoked_token_response(jwt_header, jwt_payload):
     return jsonify({"error": "Token has been revoked, please login again."}), 401
-
 
 
 @auth_bp.route('/register', methods=['POST'])
@@ -58,7 +73,7 @@ def register():
     db.session.commit()
     send_email(user.username, user.email)
 
-    access_token = create_access_token(identity=user.id)
+    access_token = create_access_token(identity={"id": user.id, "role": user.role})
     user_info = {
         "id": user.id,
         "username": user.username,
@@ -73,7 +88,6 @@ def register():
     }), 201
 
 
-
 @auth_bp.route('/login', methods=['POST'])
 def login():
     try:
@@ -86,16 +100,14 @@ def login():
 
         user = User.query.filter_by(email=email).first()
 
-        if user and check_password_hash(user.password, password):
-            access_token = create_access_token(identity=
-                user.id
-            )
+        if user and check_password_hash(user.password_hash, password):
+            access_token = create_access_token(identity={"id": user.id, "role": user.role})
             user_info = {
                 "id": user.id,
                 "username": user.username,
                 "email": user.email,
                 "role": user.role,
-                "created_at":user.created_at
+                "created_at": user.created_at
             }
 
             return jsonify({
@@ -108,7 +120,6 @@ def login():
     except Exception as e:
         print(f"Login error: {e}")
         return jsonify({"error": "Internal server error"}), 500
-
 
 
 @auth_bp.route('/logout', methods=['DELETE'])

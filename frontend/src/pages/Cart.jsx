@@ -45,7 +45,10 @@ const Cart = () => {
             </p>
           </div>
           <Link to="/products">
-            <Button variant="outline" className="flex items-center space-x-2">
+            <Button
+              variant="outline"
+              className="flex items-center space-x-2 cursor-pointer"
+            >
               <ArrowLeft className="h-4 w-4" />
               <span>Continue Shopping</span>
             </Button>
@@ -95,7 +98,7 @@ const Cart = () => {
                         onClick={() =>
                           updateQuantity(item.id, item.quantity - 1)
                         }
-                        className="p-1 hover:bg-gray-100 transition-colors"
+                        className="p-1 hover:bg-gray-100 transition-colors cursor-pointer"
                         disabled={item.quantity <= 1}
                       >
                         <Minus className="h-4 w-4" />
@@ -107,7 +110,7 @@ const Cart = () => {
                         onClick={() =>
                           updateQuantity(item.id, item.quantity + 1)
                         }
-                        className="p-1 hover:bg-gray-100 transition-colors"
+                        className="p-1 hover:bg-gray-100 transition-colors cursor-pointer"
                       >
                         <Plus className="h-4 w-4" />
                       </button>
@@ -137,7 +140,7 @@ const Cart = () => {
               <Button
                 variant="outline"
                 onClick={clearCart}
-                className="text-red-600 border-red-300 hover:bg-red-50"
+                className="text-red-600 border-red-300 hover:bg-red-50 cursor-pointer"
               >
                 Clear Cart
               </Button>
@@ -196,7 +199,7 @@ const Cart = () => {
               <Link to="/checkout" className="block mt-6">
                 <Button
                   size="lg"
-                  className="w-full bg-rose-500 hover:bg-rose-600 text-white py-4"
+                  className="w-full bg-rose-500 hover:bg-rose-600 text-white py-4 cursor-pointer"
                 >
                   Proceed to Checkout
                 </Button>
