@@ -1,8 +1,5 @@
-from faker import Faker
-from models import User, Category, Product, CartItem, Order, OrderItem, Invoice
-import random
-from datetime import datetime
-from app import app, db
+from models import db, Category, Product, User, Order, OrderItem
+from main import app
 from werkzeug.security import generate_password_hash
 
 fake = Faker()

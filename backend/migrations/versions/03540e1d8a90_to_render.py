@@ -1,17 +1,16 @@
-"""initial migration
+"""to render
 
-Revision ID: f8261352c6d1
+Revision ID: 03540e1d8a90
 Revises: 
-Create Date: 2025-07-22 11:52:27.516323
+Create Date: 2025-07-22 15:36:05.417977
 
 """
 from alembic import op
 import sqlalchemy as sa
 from sqlalchemy.dialects import postgresql
-from sqlalchemy import Text
 
 # revision identifiers, used by Alembic.
-revision = 'f8261352c6d1'
+revision = '03540e1d8a90'
 down_revision = None
 branch_labels = None
 depends_on = None
@@ -38,7 +37,7 @@ def upgrade():
     sa.Column('id', sa.Integer(), nullable=False),
     sa.Column('username', sa.String(length=80), nullable=False),
     sa.Column('email', sa.String(length=120), nullable=False),
-    sa.Column('password', sa.Text(), nullable=False),
+    sa.Column('password_hash', sa.Text(), nullable=False),
     sa.Column('role', sa.String(length=10), nullable=False),
     sa.Column('blocked', sa.Boolean(), nullable=True),
     sa.Column('created_at', sa.DateTime(), nullable=True),
@@ -51,7 +50,7 @@ def upgrade():
     sa.Column('user_id', sa.Integer(), nullable=False),
     sa.Column('created_at', sa.DateTime(), nullable=True),
     sa.Column('status', sa.String(length=50), nullable=True),
-    sa.Column('shipping_info', postgresql.JSON(astext_type=Text()), nullable=True),
+    sa.Column('shipping_info', postgresql.JSON(astext_type=sa.Text()), nullable=True),
     sa.Column('total_price', sa.Float(), nullable=False),
     sa.ForeignKeyConstraint(['user_id'], ['users.id'], ),
     sa.PrimaryKeyConstraint('id')
