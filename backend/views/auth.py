@@ -115,7 +115,7 @@ def login():
                 "user": user_info
             }), 200
 
-        return jsonify({"error": "Email or password is incorrect"}), 400
+        return jsonify({"error": "Email or password is incorrect"}), 400 
 
     except Exception as e:
         print(f"Login error: {e}")
