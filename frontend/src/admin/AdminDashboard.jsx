@@ -2,6 +2,8 @@ import { useState, useEffect } from "react";
 import { useOrders } from "../context/ordersContext";
 import { useProducts } from "../context/ProductsContext";
 
+const API_BASE_URL = `${import.meta.env.VITE_SERVER_URL}/users`;
+
 const Package = ({ className }) => (
   <svg
     className={className}
@@ -129,7 +131,7 @@ const AdminDashboard = () => {
         return;
       }
 
-      const response = await fetch("http://localhost:5000/users", {
+      const response = await fetch(API_BASE_URL, {
         headers: {
           Authorization: `Bearer ${token}`,
           "Content-Type": "application/json",
