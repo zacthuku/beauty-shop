@@ -5,6 +5,8 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { useAuth } from "../context/AuthContext";
 
+const VITE_SERVER_URL = import.meta.env.VITE_SERVER_URL;
+
 const OrderHistory = () => {
   const [orders, setOrders] = useState([]);
   const { user, loading: authLoading } = useAuth();
@@ -20,7 +22,7 @@ const OrderHistory = () => {
   useEffect(() => {
     const fetchOrders = async () => {
       try {
-        const response = await fetch("http://127.0.0.1:5000/orders/", {
+        const response = await fetch(`${API_BASE_URL}/orders/`, {
           headers: {
             Authorization: `Bearer ${user?.token}`,
             "Content-Type": "application/json",

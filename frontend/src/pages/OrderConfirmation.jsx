@@ -4,6 +4,8 @@ import { CheckCircle, Truck, CreditCard, AlertCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "../context/AuthContext";
 
+const VITE_SERVER_URL = import.meta.env.VITE_SERVER_URL;
+
 const OrderConfirmation = () => {
   const { orderId } = useParams();
   const [order, setOrder] = useState(null);
@@ -27,15 +29,12 @@ const OrderConfirmation = () => {
         setLoading(true);
         setError(null);
 
-        const response = await fetch(
-          `http://127.0.0.1:5000/orders/${orderId}`,
-          {
-            headers: {
-              Authorization: `Bearer ${token}`,
-              "Content-Type": "application/json",
-            },
-          }
-        );
+        const response = await fetch(`${API_BASE_URL}/orders/${orderId}`, {
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json",
+          },
+        });
 
         if (!response.ok) {
           if (response.status === 404) {
