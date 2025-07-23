@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { useAuth } from "../context/AuthContext";
 
-const VITE_SERVER_URL = import.meta.env.VITE_SERVER_URL;
+const API_BASE_URL = import.meta.env.VITE_SERVER_URL;
 
 const OrderHistory = () => {
   const [orders, setOrders] = useState([]);

@@ -36,8 +36,6 @@ const AdminUsers = () => {
   const [creating, setCreating] = useState(false);
   const [newManagerEmail, setNewManagerEmail] = useState("");
   const [actionLoading, setActionLoading] = useState(null);
-  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
-  const [userToDelete, setUserToDelete] = useState(null);
 
   const statusColorMap = {
     true: "bg-red-100 text-red-800 border border-red-300",
@@ -140,30 +138,6 @@ const AdminUsers = () => {
     }
   };
 
-  const deleteUser = async (id) => {
-    setActionLoading(`delete-${id}`);
-    try {
-      const res = await fetch(`${API_BASE_URL}/${id}`, {
-        method: "DELETE",
-        headers: { Authorization: `Bearer ${token}` },
-      });
-      const data = await res.json();
-      if (res.ok) {
-        toast.success("User deleted");
-        setUsers((prev) => prev.filter((u) => u._id !== id));
-      } else {
-        toast.error(data.message || "Delete failed");
-      }
-    } catch (error) {
-      toast.error("Error deleting user");
-    } finally {
-      setActionLoading(null);
-      setIsDeleteDialogOpen(false);
-      setUserToDelete(null);
-    }
-  };
-
-  // Create manager
   const createManager = async () => {
     if (!isValidEmail(newManagerEmail)) {
       toast.error("Enter a valid email address");
@@ -203,11 +177,6 @@ const AdminUsers = () => {
     } finally {
       setCreating(false);
     }
-  };
-
-  const handleDeleteClick = (user) => {
-    setUserToDelete(user);
-    setIsDeleteDialogOpen(true);
   };
 
   const formatDate = (dateString) => {
@@ -255,7 +224,7 @@ const AdminUsers = () => {
         </Button>
       </div>
 
-      <div className="rounded-md border">
+      <div className="rounded-md border max-w-7xl">
         <Table>
           <TableHeader>
             <TableRow>
@@ -309,48 +278,12 @@ const AdminUsers = () => {
                         : "Block"}
                     </Button>
                   )}
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => handleDeleteClick(u)}
-                    disabled={actionLoading === `delete-${u._id}`}
-                    className="bg-red-200 hover:bg-red-300 text-red-700 border-red-300 hover:text-red-800"
-                  >
-                    Delete
-                  </Button>
                 </TableCell>
               </TableRow>
             ))}
           </TableBody>
         </Table>
       </div>
-
-      <AlertDialog
-        open={isDeleteDialogOpen}
-        onOpenChange={setIsDeleteDialogOpen}
-      >
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
-            <AlertDialogDescription>
-              This action cannot be undone. This will permanently delete the
-              user <span className="font-semibold">{userToDelete?.name}</span>{" "}
-              and all their data from our servers.
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel>Cancel</AlertDialogCancel>
-            <AlertDialogAction
-              onClick={() => deleteUser(userToDelete?._id)}
-              className="bg-red-200 hover:bg-red-300 text-red-700"
-            >
-              {actionLoading === `delete-${userToDelete?._id}`
-                ? "Deleting..."
-                : "Delete"}
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
     </div>
   );
 };
