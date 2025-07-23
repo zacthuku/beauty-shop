@@ -33,10 +33,10 @@ def send_email(name, email):
                 <li style="margin-bottom: 10px; font-size: 16px;">Shop happily with a beautiful and secure experience</li>
             </ul>
             
-            <p style="margin-bottom: 25px; font-size: 16px;">Ready to look Stunning?</p>
+            <p style="margin-bottom: 25px; font-size: 16px;">Ready to look stunning?</p>
             
             <div style="margin: 30px 0;">
-                <a href="https://thebeauty.vercel.app" 
+                <a href="https://beauty-shop-rho.vercel.app" 
                    style="background-color: #e11d48; color: white; padding: 15px 30px; text-decoration: none; border-radius: 8px; font-weight: bold; font-size: 16px; display: inline-block;">
                    Start Shopping
                 </a>
@@ -53,15 +53,14 @@ def send_email(name, email):
     text_body = f"""
     Hello {name},
     
-    Welcome to The Beauty — your one-stop shop for stunning products!
+    Welcome to The Beauty — your one-stop shop for the best products!
     
     Here's what you can expect:
     - Explore handpicked skincare, makeup, and haircare
     - Get exclusive offers
     - Enjoy a smooth shopping experience
     
-    Start shopping now: https://thebeauty.vercel.app
-    
+    Start shopping now: https://beauty-shop-rho.vercel.app
     With love,
     The Beauty Team 
     """
@@ -231,5 +230,83 @@ The Beauty Team 💖"""
         html=html_body,        
         body=text_body     
     )      
+
+    mail.send(msg)
+
+def send_manager_invite_email(name, email, is_existing_user=False, password=None):
+    subject = "You've Been Added as a Manager - The Beauty"
+
+    if is_existing_user:
+        html_body = f"""
+        <html>
+            <body style="font-family: Arial, sans-serif; background-color: #fff0f5; color: #3a0c1a; padding: 20px; line-height: 1.6;">
+                <h2 style="color: #d6336c;">Hi {name},</h2>
+                <p>We're excited to let you know that you've been granted <strong>Manager Access</strong> on <strong>The Beauty</strong>.</p>
+                <p>You can now log in and manage orders and products directly from the admin panel.</p>
+                <div style="margin: 30px 0;">
+                    <a href="https://beauty-shop-rho.vercel.app/login"
+                       style="background-color: #e11d48; color: white; padding: 12px 25px; text-decoration: none; border-radius: 8px; font-weight: bold; font-size: 16px;">
+                       Login
+                    </a>
+                </div>
+                <p style="margin-top: 40px;">With love,<br/>The Beauty Team 💖</p>
+            </body>
+        </html>
+        """
+
+        text_body = f"""Hi {name},
+
+You've been promoted to Manager on The Beauty platform!
+
+You can now log in and manage products and orders here:
+https://beauty-shop-rho.vercel.app/login
+
+With love,
+The Beauty Team 💖
+"""
+    else:
+        html_body = f"""
+        <html>
+            <body style="font-family: Arial, sans-serif; background-color: #fff0f5; color: #3a0c1a; padding: 20px; line-height: 1.6;">
+                <h2 style="color: #d6336c;">Welcome {name}!</h2>
+                <p>You've been added as a <strong>Manager</strong> on <strong>The Beauty</strong>.</p>
+                <p>Your login details are:</p>
+                <ul>
+                    <li><strong>Email:</strong> {email}</li>
+                    <li><strong>Password:</strong> {password}</li>
+                </ul>
+                <p>We recommend changing your password after first login.</p>
+                <div style="margin: 30px 0;">
+                    <a href="https://beauty-shop-rho.vercel.app/login"
+                       style="background-color: #e11d48; color: white; padding: 12px 25px; text-decoration: none; border-radius: 8px; font-weight: bold; font-size: 16px;">
+                       Log In as Manager
+                    </a>
+                </div>
+                <p style="margin-top: 40px;">With love,<br/>The Beauty Team 💖</p>
+            </body>
+        </html>
+        """
+
+        text_body = f"""Welcome {name}!
+
+You've been added as a Manager on The Beauty.
+
+Login with:
+Email: {email}
+Password: {password}
+
+
+Access the admin dashboard here: https://beauty-shop-rho.vercel.app/login
+
+With love,
+The Beauty Team 💖
+"""
+
+    msg = Message(
+        subject=subject,
+        recipients=[email],
+        html=html_body,
+        body=text_body
+    )
 
     mail.send(msg)

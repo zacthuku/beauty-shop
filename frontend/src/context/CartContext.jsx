@@ -1,7 +1,7 @@
 import { createContext, useContext, useState, useEffect } from "react";
 import { useAuth } from "./AuthContext";
 
-const api_url = import.meta.env.VITE_SERVER_URL;
+const API_BASE_URL = import.meta.env.VITE_SERVER_URL;
 
 const CartContext = createContext();
 
@@ -45,7 +45,7 @@ export const CartProvider = ({ children }) => {
       ...(body && { body: JSON.stringify(body) }),
     };
 
-    const response = await fetch(`${api_url}/cart${url}`, options);
+    const response = await fetch(`${API_BASE_URL}/cart${url}`, options);
     if (!response.ok) {
       const errorData = await response.json().catch(() => ({}));
       throw new Error(
