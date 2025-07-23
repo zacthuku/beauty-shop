@@ -18,7 +18,7 @@ app = Flask(__name__)
 
 
 
-app.config['SQLALCHEMY_DATABASE_URI'] = ('sqlite:///beauty.db')
+app.config['SQLALCHEMY_DATABASE_URI'] = os.getenv('DATABASE_URL')
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 app.config['JWT_SECRET_KEY'] = os.getenv('JWT_SECRET_KEY')
 app.config['JWT_ACCESS_TOKEN_EXPIRES'] = timedelta(days=1)
@@ -26,15 +26,7 @@ app.config['JWT_ACCESS_TOKEN_EXPIRES'] = timedelta(days=1)
 
 db.init_app(app)
 migrate = Migrate(app, db)
-CORS(app,
-     supports_credentials=True,
-     resources={r"/*": {"origins": [
-         "http://127.0.0.1:5173",
-         "http://localhost:5173",
-         "https://beauty-shop-rho.vercel.app"
-     ]}},
-     allow_headers=["Content-Type", "Authorization"],
-     methods=["GET", "POST", "PATCH", "PUT", "DELETE", "OPTIONS"])
+CORS(app, credentials=True)
 
 
 jwt = JWTManager(app)
