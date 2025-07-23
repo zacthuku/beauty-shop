@@ -12,11 +12,24 @@ import {
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
 import { useAuth } from "../context/AuthContext";
 import { toast } from "sonner";
 
+const API_BASE_URL = import.meta.env.VITE_SERVER_URL;
+
 const Profile = () => {
-  const { user, logout, loading } = useAuth();
+  const { user, loading, clearStorage } = useAuth();
   const navigate = useNavigate();
   const [isEditing, setIsEditing] = useState(false);
   const [formData, setFormData] = useState({
@@ -85,22 +98,46 @@ const Profile = () => {
   };
 
   const handleDeleteAccount = () => {
-    if (
-      window.confirm(
-        "Are you sure you want to delete your account? This action cannot be undone."
-      )
-    ) {
-      logout();
-      toast({
-        title: "Account deleted",
-        description: "Your account has been deleted successfully.",
-      });
-      navigate("/");
-    }
+    const deleteAccount = async () => {
+      try {
+        const token = localStorage.getItem("beautyApp_token");
+        if (!token) throw new Error("No authentication token found");
+
+        const response = await fetch(`${API_BASE_URL}/users/delete`, {
+          method: "DELETE",
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json",
+          },
+        });
+
+        const data = await response.json();
+        if (!response.ok)
+          throw new Error(data.error || "Failed to delete account");
+
+        await new Promise((resolve) => setTimeout(resolve, 3500));
+
+        return data;
+      } catch (error) {
+        console.error("Delete error:", error);
+        throw error;
+      }
+    };
+
+    toast.promise(deleteAccount(), {
+      loading: "Deleting account...",
+      success: (data) => {
+        clearStorage();
+        window.location.href = "/";
+        return data.message || "Account deleted successfully!";
+      },
+      error: (err) => err.message || "Failed to delete account",
+    });
   };
 
   const getFormattedDate = () => {
     const date = user.created_at;
+
     try {
       const parsedDate = new Date(date);
       if (isNaN(parsedDate.getTime())) return "Unknown Date";
@@ -323,13 +360,37 @@ const Profile = () => {
                     Permanently delete your account and data
                   </p>
                 </div>
-                <Button
-                  variant="outline"
-                  onClick={handleDeleteAccount}
-                  className="border-red-300 text-red-600 hover:bg-red-100"
-                >
-                  Delete Account
-                </Button>
+                <AlertDialog>
+                  <AlertDialogTrigger asChild>
+                    <Button
+                      variant="outline"
+                      className="border-red-300 text-red-600 hover:bg-red-100"
+                    >
+                      Delete Account
+                    </Button>
+                  </AlertDialogTrigger>
+                  <AlertDialogContent>
+                    <AlertDialogHeader>
+                      <AlertDialogTitle>
+                        Are you absolutely sure?
+                      </AlertDialogTitle>
+                      <AlertDialogDescription>
+                        This action cannot be undone. This will permanently
+                        delete your account and remove all your data from our
+                        servers.
+                      </AlertDialogDescription>
+                    </AlertDialogHeader>
+                    <AlertDialogFooter>
+                      <AlertDialogCancel>Cancel</AlertDialogCancel>
+                      <AlertDialogAction
+                        onClick={handleDeleteAccount}
+                        className="bg-red-600 hover:bg-red-700 focus:ring-red-600"
+                      >
+                        Delete Account
+                      </AlertDialogAction>
+                    </AlertDialogFooter>
+                  </AlertDialogContent>
+                </AlertDialog>
               </div>
             </div>
           </div>
