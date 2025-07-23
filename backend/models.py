@@ -1,6 +1,7 @@
 from flask_sqlalchemy import SQLAlchemy
 from datetime import datetime
-from sqlalchemy import MetaData
+from sqlalchemy import MetaData, Text
+from sqlalchemy.dialects.postgresql import JSON
 
 metadata = MetaData()
 db = SQLAlchemy(metadata=metadata)
@@ -13,7 +14,7 @@ class User(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     username = db.Column(db.String(80), unique=True, nullable=False)
     email = db.Column(db.String(120), unique=True, nullable=False)
-    password = db.Column(db.Text, nullable=False)
+    password_hash = db.Column(db.Text, nullable=False)
     role = db.Column(db.String(10), nullable=False, default='customer')
     blocked= db.Column(db.Boolean, default=False)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
@@ -32,15 +33,15 @@ class User(db.Model):
             "created_at": self.created_at.isoformat()
         }
 
-
 class Category(db.Model):
     __tablename__ = "categories"
 
-    id       = db.Column(db.Integer, primary_key=True)
-    name     = db.Column(db.String(50), unique=True, nullable=False)
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String(50), unique=True, nullable=False)
     label = db.Column(db.String(50), nullable=False)
-    icon = db.Column(db.String(10), nullable=True)
+    icon = db.Column(db.String(20))
 
+    # Relationship
     products = db.relationship("Product", back_populates="category", cascade="all, delete-orphan")
 
     def to_dict(self):
@@ -53,37 +54,35 @@ class Category(db.Model):
         }
 
 class Product(db.Model):
-    __tablename__ = "products"
+    __tablename__ = 'products'
 
-    id             = db.Column(db.Integer, primary_key=True)
-    name           = db.Column(db.String(100), nullable=False)
-    description    = db.Column(db.Text)
-    price          = db.Column(db.Float, nullable=False)
-    image_url      = db.Column(db.String(255))
-    stock_quantity = db.Column(db.Integer, default=0)
-    category_id    = db.Column(db.Integer, db.ForeignKey('categories.id'), nullable=False)
-    in_stock = db.Column(db.Boolean)
-    rating = db.Column(db.Float)
-    reviews = db.Column(db.Integer)
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String(120), nullable=False)
+    price = db.Column(db.Float, nullable=False)
+    image = db.Column(db.String(255), nullable=True)
+    description = db.Column(db.Text, nullable=True)
+    in_stock = db.Column(db.Boolean, default=True)
+    rating = db.Column(db.Float, default=0.0)
+    reviews = db.Column(db.Integer, default=0)
 
-    # Relationships
-    category       = db.relationship("Category", back_populates="products")
-    cart_items     = db.relationship("CartItem",  back_populates="product", cascade="all, delete-orphan")
-    order_items    = db.relationship("OrderItem", back_populates="product")
+    
+    category_id = db.Column(db.Integer, db.ForeignKey('categories.id'), nullable=False)    # Relationship to access category info from product
+    category = db.relationship("Category", back_populates="products")
+    
+    cart_items = db.relationship("CartItem", back_populates="product", cascade="all, delete-orphan")
+    order_items = db.relationship("OrderItem", back_populates="product", cascade="all, delete-orphan")
 
     def to_dict(self):
         return {
             "id": self.id,
             "name": self.name,
-            "description": self.description,
+            "category": self.category.name if self.category else None,
             "price": self.price,
-            "image_url": self.image_url,
-            "stock_quantity": self.stock_quantity,
-            "category_id": self.category_id,
-            "in_stock": self.in_stock,
+            "image": self.image,
+            "description": self.description,
+            "inStock": self.in_stock,
             "rating": self.rating,
             "reviews": self.reviews,
-            "category_name": self.category.name if self.category else None
         }
 
 
@@ -111,31 +110,50 @@ class CartItem(db.Model):
 class Order(db.Model):
     __tablename__ = "orders"
 
-    id              = db.Column(db.Integer, primary_key=True)
-    status          = db.Column(db.String(50), default="Pending", nullable=False)
-    total_price     = db.Column(db.Float, nullable=False)
-    created_at      = db.Column(db.DateTime, default=datetime.utcnow)
-    delivery_address= db.Column(db.String(255))
-    billing_info    = db.Column(db.String(255))
-    user_id         = db.Column(db.Integer, db.ForeignKey("users.id"))
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey("users.id"), nullable=True)
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    status = db.Column(db.String(50), default="pending")
+    shipping_info = db.Column(JSON, nullable=True)
+    total_price = db.Column(db.Float, nullable=False)
 
-    # Relationships
-    user            = db.relationship("User", back_populates="orders")
-    order_items     = db.relationship("OrderItem", back_populates="order", cascade="all, delete-orphan")
-    invoice         = db.relationship("Invoice", back_populates="order", uselist=False, cascade="all, delete-orphan")
+    user = db.relationship("User", back_populates="orders")
+    order_items = db.relationship("OrderItem", back_populates="order", cascade="all, delete-orphan")
+    invoice = db.relationship("Invoice", back_populates="order", uselist=False)
 
     def to_dict(self):
+        shipping_info = self.shipping_info or {}
+        shipping_cost = shipping_info.get("shipping", 0)
+
         return {
             "id": self.id,
-            "status": self.status,
-            "total_price": self.total_price,
-            "created_at": self.created_at.isoformat(),
-            "delivery_address": self.delivery_address,
-            "billing_info": self.billing_info,
-            "user_id": self.user_id,
-            "order_items": [item.to_dict() for item in self.order_items],
-            "invoice": self.invoice.to_dict() if self.invoice else None
+            "userId": self.user_id,
+            "user": self.user.username if self.user else None,
+            "createdAt": self.created_at.isoformat(),
+            "status": self.status.lower(),
+            "subtotal": float(sum(item.price_at_order * item.quantity for item in self.order_items)),
+            "shipping": float(shipping_cost),
+            "total": float(self.total_price),
+            "shippingInfo": {
+                "firstName": shipping_info.get("firstName", ""),
+                "lastName": shipping_info.get("lastName", ""),
+                "email": shipping_info.get("email", ""),
+                "city": shipping_info.get("city", ""),
+                "county": shipping_info.get("county", ""),
+            },
+            "items": [
+                {
+                    "id": item.product_id,
+                    "name": item.product.name if item.product else "Unknown Product",
+                    "image": item.product.image if item.product else None,
+                    "quantity": item.quantity,
+                    "price": float(item.price_at_order),
+                }
+                for item in self.order_items
+            ]
         }
+
+
 
 class OrderItem(db.Model):
     __tablename__ = "order_items"

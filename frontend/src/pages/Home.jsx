@@ -1,10 +1,17 @@
+import React, { useEffect } from "react";
 import { Link } from "react-router-dom";
 import { ArrowRight, Star, Truck, Shield, Headphones } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import ProductCard from "../components/ProductCard";
-import { products, categories } from "../data/products";
+import { useProducts } from "../context/ProductsContext";
 
 const Home = () => {
+  const { products, categories, fetchProducts } = useProducts();
+
+  useEffect(() => {
+    fetchProducts();
+  }, []);
+
   const featuredProducts = products.slice(0, 8);
   const bestSellers = products.filter((p) => p.rating >= 4.7).slice(0, 4);
 

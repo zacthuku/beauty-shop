@@ -4,12 +4,13 @@ import { ShoppingBag, User, Menu, X, ShoppingCart } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "../context/AuthContext";
 import { useCart } from "../context/CartContext";
-import { categories } from "../data/products";
+import { useProducts } from "../context/ProductsContext";
 
 const Header = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const { user, logout } = useAuth();
   const { getCartItemsCount } = useCart();
+  const { categories } = useProducts();
   const navigate = useNavigate();
   const location = useLocation();
 
@@ -69,65 +70,6 @@ const Header = () => {
                 {category.label}
               </Link>
             ))}
-            {/*admin menu */}
-            {user && user.role === "admin" && (
-              <>
-              <Link
-                to="/admin/users"
-                className={`font-medium transition-colors ${
-                  isActivePage("/admin/users")
-                    ? "text-rose-600"
-                    : "text-gray-700 hover:text-rose-600"
-                }`}
-              >
-                Users
-              </Link>
-              <Link
-                to="/admin/register-order-manager"
-                className={`font-medium transition-colors ${
-                  isActivePage("/admin/register-order-manager")
-                    ? "text-rose-600"
-                    : "text-gray-700 hover:text-rose-600"
-                }`}
-              >
-                Add Manager
-              </Link>
-              <Link
-                to="/purchase-history"
-                className={`font-medium transition-colors ${
-                  isActivePage("/purchase-history")
-                    ? "text-rose-600"
-                    : "text-gray-700 hover:text-rose-600"
-                }`}
-              >
-                Purchase History
-              </Link>
-              <Link
-                to="/manage-inventory"
-                className={`font-medium transition-colors ${
-                  isActivePage("/manage-inventory")
-                    ? "text-rose-600"
-                    : "text-gray-700 hover:text-rose-600"
-                }`}
-              >
-                Manage Inventory
-              </Link>
-              </>
-            )}
-            {/*order manager menu */}
-            {user && user.role === "order_manager" && (
-              <>
-              <Link
-                to="manage-inventory"
-                className={`font-medium transition-colors ${
-                  isActivePage("/manage-inventory")
-                    ? "text-rose-600"
-                    : "text-gray-700 hover:text-rose-600"
-                }`}
-              >
-                Manage Inventory
-              </Link>
-              </>)}
           </nav>
 
           {/* Actions */}
@@ -144,7 +86,6 @@ const Header = () => {
                 </span>
               )}
             </Link>
-            
 
             {/* User Menu */}
             {user ? (

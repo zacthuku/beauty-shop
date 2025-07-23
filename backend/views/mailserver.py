@@ -33,10 +33,10 @@ def send_email(name, email):
                 <li style="margin-bottom: 10px; font-size: 16px;">Shop happily with a beautiful and secure experience</li>
             </ul>
             
-            <p style="margin-bottom: 25px; font-size: 16px;">Ready to look Stunning?</p>
+            <p style="margin-bottom: 25px; font-size: 16px;">Ready to look stunning?</p>
             
             <div style="margin: 30px 0;">
-                <a href="https://thebeauty.vercel.app" 
+                <a href="https://beauty-shop-rho.vercel.app" 
                    style="background-color: #e11d48; color: white; padding: 15px 30px; text-decoration: none; border-radius: 8px; font-weight: bold; font-size: 16px; display: inline-block;">
                    Start Shopping
                 </a>
@@ -53,17 +53,16 @@ def send_email(name, email):
     text_body = f"""
     Hello {name},
     
-    Welcome to The Beauty — your one-stop shop for stunning products!
+    Welcome to The Beauty — your one-stop shop for the best products!
     
     Here's what you can expect:
     - Explore handpicked skincare, makeup, and haircare
     - Get exclusive offers
     - Enjoy a smooth shopping experience
     
-    Start shopping now: https://thebeauty.vercel.app
-    
+    Start shopping now: https://beauty-shop-rho.vercel.app
     With love,
-    The Beauty Team 💖
+    The Beauty Team 
     """
     
     msg = Message(
@@ -137,4 +136,177 @@ def send_reset_email(email, reset_url):
         body=text_body
     )
     
+    mail.send(msg)
+
+def send_order_confirmation_email(name, email, order):     
+    subject = f"Order Confirmation - #{order['id']} | The Beauty"      
+    
+
+    html_items = ''.join(f"<li>{item['quantity']} x {item['name']} - Ksh {item['price']:.2f} each = Ksh {(item['price'] * item['quantity']):.2f}</li>" for item in order['items'])          
+    
+    newline = '\n'  
+    text_items = ''.join(f"- {item['quantity']} x {item['name']} - Ksh {item['price']:.2f} each = Ksh {(item['price'] * item['quantity']):.2f}{newline}" for item in order['items'])      
+
+
+    subtotal = sum(item['price'] * item['quantity'] for item in order['items'])
+    shipping_cost = order.get('shipping_cost', 0)
+    
+    html_body = f"""     
+    <html>         
+        <body style="font-family: Arial, sans-serif; background-color: #ffffff; color: #3a0c1a; padding: 20px; line-height: 1.6;">             
+            <h2 style="color: #d6336c;">Hi {name}, your order is confirmed! </h2>                          
+            
+            <p>Thank you for shopping with <strong>The Beauty</strong>. We're thrilled to get started on your order.</p>                          
+            
+            <p><strong>Order ID:</strong> {order['id']}<br/>                
+            <strong>Invoice:</strong> {order.get('invoice_number', f"INV-{order['id']}")}<br/>
+            <strong>Payment Method:</strong> {order.get('payment_method', 'M-Pesa').upper()}<br/>
+            <strong>Total:</strong> Ksh {order['total']:.2f}</p>                          
+            
+                          
+            
+            <h3 style="margin-top: 30px;">Order Items:</h3>             
+            <ul>                 
+                {html_items}             
+            </ul>
+            
+            <h3>Payment Summary:</h3>
+            <p><strong>Subtotal:</strong> Ksh {subtotal:.2f}<br/>
+            <strong>Shipping:</strong> {('FREE' if shipping_cost == 0 else f'Ksh {shipping_cost:.2f}')}<br/>
+            <strong>Total Paid:</strong> Ksh {order['total']:.2f}</p>              
+            
+            <p style="margin-top: 30px;">We'll notify you once it ships. Estimated delivery is 1-3 days. Meanwhile, you can track your order anytime from your account.</p>              
+            
+            <div style="margin-top: 40px;">                 
+                <a href="http://127.0.0.1:5000/{order['id']}"                     
+                style="background-color: #e11d48; color: white; padding: 12px 25px; text-decoration: none; border-radius: 6px; font-weight: bold;">                    
+                View Order                 
+                </a>             
+            </div>
+            
+            <p style="margin-top: 30px; font-size: 14px; color: #666;">
+            Need help? Contact us:<br/>
+            Email: info@thebeauty.com<br/>
+            Phone: +254 721 400 997
+            </p>              
+            
+        </body>     
+    </html>     
+    """      
+
+    text_body = f"""Hi {name},  
+
+Thanks for your order with The Beauty!  
+
+Order ID: {order['id']} 
+Invoice: {order.get('invoice_number', f"INV-{order['id']}")} 
+Payment Method: {order.get('payment_method', 'M-Pesa').upper()}
+Total: Ksh {order['total']:.2f}  
+
+
+
+Items: 
+{text_items}
+
+Payment Summary:
+Subtotal: Ksh {subtotal:.2f}
+Shipping: {('FREE' if shipping_cost == 0 else f'Ksh {shipping_cost:.2f}')}
+Total Paid: Ksh {order['total']:.2f}
+
+Estimated delivery: 1-3 days
+
+You can view your order here: https://127.0.0.1:5000/{order['id']}  
+
+Need help? 
+Email: support@thebeauty.co.ke
+Phone: +254 700 000 000
+
+With love, 
+The Beauty Team 💖"""      
+
+    msg = Message(         
+        subject=subject,         
+        recipients=[email],         
+        html=html_body,        
+        body=text_body     
+    )      
+
+    mail.send(msg)
+
+def send_manager_invite_email(name, email, is_existing_user=False, password=None):
+    subject = "You've Been Added as a Manager - The Beauty"
+
+    if is_existing_user:
+        html_body = f"""
+        <html>
+            <body style="font-family: Arial, sans-serif; background-color: #fff0f5; color: #3a0c1a; padding: 20px; line-height: 1.6;">
+                <h2 style="color: #d6336c;">Hi {name},</h2>
+                <p>We're excited to let you know that you've been granted <strong>Manager Access</strong> on <strong>The Beauty</strong>.</p>
+                <p>You can now log in and manage orders and products directly from the admin panel.</p>
+                <div style="margin: 30px 0;">
+                    <a href="https://beauty-shop-rho.vercel.app/login"
+                       style="background-color: #e11d48; color: white; padding: 12px 25px; text-decoration: none; border-radius: 8px; font-weight: bold; font-size: 16px;">
+                       Login
+                    </a>
+                </div>
+                <p style="margin-top: 40px;">With love,<br/>The Beauty Team 💖</p>
+            </body>
+        </html>
+        """
+
+        text_body = f"""Hi {name},
+
+You've been promoted to Manager on The Beauty platform!
+
+You can now log in and manage products and orders here:
+https://beauty-shop-rho.vercel.app/login
+
+With love,
+The Beauty Team 💖
+"""
+    else:
+        html_body = f"""
+        <html>
+            <body style="font-family: Arial, sans-serif; background-color: #fff0f5; color: #3a0c1a; padding: 20px; line-height: 1.6;">
+                <h2 style="color: #d6336c;">Welcome {name}!</h2>
+                <p>You've been added as a <strong>Manager</strong> on <strong>The Beauty</strong>.</p>
+                <p>Your login details are:</p>
+                <ul>
+                    <li><strong>Email:</strong> {email}</li>
+                    <li><strong>Password:</strong> {password}</li>
+                </ul>
+                <p>We recommend changing your password after first login.</p>
+                <div style="margin: 30px 0;">
+                    <a href="https://beauty-shop-rho.vercel.app/login"
+                       style="background-color: #e11d48; color: white; padding: 12px 25px; text-decoration: none; border-radius: 8px; font-weight: bold; font-size: 16px;">
+                       Log In as Manager
+                    </a>
+                </div>
+                <p style="margin-top: 40px;">With love,<br/>The Beauty Team 💖</p>
+            </body>
+        </html>
+        """
+
+        text_body = f"""Welcome {name}!
+
+You've been added as a Manager on The Beauty.
+
+Login with:
+Email: {email}
+Password: {password}
+
+
+Access the admin dashboard here: https://beauty-shop-rho.vercel.app/login
+
+With love,
+The Beauty Team 💖
+"""
+
+    msg = Message(
+        subject=subject,
+        recipients=[email],
+        html=html_body,
+        body=text_body
+    )
+
     mail.send(msg)
