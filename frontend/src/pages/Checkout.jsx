@@ -14,7 +14,7 @@ import { useCart } from "../context/CartContext";
 import { useAuth } from "../context/AuthContext";
 import { toast } from "sonner";
 
-const VITE_SERVER_URL = import.meta.env.VITE_SERVER_URL;
+const API_BASE_URL = import.meta.env.VITE_SERVER_URL;
 
 const Checkout = () => {
   const navigate = useNavigate();

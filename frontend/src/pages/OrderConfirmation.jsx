@@ -4,7 +4,7 @@ import { CheckCircle, Truck, CreditCard, AlertCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "../context/AuthContext";
 
-const VITE_SERVER_URL = import.meta.env.VITE_SERVER_URL;
+const API_BASE_URL = import.meta.env.VITE_SERVER_URL;
 
 const OrderConfirmation = () => {
   const { orderId } = useParams();
