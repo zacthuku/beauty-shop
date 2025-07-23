@@ -59,7 +59,7 @@ def create_manager():
         user.role = 'manager'
         db.session.commit()
 
-        # ✅ Send email to existing user
+
         send_manager_invite_email(name=user.username, email=email, is_existing_user=True)
 
         return jsonify({

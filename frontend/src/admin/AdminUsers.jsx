@@ -136,7 +136,6 @@ const AdminUsers = () => {
     setCreating(true);
     try {
       const res = await fetch(`${API_BASE_URL}/create-manager`, {
-        // Changed endpoint
         method: "POST",
         headers: {
           "Content-Type": "application/json",
