@@ -42,7 +42,7 @@ def get_all_orders():
 
         status_filter = request.args.get('status')
 
-        if user.role == 'admin':
+        if user.role in ['admin', 'manager']:
             orders_query = Order.query
         else:
             orders_query = Order.query.filter_by(user_id=user_id)

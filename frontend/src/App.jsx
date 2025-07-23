@@ -20,7 +20,7 @@ import { OrdersProvider } from "./context/ordersContext";
 import Loader from "./components/Loader";
 import AdminLayout from "./admin/AdminLayout";
 import AdminDashboard from "./admin/AdminDashboard";
-import BlockedUserPage from "./context/BlockedUserPage";
+import BlockedUserPage from "./pages/BlockedUserPage";
 
 import AdminProducts from "./admin/AdminProducts";
 import AdminOrders from "./admin/AdminOrders";

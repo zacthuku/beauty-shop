@@ -1,8 +1,8 @@
-"""initial clean migration
+"""Make user_id nullable in orders
 
-Revision ID: 3878d9a62d3f
+Revision ID: e8849fcfa0e6
 Revises: 
-Create Date: 2025-07-23 11:55:38.202087
+Create Date: 2025-07-23 17:24:24.362981
 
 """
 from alembic import op
@@ -11,7 +11,7 @@ from sqlalchemy.dialects import postgresql
 from sqlalchemy import Text
 
 # revision identifiers, used by Alembic.
-revision = '3878d9a62d3f'
+revision = 'e8849fcfa0e6'
 down_revision = None
 branch_labels = None
 depends_on = None
@@ -48,7 +48,7 @@ def upgrade():
     )
     op.create_table('orders',
     sa.Column('id', sa.Integer(), nullable=False),
-    sa.Column('user_id', sa.Integer(), nullable=False),
+    sa.Column('user_id', sa.Integer(), nullable=True),
     sa.Column('created_at', sa.DateTime(), nullable=True),
     sa.Column('status', sa.String(length=50), nullable=True),
     sa.Column('shipping_info', postgresql.JSON(astext_type=Text()), nullable=True),

@@ -1,9 +1,7 @@
 // src/contexts/ProductsContext.js
 import { createContext, useContext, useEffect, useState } from "react";
-import {api_url} from "../config.json";
 
-
-
+const API_BASE_URL = import.meta.env.VITE_SERVER_URL;
 const ProductsContext = createContext();
 
 export const ProductsProvider = ({ children }) => {
@@ -11,12 +9,9 @@ export const ProductsProvider = ({ children }) => {
   const [categories, setCategories] = useState([]);
   const [loading, setLoading] = useState(true);
 
-  const fetchProducts = async (params = {}) => {
+  const fetchProducts = async () => {
     try {
-      const query = new URLSearchParams(params).toString();
-      const res = await fetch(
-        `${api_url}/products${query ? `?${query}` : ""}`
-      );
+      const res = await fetch(`${API_BASE_URL}/products`);
       if (!res.ok) throw new Error("Network response was not ok");
       const data = await res.json();
       setProducts(data);
@@ -27,7 +22,7 @@ export const ProductsProvider = ({ children }) => {
 
   const fetchCategories = async () => {
     try {
-      const res = await fetch(`${api_url}/products/categories`);
+      const res = await fetch(`${API_BASE_URL}/products/categories`);
       if (!res.ok) throw new Error("Network response was not ok");
       const data = await res.json();
       setCategories(data);

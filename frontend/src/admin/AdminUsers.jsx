@@ -15,7 +15,7 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { format } from "date-fns";
 
-const API_BASE_URL = `${import.meta.env.VITE_SERVER_URL}/users`;
+const API_BASE_URL = import.meta.env.VITE_SERVER_URL;
 
 const AdminUsers = () => {
   const { user: currentUser } = useAuth();
@@ -43,7 +43,7 @@ const AdminUsers = () => {
   useEffect(() => {
     const fetchUsers = async () => {
       try {
-        const res = await fetch(`${api_url}/users`, {
+        const res = await fetch(`${API_BASE_URL}/users`, {
           headers: { Authorization: `Bearer ${token}` },
         });
         const data = await res.json();
@@ -76,7 +76,7 @@ const AdminUsers = () => {
   const blockUser = async (id) => {
     setActionLoading(`block-${id}`);
     try {
-      const res = await fetch(`${api_url}/${id}/block`, {
+      const res = await fetch(`${API_BASE_URL}/${id}/block`, {
         method: "PATCH",
         headers: {
           "Content-Type": "application/json",
@@ -103,7 +103,7 @@ const AdminUsers = () => {
   const unblockUser = async (id) => {
     setActionLoading(`unblock-${id}`);
     try {
-      const res = await fetch(`${api_url}/${id}/block`, {
+      const res = await fetch(`${API_BASE_URL}/${id}/block`, {
         method: "PATCH",
         credentials: "include",
         headers: {

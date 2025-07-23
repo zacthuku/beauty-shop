@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
-import { api_url } from "../config.json"; 
+
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
 
 function PurchaseHistory() {
   const [orders, setOrders] = useState([]);
@@ -11,7 +12,7 @@ function PurchaseHistory() {
   const [endDate, setEndDate] = useState("");
 
   useEffect(() => {
-    fetch(`${api_url}/orders/history`, {
+    fetch(`${API_BASE_URL}/orders/history`, {
       headers: {
         Authorization: `Bearer ${localStorage.getItem("beautyApp_token")}`,
       },
@@ -80,9 +81,11 @@ function PurchaseHistory() {
           order.status,
           order.user?.username || "N/A",
           Array.isArray(order.items)
-            ? order.items.map((item) => `${item.product_name} x${item.quantity}`).join("; ")
+            ? order.items
+                .map((item) => `${item.product_name} x${item.quantity}`)
+                .join("; ")
             : "No items",
-          order.invoice?.total_amount ?? "N/A"
+          order.invoice?.total_amount ?? "N/A",
         ]),
       ]
         .map((row) => row.join(","))
@@ -156,15 +159,12 @@ function PurchaseHistory() {
               </div>
               <div className="text-sm mt-2">
                 <p>
-                  Status:{" "}
-                  <span className="font-medium">{order.status}</span>
+                  Status: <span className="font-medium">{order.status}</span>
                 </p>
                 {order.user && (
                   <p>
                     User:{" "}
-                    <span className="text-blue-600">
-                      {order.user.username}
-                    </span>
+                    <span className="text-blue-600">{order.user.username}</span>
                   </p>
                 )}
                 <p>
