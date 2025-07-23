@@ -9,14 +9,154 @@ import {
   Edit,
   Save,
   X,
+  KeyRound,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
+import { Label } from "@/components/ui/label";
 import { useAuth } from "../context/AuthContext";
 import { toast } from "sonner";
 
+const API_BASE_URL = import.meta.env.VITE_SERVER_URL;
+
+const ChangePasswordModal = () => {
+  const [open, setOpen] = useState(false);
+  const [currentPassword, setCurrentPassword] = useState("");
+  const [newPassword, setNewPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+
+    if (newPassword !== confirmPassword) {
+      toast.error("New passwords don't match");
+      return;
+    }
+
+    const changePassword = async () => {
+      try {
+        const token = localStorage.getItem("beautyApp_token");
+        if (!token) throw new Error("No authentication token found");
+
+        const response = await fetch(`${API_BASE_URL}/users/change-password`, {
+          method: "PATCH",
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            current_password: currentPassword,
+            new_password: newPassword,
+          }),
+        });
+
+        const data = await response.json();
+        if (!response.ok)
+          throw new Error(data.error || "Failed to change password");
+
+        await new Promise((resolve) => setTimeout(resolve, 3000));
+
+        return data;
+      } catch (error) {
+        console.error("Password change error:", error);
+        throw error;
+      }
+    };
+
+    toast.promise(changePassword(), {
+      loading: "Changing password...",
+      success: () => {
+        setOpen(false);
+        setCurrentPassword("");
+        setNewPassword("");
+        setConfirmPassword("");
+        return "Password changed successfully!";
+      },
+      error: (err) => err.message || "Failed to change password",
+    });
+  };
+
+  return (
+    <Dialog open={open} onOpenChange={setOpen}>
+      <DialogTrigger asChild>
+        <Button variant="outline">Change Password</Button>
+      </DialogTrigger>
+      <DialogContent>
+        <DialogHeader>
+          <DialogTitle className="flex items-center gap-2">
+            <KeyRound className="h-5 w-5" />
+            Change Password
+          </DialogTitle>
+        </DialogHeader>
+        <form onSubmit={handleSubmit} className="space-y-4 mt-4">
+          <div className="space-y-2">
+            <Label htmlFor="currentPassword">Current Password</Label>
+            <Input
+              id="currentPassword"
+              type="password"
+              value={currentPassword}
+              onChange={(e) => setCurrentPassword(e.target.value)}
+              required
+            />
+          </div>
+          <div className="space-y-2">
+            <Label htmlFor="newPassword">New Password</Label>
+            <Input
+              id="newPassword"
+              type="password"
+              value={newPassword}
+              onChange={(e) => setNewPassword(e.target.value)}
+              required
+              minLength={6}
+            />
+          </div>
+          <div className="space-y-2">
+            <Label htmlFor="confirmPassword">Confirm New Password</Label>
+            <Input
+              id="confirmPassword"
+              type="password"
+              value={confirmPassword}
+              onChange={(e) => setConfirmPassword(e.target.value)}
+              required
+              minLength={6}
+            />
+          </div>
+          <div className="flex justify-end gap-2 pt-4">
+            <Button
+              type="button"
+              variant="outline"
+              onClick={() => setOpen(false)}
+            >
+              Cancel
+            </Button>
+            <Button type="submit">Change Password</Button>
+          </div>
+        </form>
+      </DialogContent>
+    </Dialog>
+  );
+};
+
 const Profile = () => {
-  const { user, logout, loading } = useAuth();
+  const { user, loading, clearStorage } = useAuth();
   const navigate = useNavigate();
   const [isEditing, setIsEditing] = useState(false);
   const [formData, setFormData] = useState({
@@ -85,22 +225,46 @@ const Profile = () => {
   };
 
   const handleDeleteAccount = () => {
-    if (
-      window.confirm(
-        "Are you sure you want to delete your account? This action cannot be undone."
-      )
-    ) {
-      logout();
-      toast({
-        title: "Account deleted",
-        description: "Your account has been deleted successfully.",
-      });
-      navigate("/");
-    }
+    const deleteAccount = async () => {
+      try {
+        const token = localStorage.getItem("beautyApp_token");
+        if (!token) throw new Error("No authentication token found");
+
+        const response = await fetch(`${API_BASE_URL}/users/delete`, {
+          method: "DELETE",
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json",
+          },
+        });
+
+        const data = await response.json();
+        if (!response.ok)
+          throw new Error(data.error || "Failed to delete account");
+
+        await new Promise((resolve) => setTimeout(resolve, 3500));
+
+        return data;
+      } catch (error) {
+        console.error("Delete error:", error);
+        throw error;
+      }
+    };
+
+    toast.promise(deleteAccount(), {
+      loading: "Deleting account...",
+      success: (data) => {
+        clearStorage();
+        window.location.href = "/";
+        return data.message || "Account deleted successfully!";
+      },
+      error: (err) => err.message || "Failed to delete account",
+    });
   };
 
   const getFormattedDate = () => {
     const date = user.created_at;
+
     try {
       const parsedDate = new Date(date);
       if (isNaN(parsedDate.getTime())) return "Unknown Date";
@@ -313,7 +477,7 @@ const Profile = () => {
                     Update your account password
                   </p>
                 </div>
-                <Button variant="outline">Change Password</Button>
+                <ChangePasswordModal />
               </div>
 
               <div className="flex items-center justify-between p-4 border border-red-200 rounded-lg bg-red-50">
@@ -323,13 +487,37 @@ const Profile = () => {
                     Permanently delete your account and data
                   </p>
                 </div>
-                <Button
-                  variant="outline"
-                  onClick={handleDeleteAccount}
-                  className="border-red-300 text-red-600 hover:bg-red-100"
-                >
-                  Delete Account
-                </Button>
+                <AlertDialog>
+                  <AlertDialogTrigger asChild>
+                    <Button
+                      variant="outline"
+                      className="border-red-300 text-red-600 hover:bg-red-100"
+                    >
+                      Delete Account
+                    </Button>
+                  </AlertDialogTrigger>
+                  <AlertDialogContent>
+                    <AlertDialogHeader>
+                      <AlertDialogTitle>
+                        Are you absolutely sure?
+                      </AlertDialogTitle>
+                      <AlertDialogDescription>
+                        This action cannot be undone. This will permanently
+                        delete your account and remove all your data from our
+                        servers.
+                      </AlertDialogDescription>
+                    </AlertDialogHeader>
+                    <AlertDialogFooter>
+                      <AlertDialogCancel>Cancel</AlertDialogCancel>
+                      <AlertDialogAction
+                        onClick={handleDeleteAccount}
+                        className="bg-red-600 hover:bg-red-700 focus:ring-red-600"
+                      >
+                        Delete Account
+                      </AlertDialogAction>
+                    </AlertDialogFooter>
+                  </AlertDialogContent>
+                </AlertDialog>
               </div>
             </div>
           </div>

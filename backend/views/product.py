@@ -40,7 +40,7 @@ def get_products():
 @jwt_required()
 def add_product():
     user = get_jwt_identity()
-    if user['role'] != 'admin' and user['role'] != 'order_manager':
+    if user['role'] != 'admin' and user['role'] != 'manager':
         return jsonify({"error": "Permission denied"}), 403
 
     data = request.get_json()
@@ -86,7 +86,7 @@ def get_categories():
 def update_product(id):
     identity = get_jwt_identity()
 
-    if identity['role'] not in ['admin', 'order_manager']:
+    if identity['role'] not in ['admin', 'manager']:
         return jsonify({"error": "Permission denied"}), 403
 
     product = Product.query.get_or_404(id)
@@ -110,7 +110,7 @@ def delete_product(id):
         if not isinstance(identity, dict):
             return jsonify({"error": "Invalid token format - identity must be a dict"}), 401
 
-        if identity.get('role') not in ['admin', 'order_manager']:
+        if identity.get('role') not in ['admin', 'manager']:
             return jsonify({"error": "Permission denied"}), 403
 
         product = Product.query.get_or_404(id)

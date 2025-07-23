@@ -25,13 +25,22 @@ const AdminSidebar = ({ isCollapsed, onToggle }) => {
   const { user, logout } = useAuth();
   const navigate = useNavigate();
 
-  const navigation = [
-    { name: "Dashboard", href: "/admin/dashboard", icon: LayoutDashboard },
-    { name: "Products", href: "/admin/products", icon: Package },
-    { name: "Orders", href: "/admin/orders", icon: ShoppingCart },
-    { name: "Users", href: "/admin/users", icon: Users },
-    { name: "Analytics", href: "/admin/analytics", icon: BarChart3 },
-  ];
+  let navigation = [];
+
+  if (user?.role === "admin") {
+    navigation = [
+      { name: "Dashboard", href: "/admin/dashboard", icon: LayoutDashboard },
+      { name: "Products", href: "/admin/products", icon: Package },
+      { name: "Orders", href: "/admin/orders", icon: ShoppingCart },
+      { name: "Users", href: "/admin/users", icon: Users },
+      { name: "Analytics", href: "/admin/analytics", icon: BarChart3 },
+    ];
+  } else if (user?.role === "manager") {
+    navigation = [
+      { name: "Products", href: "/admin/products", icon: Package },
+      { name: "Orders", href: "/admin/orders", icon: ShoppingCart },
+    ];
+  }
 
   const isActive = (path) => location.pathname === path;
 

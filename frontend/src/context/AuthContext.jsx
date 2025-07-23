@@ -59,6 +59,10 @@ export const AuthProvider = ({ children }) => {
 
       const data = await response.json();
 
+      if (data.user?.blocked) {
+        throw new Error("Account suspended");
+      }
+
       const userWithToken = {
         ...data.user,
         token: data.access_token,
@@ -96,7 +100,6 @@ export const AuthProvider = ({ children }) => {
         throw new Error(data.error || "Registration failed");
       }
 
-      // Combine user data with token
       const userWithToken = {
         ...data.user,
         token: data.access_token,
@@ -121,6 +124,7 @@ export const AuthProvider = ({ children }) => {
     register,
     loading,
     isAuthenticated: !!user?.token,
+    clearStorage,
   };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

@@ -20,6 +20,7 @@ import { OrdersProvider } from "./context/ordersContext";
 import Loader from "./components/Loader";
 import AdminLayout from "./admin/AdminLayout";
 import AdminDashboard from "./admin/AdminDashboard";
+import BlockedUserPage from "./context/BlockedUserPage";
 
 import AdminProducts from "./admin/AdminProducts";
 import AdminOrders from "./admin/AdminOrders";
@@ -74,6 +75,7 @@ const App = () => {
                     <Route path="/checkout" element={<Checkout />} />
                     <Route path="/login" element={<Login />} />
                     <Route path="/register" element={<Register />} />
+                    <Route path="/blocked" element={<BlockedUserPage />} />
                     <Route
                       path="/order-confirmation/:orderId"
                       element={<OrderConfirmation />}

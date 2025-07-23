@@ -4,8 +4,8 @@ import { Calendar, Package, Eye, ShoppingBag } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { useAuth } from "../context/AuthContext";
-import {api_url} from "../config.json";
 
+const API_BASE_URL = import.meta.env.VITE_SERVER_URL;
 
 const OrderHistory = () => {
   const [orders, setOrders] = useState([]);
