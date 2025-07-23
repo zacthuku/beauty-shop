@@ -1,8 +1,8 @@
-"""Make user_id nullable in orders
+"""Make user_id nullable in order
 
-Revision ID: e8849fcfa0e6
+Revision ID: 445892a40306
 Revises: 
-Create Date: 2025-07-23 17:24:24.362981
+Create Date: 2025-07-23 20:02:25.877032
 
 """
 from alembic import op
@@ -11,7 +11,7 @@ from sqlalchemy.dialects import postgresql
 from sqlalchemy import Text
 
 # revision identifiers, used by Alembic.
-revision = 'e8849fcfa0e6'
+revision = '445892a40306'
 down_revision = None
 branch_labels = None
 depends_on = None
