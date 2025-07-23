@@ -3,7 +3,7 @@ from flask_jwt_extended import jwt_required, get_jwt_identity
 from flask_mail import Mail, Message
 from models import db,User
 from flask_mail import Message
-from werkzeug.security import generate_password_hash
+from werkzeug.security import generate_password_hash, check_password_hash
 from views.mailserver import send_manager_invite_email
 from models import db, User, Order
 
@@ -117,3 +117,34 @@ def delete_account():
     except Exception as e:
         db.session.rollback()
         return jsonify({"error": f"Failed to delete account: {str(e)}"}), 500
+    
+
+
+
+@user_bp.route("/change-password", methods=["PATCH"])
+@jwt_required()
+def change_password():
+    identity = get_jwt_identity()
+    user_id = identity.get("id")
+
+    user = User.query.get(user_id)
+    if not user:
+        return jsonify({"error": "User not found"}), 404
+
+    data = request.get_json()
+    current_password = data.get("current_password")
+    new_password = data.get("new_password")
+
+    if not current_password or not new_password:
+        return jsonify({"error": "Both current and new passwords are required"}), 400
+
+
+    if not check_password_hash(user.password_hash, current_password):
+        return jsonify({"error": "Current password is incorrect"}), 400
+
+    user.password_hash = generate_password_hash(new_password)
+    db.session.commit()
+
+    return jsonify({"message": "Password updated successfully"}), 200
+
+
