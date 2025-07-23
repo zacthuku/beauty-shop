@@ -21,7 +21,7 @@ def get_all_users():
     return jsonify({"users": [u.to_dict() for u in users]})
 
 
-@user_bp.route('/<int:id>/block', methods=['PATCH','OPTIONS'])
+@user_bp.route('/<int:id>/block', methods=['PATCH'])
 @jwt_required()
 def toggle_block_user(id):
     identity = get_jwt_identity()
@@ -56,7 +56,7 @@ def delete_user(id):
     return jsonify({"message": f"User with ID {id} deleted successfully."}), 200
 
 
-@user_bp.route('/register/order_manager', methods=['POST'])
+@user_bp.route('/create-manager', methods=['POST'])
 @jwt_required()
 def create_manager():
     identity = get_jwt_identity()
@@ -75,14 +75,12 @@ def create_manager():
         user.role = 'manager'
         db.session.commit()
 
-
         send_manager_invite_email(name=user.username, email=email, is_existing_user=True)
 
         return jsonify({
             "message": f"User '{email}' role updated to manager.",
             "user": user.to_dict()
         }), 200
-
 
     default_password = "manager@thebeauty"
     hashed_password = generate_password_hash(default_password)

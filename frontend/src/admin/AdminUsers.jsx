@@ -76,7 +76,7 @@ const AdminUsers = () => {
   const blockUser = async (id) => {
     setActionLoading(`block-${id}`);
     try {
-      const res = await fetch(`${API_BASE_URL}/${id}/block`, {
+      const res = await fetch(`${API_BASE_URL}/users/${id}/block`, {
         method: "PATCH",
         headers: {
           "Content-Type": "application/json",
@@ -103,7 +103,8 @@ const AdminUsers = () => {
   const unblockUser = async (id) => {
     setActionLoading(`unblock-${id}`);
     try {
-      const res = await fetch(`${API_BASE_URL}/${id}/block`, {
+      const res = await fetch(`${API_BASE_URL}/users/${id}/block`, {
+        // Fixed endpoint
         method: "PATCH",
         credentials: "include",
         headers: {
@@ -136,7 +137,8 @@ const AdminUsers = () => {
 
     setCreating(true);
     try {
-      const res = await fetch(`${API_BASE_URL}/create-manager`, {
+      const res = await fetch(`${API_BASE_URL}/users/create-manager`, {
+        // Fixed endpoint
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -154,13 +156,14 @@ const AdminUsers = () => {
             name: data.user.username,
             email: data.user.email,
             role: "manager",
-            isBlocked: false,
-            createdAt: new Date().toISOString(),
+            isBlocked: data.user.blocked,
+            createdAt: data.user.created_at,
           },
         ]);
         setNewManagerEmail("");
       } else {
-        toast.error(data.error || "Create failed");
+        // Handle both 'error' and 'message' fields for error responses
+        toast.error(data.error || data.message || "Create failed");
       }
     } catch (error) {
       toast.error("Error creating manager");
