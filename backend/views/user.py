@@ -4,8 +4,7 @@ from flask_mail import Mail, Message
 from models import db,User
 from flask_mail import Message
 from werkzeug.security import generate_password_hash
-import random
-import string
+from views.mailserver import send_manager_invite_email
 from models import db, User, Order
 
 
@@ -59,17 +58,23 @@ def create_manager():
     if user:
         user.role = 'manager'
         db.session.commit()
+
+        # ✅ Send email to existing user
+        send_manager_invite_email(name=user.username, email=email, is_existing_user=True)
+
         return jsonify({
             "message": f"User '{email}' role updated to manager.",
             "user": user.to_dict()
         }), 200
 
- 
+
     default_password = "manager@thebeauty"
     hashed_password = generate_password_hash(default_password)
 
+    username = email.split('@')[0]
+
     new_user = User(
-        username=email.split('@')[0],
+        username=username,
         email=email,
         password_hash=hashed_password,
         role='manager'
@@ -77,11 +82,14 @@ def create_manager():
     db.session.add(new_user)
     db.session.commit()
 
+    send_manager_invite_email(name=username, email=email, is_existing_user=False, password=default_password)
+
     return jsonify({
         "message": f"Manager account created for {email}",
         "default_password": default_password,
         "user": new_user.to_dict()
     }), 201
+
 
 
 

@@ -5,16 +5,6 @@ import { Input } from "@/components/ui/input";
 import { toast } from "sonner";
 import { Navigate } from "react-router-dom";
 import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-} from "@/components/ui/alert-dialog";
-import {
   Table,
   TableBody,
   TableCell,
@@ -163,8 +153,8 @@ const AdminUsers = () => {
             _id: data.user.id,
             name: data.user.username,
             email: data.user.email,
-            role: "manager", // Set directly since this endpoint creates managers
-            isBlocked: false, // New managers are typically not blocked
+            role: "manager",
+            isBlocked: false,
             createdAt: new Date().toISOString(),
           },
         ]);
