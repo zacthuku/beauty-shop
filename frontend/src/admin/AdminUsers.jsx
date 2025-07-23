@@ -83,7 +83,6 @@ const AdminUsers = () => {
     if (token) fetchUsers();
   }, [token]);
 
-  // Block user
   const blockUser = async (id) => {
     setActionLoading(`block-${id}`);
     try {
@@ -146,7 +145,8 @@ const AdminUsers = () => {
 
     setCreating(true);
     try {
-      const res = await fetch(`${API_BASE_URL}/register/order_manager`, {
+      const res = await fetch(`${API_BASE_URL}/create-manager`, {
+        // Changed endpoint
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -156,21 +156,21 @@ const AdminUsers = () => {
       });
       const data = await res.json();
       if (res.ok) {
-        toast.success("Manager created");
+        toast.success(data.message || "Manager created");
         setUsers((prev) => [
           ...prev,
           {
             _id: data.user.id,
             name: data.user.username,
             email: data.user.email,
-            role: data.user.role,
-            isBlocked: data.user.blocked,
-            createdAt: data.user.created_at,
+            role: "manager", // Set directly since this endpoint creates managers
+            isBlocked: false, // New managers are typically not blocked
+            createdAt: new Date().toISOString(),
           },
         ]);
         setNewManagerEmail("");
       } else {
-        toast.error(data.message || "Create failed");
+        toast.error(data.error || "Create failed");
       }
     } catch (error) {
       toast.error("Error creating manager");

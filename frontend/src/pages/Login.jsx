@@ -59,13 +59,22 @@ const Login = () => {
         navigate("/blocked", { replace: true });
         return;
       }
+
       toast.success(`Welcome back, ${user.username || decoded.name}!`);
-      navigate(from, { replace: true });
+
+      if (user?.role === "admin" || user?.role === "manager") {
+        navigate("/admin/dashboard", { replace: true });
+      } else {
+        navigate(from, { replace: true });
+      }
     } catch (error) {
       console.error("Google login failed:", error);
-      toast.error("Google login failed.");
-    } finally {
-      setIsGoogleLoading(false);
+
+      if (error.message === "Account is suspended") {
+        navigate("/blocked", { replace: true });
+      } else {
+        toast.error("Google login failed.");
+      }
     }
   };
 

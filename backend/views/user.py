@@ -54,12 +54,19 @@ def create_manager():
     if not email:
         return jsonify({"error": "Email is required"}), 400
 
-    existing = User.query.filter_by(email=email).first()
-    if existing:
-        return jsonify({"error": "User with this email already exists"}), 409
+    user = User.query.filter_by(email=email).first()
 
-    otp = ''.join(random.choices(string.ascii_letters + string.digits, k=10))
-    hashed_password = generate_password_hash(otp)
+    if user:
+        user.role = 'manager'
+        db.session.commit()
+        return jsonify({
+            "message": f"User '{email}' role updated to manager.",
+            "user": user.to_dict()
+        }), 200
+
+ 
+    default_password = "manager@thebeauty"
+    hashed_password = generate_password_hash(default_password)
 
     new_user = User(
         username=email.split('@')[0],
@@ -70,19 +77,12 @@ def create_manager():
     db.session.add(new_user)
     db.session.commit()
 
-    try:
-        msg = Message(
-            subject="Welcome to Beauty Shop - Manager Access",
-            recipients=[email],
-            body=f"Hello,\n\nYou have been registered as a Manager.\nYour temporary password is: {otp}\n\nPlease log in and change your password immediately."
-        )
-        mail.send(msg)
-        return jsonify({
-            "message": f"Manager registered and email sent to {email}",
-            "user": new_user.to_dict()
-        }), 201
-    except Exception as e:
-        return jsonify({"error": f"User created but failed to send email: {str(e)}"}), 500
+    return jsonify({
+        "message": f"Manager account created for {email}",
+        "default_password": default_password,
+        "user": new_user.to_dict()
+    }), 201
+
 
 
 
