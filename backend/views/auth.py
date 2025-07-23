@@ -87,45 +87,47 @@ def register():
         "access_token": access_token
     }), 201
 
-
 @auth_bp.route('/login', methods=['POST'])
 def login():
     try:
         data = request.get_json()
         email = data.get('email')
         password = data.get('password')
-
+        
         if not email or not password:
             return jsonify({"error": "Email or password is missing"}), 400
-
+        
         user = User.query.filter_by(email=email).first()
+        
 
-        if user:
-            if user.blocked:
-                return jsonify({"error": "Account is suspended"}), 403
+        if not user:
+            return jsonify({"error": "User not found"}), 404
+        
 
-            if check_password_hash(user.password_hash, password):
-                access_token = create_access_token(identity={"id": user.id, "role": user.role})
-                user_info = {
-                    "id": user.id,
-                    "username": user.username,
-                    "email": user.email,
-                    "role": user.role,
-                    "created_at": user.created_at
-                }
+        if user.blocked:
+            return jsonify({"error": "Account is suspended"}), 403
+        
+        if not check_password_hash(user.password_hash, password):
+            return jsonify({"error": "Invalid password"}), 401
+        
 
-                return jsonify({
-                    "access_token": access_token,
-                    "user": user_info
-                }), 200
-
-        return jsonify({"error": "Email or password is incorrect"}), 400 
-
+        access_token = create_access_token(identity={"id": user.id, "role": user.role})
+        user_info = {
+            "id": user.id,
+            "username": user.username,
+            "email": user.email,
+            "role": user.role,
+            "created_at": user.created_at
+        }
+        
+        return jsonify({
+            "access_token": access_token,
+            "user": user_info
+        }), 200
+        
     except Exception as e:
         print(f"Login error: {e}")
         return jsonify({"error": "Internal server error"}), 500
-
-
 
 @auth_bp.route('/logout', methods=['DELETE'])
 @jwt_required()

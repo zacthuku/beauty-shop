@@ -48,6 +48,8 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 
+const API_BASE_URL = import.meta.env.VITE_SERVER_URL;
+
 const AdminProducts = () => {
   const { products, categories, loading, error, fetchProducts } = useProducts();
   const [searchTerm, setSearchTerm] = useState("");
@@ -121,7 +123,7 @@ const AdminProducts = () => {
       }
 
       const response = await fetch(
-        `http://localhost:5000/products/${productToDelete.id}`,
+        `${API_BASE_URL}/products/${productToDelete.id}`,
         {
           method: "DELETE",
           headers: {
@@ -189,7 +191,7 @@ const AdminProducts = () => {
       };
 
       const response = await fetch(
-        `http://localhost:5000/products/${productToEdit.id}`,
+        `${API_BASE_URL}/products/${productToEdit.id}`,
         {
           method: "PUT",
           headers: {
@@ -241,7 +243,7 @@ const AdminProducts = () => {
         reviews: 0,
       };
 
-      const response = await fetch("http://localhost:5000/products/", {
+      const response = await fetch(`${API_BASE_URL}/products/`, {
         method: "POST",
         headers: {
           Authorization: `Bearer ${token}`,
