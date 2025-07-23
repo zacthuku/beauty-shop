@@ -76,7 +76,7 @@ const AdminUsers = () => {
   const blockUser = async (id) => {
     setActionLoading(`block-${id}`);
     try {
-      const res = await fetch(`${API_BASE_URL}/users/${id}/block`, {
+      const response = await fetch(`${API_BASE_URL}/users/${id}/block`, {
         method: "PATCH",
         headers: {
           "Content-Type": "application/json",
@@ -84,17 +84,24 @@ const AdminUsers = () => {
         },
         body: JSON.stringify({ blocked: true }),
       });
-      const data = await res.json();
-      if (res.ok) {
-        toast.success("User blocked");
-        setUsers((prev) =>
-          prev.map((u) => (u._id === id ? { ...u, isBlocked: true } : u))
-        );
-      } else {
-        toast.error(data.message || "Block failed");
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        toast.error(data.message || "Failed to block user");
+        return;
       }
+
+      setUsers((prevUsers) =>
+        prevUsers.map((user) =>
+          user._id === id ? { ...user, isBlocked: true } : user
+        )
+      );
+
+      toast.success("User blocked successfully");
     } catch (error) {
-      toast.error("Error blocking user");
+      console.error("Error blocking user:", error);
+      toast.error("Network error while blocking user");
     } finally {
       setActionLoading(null);
     }
@@ -103,27 +110,32 @@ const AdminUsers = () => {
   const unblockUser = async (id) => {
     setActionLoading(`unblock-${id}`);
     try {
-      const res = await fetch(`${API_BASE_URL}/users/${id}/block`, {
-        // Fixed endpoint
+      const response = await fetch(`${API_BASE_URL}/users/${id}/block`, {
         method: "PATCH",
-        credentials: "include",
         headers: {
           "Content-Type": "application/json",
           Authorization: `Bearer ${token}`,
         },
         body: JSON.stringify({ blocked: false }),
       });
-      const data = await res.json();
-      if (res.ok) {
-        toast.success("User unblocked");
-        setUsers((prev) =>
-          prev.map((u) => (u._id === id ? { ...u, isBlocked: false } : u))
-        );
-      } else {
-        toast.error(data.message || "Unblock failed");
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        toast.error(data.message || "Failed to unblock user");
+        return;
       }
+
+      setUsers((prevUsers) =>
+        prevUsers.map((user) =>
+          user._id === id ? { ...user, isBlocked: false } : user
+        )
+      );
+
+      toast.success("User unblocked successfully");
     } catch (error) {
-      toast.error("Error unblocking user");
+      console.error("Error unblocking user:", error);
+      toast.error("Network error while unblocking user");
     } finally {
       setActionLoading(null);
     }
@@ -131,14 +143,14 @@ const AdminUsers = () => {
 
   const createManager = async () => {
     if (!isValidEmail(newManagerEmail)) {
-      toast.error("Enter a valid email address");
+      toast.error("Please enter a valid email address");
       return;
     }
 
     setCreating(true);
+
     try {
-      const res = await fetch(`${API_BASE_URL}/users/create-manager`, {
-        // Fixed endpoint
+      const response = await fetch(`${API_BASE_URL}/users/create-manager`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -146,27 +158,38 @@ const AdminUsers = () => {
         },
         body: JSON.stringify({ email: newManagerEmail }),
       });
-      const data = await res.json();
-      if (res.ok) {
-        toast.success(data.message || "Manager created");
-        setUsers((prev) => [
-          ...prev,
-          {
-            _id: data.user.id,
-            name: data.user.username,
-            email: data.user.email,
-            role: "manager",
-            isBlocked: data.user.blocked,
-            createdAt: data.user.created_at,
-          },
-        ]);
-        setNewManagerEmail("");
-      } else {
-        // Handle both 'error' and 'message' fields for error responses
-        toast.error(data.error || data.message || "Create failed");
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        if (response.status === 403) {
+          toast.error("Only admins can create managers");
+        } else if (response.status === 400) {
+          toast.error(data.error || "Email is required");
+        } else {
+          toast.error(data.error || "Failed to create manager");
+        }
+        return;
       }
+
+      toast.success(data.message || "Manager created successfully");
+
+      setUsers((prevUsers) => [
+        ...prevUsers,
+        {
+          _id: data.user.id,
+          name: data.user.username,
+          email: data.user.email,
+          role: data.user.role,
+          isBlocked: data.user.blocked,
+          createdAt: data.user.created_at,
+        },
+      ]);
+
+      setNewManagerEmail("");
     } catch (error) {
-      toast.error("Error creating manager");
+      console.error("Error creating manager:", error);
+      toast.error("Network error while creating manager");
     } finally {
       setCreating(false);
     }
