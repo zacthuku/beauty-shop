@@ -34,12 +34,15 @@ const Login = () => {
         navigate(from, { replace: true });
       }
     } catch (error) {
-      toast.error(error.message || "Invalid email or password");
+      if (error.message === "Account is suspended") {
+        navigate("/blocked", { replace: true });
+      } else {
+        toast.error(error.message || "Invalid email or password");
+      }
     } finally {
       setIsLoading(false);
     }
   };
-
   const handleGoogleLogin = async (credentialResponse) => {
     setIsGoogleLoading(true);
     try {
@@ -51,6 +54,11 @@ const Login = () => {
       };
 
       const user = await login(googleUser);
+
+      if (user?.blocked === true) {
+        navigate("/blocked", { replace: true });
+        return;
+      }
       toast.success(`Welcome back, ${user.username || decoded.name}!`);
       navigate(from, { replace: true });
     } catch (error) {
