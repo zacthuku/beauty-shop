@@ -47,6 +47,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { api_url } from "../config";
 
 const AdminProducts = () => {
   const { products, categories, loading, error, fetchProducts } = useProducts();
@@ -121,7 +122,7 @@ const AdminProducts = () => {
       }
 
       const response = await fetch(
-        `http://localhost:5000/products/${productToDelete.id}`,
+        `${api_url}/products/${productToDelete.id}`,
         {
           method: "DELETE",
           headers: {
@@ -189,7 +190,7 @@ const AdminProducts = () => {
       };
 
       const response = await fetch(
-        `http://localhost:5000/products/${productToEdit.id}`,
+        `${api_url}/products/${productToEdit.id}`,
         {
           method: "PUT",
           headers: {
@@ -241,7 +242,7 @@ const AdminProducts = () => {
         reviews: 0,
       };
 
-      const response = await fetch("http://localhost:5000/products/", {
+      const response = await fetch("${api_url}/products/", {
         method: "POST",
         headers: {
           Authorization: `Bearer ${token}`,
