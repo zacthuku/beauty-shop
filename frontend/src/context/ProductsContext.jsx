@@ -1,4 +1,3 @@
-// src/contexts/ProductsContext.js
 import { createContext, useContext, useEffect, useState } from "react";
 
 const API_BASE_URL = import.meta.env.VITE_SERVER_URL;

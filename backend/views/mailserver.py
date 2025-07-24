@@ -36,7 +36,7 @@ def send_email(name, email):
             <p style="margin-bottom: 25px; font-size: 16px;">Ready to look stunning?</p>
             
             <div style="margin: 30px 0;">
-                <a href="https://beauty-shop-ecru.vercel.app/" 
+                <a href="https://beauty-shop-opal.vercel.app/" 
                    style="background-color: #e11d48; color: white; padding: 15px 30px; text-decoration: none; border-radius: 8px; font-weight: bold; font-size: 16px; display: inline-block;">
                    Start Shopping
                 </a>
@@ -60,7 +60,7 @@ def send_email(name, email):
     - Get exclusive offers
     - Enjoy a smooth shopping experience
     
-    Start shopping now: https://beauty-shop-ecru.vercel.app/
+    Start shopping now: https://beauty-shop-opal.vercel.app/
     With love,
     The Beauty Team 
     """
@@ -244,7 +244,7 @@ def send_manager_invite_email(name, email, is_existing_user=False, password=None
                 <p>We're excited to let you know that you've been granted <strong>Manager Access</strong> on <strong>The Beauty</strong>.</p>
                 <p>You can now log in and manage orders and products directly from the admin panel.</p>
                 <div style="margin: 30px 0;">
-                    <a href="https://beauty-shop-ecru.vercel.app/login"
+                    <a href="https://beauty-shop-opal.vercel.app/login"
                        style="background-color: #e11d48; color: white; padding: 12px 25px; text-decoration: none; border-radius: 8px; font-weight: bold; font-size: 16px;">
                        Login
                     </a>
@@ -259,7 +259,7 @@ def send_manager_invite_email(name, email, is_existing_user=False, password=None
 You've been promoted to Manager on The Beauty platform!
 
 You can now log in and manage products and orders here:
-https://beauty-shop-ecru.vercel.app/login
+https://beauty-shop-opal.vercel.app/login
 
 With love,
 The Beauty Team 💖
@@ -277,7 +277,7 @@ The Beauty Team 💖
                 </ul>
                 <p>We recommend changing your password after first login.</p>
                 <div style="margin: 30px 0;">
-                    <a href="https://beauty-shop-ecru.vercel.app/login"
+                    <a href="https://beauty-shop-opal.vercel.app/login"
                        style="background-color: #e11d48; color: white; padding: 12px 25px; text-decoration: none; border-radius: 8px; font-weight: bold; font-size: 16px;">
                        Log In as Manager
                     </a>
@@ -296,7 +296,7 @@ Email: {email}
 Password: {password}
 
 
-Access the admin dashboard here: https://beauty-shop-ecru.vercel.app/login
+Access the admin dashboard here: https://beauty-shop-opal.vercel.app/login
 
 With love,
 The Beauty Team 💖

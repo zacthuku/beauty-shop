@@ -100,13 +100,17 @@ We welcome contributions! Please follow these steps:
 
 -Vercel frontend [The Beauty](https://beauty-shop-opal.vercel.app/)
 
--Render [Backend](https://beauty-shop-xoxn.onrender.com)
+-Render [Backend](https://beauty-shop-xoxn.onrender.com/)
 
 ## Support
 
-For support, questions, or feedback, open an issue or contact the developer:
+For support, questions, or feedback, open an issue or contact the developers:
 
 📧 dmnbilly@gmail.com
+
+📧 marycharity5@gmail.com
+
+📧 zacthuku@gmail.com
 
 ---
 
