@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { User, Mail, Calendar, MapPin, Phone, KeyRound } from "lucide-react";
+import { User, Mail, Calendar, Phone, KeyRound } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
@@ -363,68 +363,6 @@ const Profile = () => {
                   <div className="flex items-center space-x-3">
                     <Calendar className="h-5 w-5 text-gray-400" />
                     <span>{getFormattedDate()}</span>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            {/* Address Information */}
-            <div className="bg-white rounded-lg p-6 shadow-sm">
-              <h2 className="text-xl font-semibold text-gray-900 mb-6">
-                Address Information
-              </h2>
-
-              <div className="space-y-4">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Postal Address
-                  </label>
-                  {isEditing ? (
-                    <Input
-                      name="address"
-                      value={formData.address}
-                      onChange={handleChange}
-                      placeholder="Enter postal address"
-                    />
-                  ) : (
-                    <div className="flex items-center space-x-3">
-                      <MapPin className="h-5 w-5 text-gray-400" />
-                      <span>{user.address || "Not provided"}</span>
-                    </div>
-                  )}
-                </div>
-
-                <div className="grid grid-cols-2 gap-4">
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
-                      County
-                    </label>
-                    {isEditing ? (
-                      <Input
-                        name="city"
-                        value={formData.city}
-                        onChange={handleChange}
-                        placeholder="County"
-                      />
-                    ) : (
-                      <span>{user.city || "Not provided"}</span>
-                    )}
-                  </div>
-
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
-                      Town
-                    </label>
-                    {isEditing ? (
-                      <Input
-                        name="state"
-                        value={formData.state}
-                        onChange={handleChange}
-                        placeholder="Town"
-                      />
-                    ) : (
-                      <span>{user.state || "Not provided"}</span>
-                    )}
                   </div>
                 </div>
               </div>
