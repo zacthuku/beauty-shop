@@ -1,6 +1,6 @@
-# Beauty Shop
+# The Beauty
 
-An e-commerce web application for a beauty products shop, featuring a modern frontend built with React (Vite) and a Python Flask backend. The platform allows users to browse, search, and purchase beauty products, manage their cart, and view order history. Admin features can be extended in the `frontend/admin` directory.
+This is a multiuser e-commerce web application for a beauty products shop, featuring a modern intuative frontend built with React and a Python Flask backend. The platform allows users to browse, search, and purchase beauty products, manage their cart, and view order history.
 
 ## Features
 
@@ -10,35 +10,12 @@ An e-commerce web application for a beauty products shop, featuring a modern fro
 - Order history and order confirmation
 - Product reviews and ratings
 - Responsive, modern UI
-- Admin-ready structure for future management features
 
 ## Tech Stack
 
-- **Frontend:** React, Vite, Tailwind CSS
-- **Backend:** Python, Flask, SQLAlchemy
-- **Database:** SQLite (default, can be changed)
-
-## Project Structure
-
-```
-beauty-shop/
-├── backend/
-│   ├── app.py
-│   ├── models.py
-│   ├── seed.py
-│   ├── migrations/
-│   └── ...
-├── frontend/
-│   ├── src/
-│   │   ├── components/
-│   │   ├── context/
-│   │   ├── data/
-│   │   ├── pages/
-│   │   └── ...
-│   ├── admin/
-│   └── ...
-└── README.md
-```
+- **Frontend:** React, Tailwind CSS
+- **Backend:** Python, Flask
+- **Database:** PostgreSQL
 
 ## Getting Started
 
@@ -56,7 +33,7 @@ beauty-shop/
    ```sh
    pipenv run flask db upgrade
    ```
-4. Seed the database (optional):
+4. Seed the database
    ```sh
    pipenv run python seed.py
    ```
@@ -79,23 +56,60 @@ beauty-shop/
    ```sh
    npm run dev
    ```
-4. Open [http://localhost:5173](http://localhost:5173) in your browser.
+4. It will run on the locahost
 
 ## Usage
 
 - Browse products, view details, and add items to your cart.
 - Register or log in to place orders and view your order history.
-- Admin features can be added in the `frontend/admin` directory.
 
-## Folder Overview
+### Admin Access
 
-- `backend/` - Flask API, models, migrations, and database
-- `frontend/` - React app, UI components, pages, and admin folder
+Admin Login
+
+1. Login with admin credentials
+
+```
+- Email: admin@admin
+- Password: admin@thebeauty
+```
+
+2. Admins will automatically be redirected to admin page
+3. Access the admin dashboard to view registered users
 
 ## Contributing
 
-Pull requests are welcome! For major changes, please open an issue first to discuss what you would like to change.
+We welcome contributions! Please follow these steps:
 
-## License
+1. **Fork the repository**
+2. **Create a feature branch**
+   ```bash
+   git checkout -b feature/amazing-feature
+   ```
+3. **Commit your changes**
+   ```bash
+   git commit -m 'Add some amazing feature'
+   ```
+4. **Push to the branch**
+   ```bash
+   git push origin feature/amazing-feature
+   ```
+5. **Open a Pull Request**
 
-This project is licensed under the MIT License.
+## Live Demo
+
+-Vercel frontend [The Beauty](https://beauty-shop-opal.vercel.app/)
+
+-Render [Backend](https://beauty-shop-xoxn.onrender.com)
+
+## Support
+
+For support, questions, or feedback, open an issue or contact the developer:
+
+📧 dmnbilly@gmail.com
+
+---
+
+**Made with love by Billy**
+
+_Happy Shopping!_
