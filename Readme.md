@@ -114,6 +114,6 @@ For support, questions, or feedback, open an issue or contact the developers:
 
 ---
 
-**Made with love by Billy**
+**Made with love**
 
 _Happy Shopping!_
