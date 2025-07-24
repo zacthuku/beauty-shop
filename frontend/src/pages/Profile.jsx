@@ -1,16 +1,6 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import {
-  User,
-  Mail,
-  Calendar,
-  MapPin,
-  Phone,
-  Edit,
-  Save,
-  X,
-  KeyRound,
-} from "lucide-react";
+import { User, Mail, Calendar, MapPin, Phone, KeyRound } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
@@ -298,28 +288,6 @@ const Profile = () => {
                     Member since {getFormattedDate()}
                   </p>
                 </div>
-              </div>
-              <div className="flex items-center space-x-3">
-                {isEditing ? (
-                  <>
-                    <Button variant="outline" onClick={handleCancel}>
-                      <X className="h-4 w-4 mr-2" />
-                      Cancel
-                    </Button>
-                    <Button
-                      onClick={handleSave}
-                      className="bg-rose-500 hover:bg-rose-600"
-                    >
-                      <Save className="h-4 w-4 mr-2" />
-                      Save
-                    </Button>
-                  </>
-                ) : (
-                  <Button onClick={() => setIsEditing(true)} variant="outline">
-                    <Edit className="h-4 w-4 mr-2" />
-                    Edit Profile
-                  </Button>
-                )}
               </div>
             </div>
           </div>

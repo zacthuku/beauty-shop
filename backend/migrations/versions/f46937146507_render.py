@@ -1,18 +1,17 @@
 """render
 
-Revision ID: 3a91bdd401db
-Revises: 79c39f1e929d
-Create Date: 2025-07-24 09:42:55.907414
+Revision ID: f46937146507
+Revises: 
+Create Date: 2025-07-24 16:07:56.409540
 
 """
 from alembic import op
 import sqlalchemy as sa
 from sqlalchemy.dialects import postgresql
-from sqlalchemy import Text
 
 # revision identifiers, used by Alembic.
-revision = '3a91bdd401db'
-down_revision = '79c39f1e929d'
+revision = 'f46937146507'
+down_revision = None
 branch_labels = None
 depends_on = None
 
