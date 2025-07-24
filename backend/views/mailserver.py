@@ -177,13 +177,12 @@ def send_order_confirmation_email(name, email, order):
             
             <p style="margin-top: 30px;">We'll notify you once it ships. Estimated delivery is 1-3 days. Meanwhile, you can track your order anytime from your account.</p>              
             
-            <div style="margin-top: 40px;">                 
-                <a https://beauty-shop-opal.vercel.app/{order['id']}"                     
-                style="background-color: #e11d48; color: white; padding: 12px 25px; text-decoration: none; border-radius: 6px; font-weight: bold;">                    
-                View Order                 
-                </a>             
-            </div>
-            
+           <div style="margin-top: 40px;">                 
+    <a href="https://beauty-shop-opal.vercel.app/{order['id']}"                     
+       style="background-color: #e11d48; color: white; padding: 12px 25px; text-decoration: none; border-radius: 6px; font-weight: bold;">                    
+        View Order                 
+    </a>             
+</div>
             <p style="margin-top: 30px; font-size: 14px; color: #666;">
             Need help? Contact us:<br/>
             Email: info@thebeauty.com<br/>
