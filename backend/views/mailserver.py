@@ -178,7 +178,7 @@ def send_order_confirmation_email(name, email, order):
             <p style="margin-top: 30px;">We'll notify you once it ships. Estimated delivery is 1-3 days. Meanwhile, you can track your order anytime from your account.</p>              
             
             <div style="margin-top: 40px;">                 
-                <a href="http://127.0.0.1:5000/{order['id']}"                     
+                <a https://beauty-shop-opal.vercel.app/{order['id']}"                     
                 style="background-color: #e11d48; color: white; padding: 12px 25px; text-decoration: none; border-radius: 6px; font-weight: bold;">                    
                 View Order                 
                 </a>             
@@ -215,7 +215,7 @@ Total Paid: Ksh {order['total']:.2f}
 
 Estimated delivery: 1-3 days
 
-You can view your order here: https://127.0.0.1:5000/{order['id']}  
+You can view your order here: https://beauty-shop-opal.vercel.app/{order['id']}  
 
 Need help? 
 Email: support@thebeauty.co.ke
