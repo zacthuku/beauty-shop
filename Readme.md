@@ -100,7 +100,7 @@ We welcome contributions! Please follow these steps:
 
 -Vercel frontend [The Beauty](https://beauty-shop-opal.vercel.app/)
 
--Render [Backend](https://beauty-shop-xoxn.onrender.com/)
+-Render [Backend](https://beauty-shop-v8y3.onrender.com)
 
 ## Support
 
