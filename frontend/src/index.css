@@ -1,7 +1,7 @@
 @import "tailwindcss";
 @import "tw-animate-css";
 
-@custom-variant dark (&:is(.dark *));
+@custom-variant dark (&:is([data-theme='dark'] *));
 
 @theme inline {
   --radius-sm: calc(var(--radius) - 4px);
@@ -76,7 +76,7 @@
   --sidebar-ring: oklch(0.708 0 0);
 }
 
-.dark {
+[data-theme='dark'] {
   --background: oklch(0.145 0 0);
   --foreground: oklch(0.985 0 0);
   --card: oklch(0.205 0 0);
@@ -108,6 +108,34 @@
   --sidebar-accent-foreground: oklch(0.985 0 0);
   --sidebar-border: oklch(1 0 0 / 10%);
   --sidebar-ring: oklch(0.556 0 0);
+
+  /* Global overrides for common utility classes in dark mode */
+  /* This prevents needing to edit every file to replace bg-white with bg-card/bg-background */
+  
+  .bg-white {
+    background-color: var(--card);
+  }
+  
+  .bg-gray-50 {
+    background-color: var(--background);
+  }
+
+  .text-gray-900 {
+    color: var(--foreground);
+  }
+
+  .text-gray-600, 
+  .text-gray-500,
+  .text-gray-700 {
+    color: var(--muted-foreground);
+  }
+
+  .border-gray-200, 
+  .border-gray-100 {
+    border-color: var(--border);
+  }
+  
+  /* Handle specific gradients if needed, or let them be */
 }
 
 @layer base {
@@ -115,6 +143,6 @@
     @apply border-border outline-ring/50;
   }
   body {
-    @apply bg-background text-foreground;
+    @apply bg-background text-foreground transition-colors duration-300;
   }
 }
