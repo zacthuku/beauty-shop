@@ -16,9 +16,9 @@ const Home = () => {
   const bestSellers = products.filter((p) => p.rating >= 4.7).slice(0, 4);
 
   return (
-    <div className="min-h-screen">
+    <div className="min-h-screen bg-gray-50">
       {/* Hero Section */}
-      <section className="relative bg-gradient-to-br from-rose-50 via-pink-50 to-rose-100 py-20">
+      <section className="relative bg-gradient-to-br from-rose-50 via-pink-50 to-rose-100 dark:from-gray-950/20 dark:via-pink-950/10 dark:to-rose-950/20 py-20 transition-colors duration-300">
         <div className="container mx-auto px-4">
           <div className="grid lg:grid-cols-2 gap-12 items-center">
             <div className="space-y-8">
@@ -95,8 +95,8 @@ const Home = () => {
               </div>
 
               {/* Floating elements */}
-              <div className="absolute -top-4 -left-4 w-20 h-20 bg-pink-200 rounded-full opacity-60 animate-pulse"></div>
-              <div className="absolute -bottom-4 -right-4 w-16 h-16 bg-rose-200 rounded-full opacity-60 animate-pulse delay-1000"></div>
+              <div className="absolute -top-4 -left-4 w-20 h-20 bg-pink-200 dark:bg-pink-900/30 rounded-full opacity-60 animate-pulse"></div>
+              <div className="absolute -bottom-4 -right-4 w-16 h-16 bg-rose-200 dark:bg-rose-900/30 rounded-full opacity-60 animate-pulse delay-1000"></div>
             </div>
           </div>
         </div>
@@ -120,7 +120,7 @@ const Home = () => {
               <Link
                 key={category.name}
                 to={`/products/${category.name}`}
-                className="group relative overflow-hidden rounded-2xl bg-gradient-to-br from-rose-100 to-pink-100 p-8 hover:from-rose-200 hover:to-pink-200 transition-all duration-300 transform hover:scale-105"
+                className="group relative overflow-hidden rounded-2xl bg-gradient-to-br from-rose-100 to-pink-100 dark:from-rose-950/20 dark:to-pink-950/20 p-8 hover:from-rose-200 hover:to-pink-200 dark:hover:from-rose-900/30 dark:hover:to-pink-900/30 transition-all duration-300 transform hover:scale-105"
               >
                 <div className="relative z-10">
                   <div className="text-4xl mb-4">{category.icon}</div>
@@ -165,7 +165,7 @@ const Home = () => {
               <Button
                 size="lg"
                 variant="outline"
-                className="border-rose-300 text-rose-600 hover:bg-rose-50"
+                className="border-rose-300 text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-950/20"
               >
                 View All Products
                 <ArrowRight className="ml-2 h-5 w-5" />
@@ -200,11 +200,11 @@ const Home = () => {
       </section>
 
       {/* Features Section */}
-      <section className="py-20 bg-gradient-to-br from-rose-50 to-pink-50">
+      <section className="py-20 bg-gradient-to-br from-rose-50 to-pink-50 dark:from-rose-950/20 dark:to-pink-950/20">
         <div className="container mx-auto px-4">
           <div className="grid md:grid-cols-3 gap-8">
             <div className="text-center p-6">
-              <div className="w-16 h-16 bg-rose-100 rounded-full flex items-center justify-center mx-auto mb-4">
+              <div className="w-16 h-16 bg-rose-100 dark:bg-rose-900/30 rounded-full flex items-center justify-center mx-auto mb-4">
                 <Truck className="h-8 w-8 text-rose-600" />
               </div>
               <h3 className="text-xl font-bold text-gray-900 mb-2">
@@ -217,7 +217,7 @@ const Home = () => {
             </div>
 
             <div className="text-center p-6">
-              <div className="w-16 h-16 bg-rose-100 rounded-full flex items-center justify-center mx-auto mb-4">
+              <div className="w-16 h-16 bg-rose-100 dark:bg-rose-900/30 rounded-full flex items-center justify-center mx-auto mb-4">
                 <Shield className="h-8 w-8 text-rose-600" />
               </div>
               <h3 className="text-xl font-bold text-gray-900 mb-2">
@@ -230,7 +230,7 @@ const Home = () => {
             </div>
 
             <div className="text-center p-6">
-              <div className="w-16 h-16 bg-rose-100 rounded-full flex items-center justify-center mx-auto mb-4">
+              <div className="w-16 h-16 bg-rose-100 dark:bg-rose-900/30 rounded-full flex items-center justify-center mx-auto mb-4">
                 <Headphones className="h-8 w-8 text-rose-600" />
               </div>
               <h3 className="text-xl font-bold text-gray-900 mb-2">
@@ -245,7 +245,7 @@ const Home = () => {
       </section>
 
       {/* Newsletter */}
-      <section className="py-20 bg-gray- text-whi">
+      <section className="py-20 bg-gray-900 text-white dark:bg-black">
         <div className="container mx-auto px-4 text-center">
           <h2 className="text-3xl md:text-4xl font-bold mb-4">Stay ahead</h2>
           <p className="text-xl text-gray-400 mb-8 max-w-2xl mx-auto">

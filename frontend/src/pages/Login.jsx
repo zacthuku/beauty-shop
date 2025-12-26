@@ -83,9 +83,9 @@ const Login = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-rose-50 to-pink-50 flex items-center justify-center p-4">
+    <div className="min-h-screen bg-gradient-to-br from-rose-50 to-pink-50 dark:from-rose-950/20 dark:to-pink-950/20 dark:bg-background flex items-center justify-center p-4 transition-colors duration-300">
       <div className="w-full max-w-sm">
-        <div className="bg-white rounded-xl shadow-lg p-6">
+        <div className="bg-white dark:bg-card rounded-xl shadow-lg p-6 border border-gray-100 dark:border-border">
           {/* Header */}
           <div className="text-center mb-6">
             <Link to="/" className="inline-flex items-center space-x-2 mb-3">
@@ -93,10 +93,10 @@ const Login = () => {
                 The Beauty
               </span>
             </Link>
-            <h1 className="text-xl font-bold text-gray-900 mb-1">
+            <h1 className="text-xl font-bold text-gray-900 dark:text-foreground mb-1">
               Welcome Back
             </h1>
-            <p className="text-sm text-gray-600">Sign in to your account</p>
+            <p className="text-sm text-gray-600 dark:text-muted-foreground">Sign in to your account</p>
           </div>
 
           {/* Google Login Button */}
@@ -113,10 +113,10 @@ const Login = () => {
           {/* Divider */}
           <div className="relative mb-4">
             <div className="absolute inset-0 flex items-center">
-              <div className="w-full border-t border-gray-300"></div>
+              <div className="w-full border-t border-gray-300 dark:border-border"></div>
             </div>
             <div className="relative flex justify-center text-xs uppercase">
-              <span className="bg-white px-2 text-gray-500">Or</span>
+              <span className="bg-white dark:bg-card px-2 text-gray-500 dark:text-muted-foreground">Or</span>
             </div>
           </div>
 
@@ -125,7 +125,7 @@ const Login = () => {
             <div>
               <label
                 htmlFor="email"
-                className="block text-xs font-medium text-gray-700 mb-1"
+                className="block text-xs font-medium text-gray-700 dark:text-muted-foreground mb-1"
               >
                 Email
               </label>
@@ -138,7 +138,7 @@ const Login = () => {
                   required
                   value={formData.email}
                   onChange={handleChange}
-                  className="pl-9 h-9 text-sm"
+                  className="pl-9 h-9 text-sm bg-white dark:bg-background border-input dark:text-foreground"
                   placeholder="Enter your email"
                 />
               </div>
@@ -147,7 +147,7 @@ const Login = () => {
             <div>
               <label
                 htmlFor="password"
-                className="block text-xs font-medium text-gray-700 mb-1"
+                className="block text-xs font-medium text-gray-700 dark:text-muted-foreground mb-1"
               >
                 Password
               </label>
@@ -160,13 +160,13 @@ const Login = () => {
                   required
                   value={formData.password}
                   onChange={handleChange}
-                  className="pl-9 pr-9 h-9 text-sm"
+                  className="pl-9 pr-9 h-9 text-sm bg-white dark:bg-background border-input dark:text-foreground"
                   placeholder="Enter your password"
                 />
                 <button
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600"
+                  className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600 cursor-pointer"
                 >
                   {showPassword ? (
                     <EyeOff className="h-4 w-4" />
@@ -186,7 +186,7 @@ const Login = () => {
             <Button
               type="submit"
               disabled={isLoading}
-              className="w-full bg-rose-500 hover:bg-rose-600 text-white h-9 text-sm"
+              className="w-full bg-rose-500 hover:bg-rose-600 text-white h-9 text-sm cursor-pointer"
             >
               {isLoading ? "Signing in..." : "Sign In"}
             </Button>
@@ -194,7 +194,7 @@ const Login = () => {
 
           {/* Sign Up Link */}
           <div className="mt-4 text-center">
-            <p className="text-xs text-gray-600">
+            <p className="text-xs text-gray-600 dark:text-muted-foreground">
               Don't have an account?{" "}
               <Link
                 to="/register"

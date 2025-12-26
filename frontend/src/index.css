@@ -110,7 +110,6 @@
   --sidebar-ring: oklch(0.556 0 0);
 
   /* Global overrides for common utility classes in dark mode */
-  /* This prevents needing to edit every file to replace bg-white with bg-card/bg-background */
   
   .bg-white {
     background-color: var(--card);
