@@ -28,14 +28,14 @@ const AdminUsers = () => {
   const [actionLoading, setActionLoading] = useState(null);
 
   const statusColorMap = {
-    true: "bg-red-100 text-red-800 border border-red-300",
-    false: "bg-green-100 text-green-800 border border-green-300",
+    true: "bg-red-100 dark:bg-red-900/30 text-red-800 dark:text-red-300 border border-red-300 dark:border-red-800",
+    false: "bg-green-100 dark:bg-green-900/30 text-green-800 dark:text-green-300 border border-green-300 dark:border-green-800",
   };
 
   const roleColorMap = {
-    admin: "bg-purple-100 text-purple-800 border border-purple-300",
-    manager: "bg-blue-100 text-blue-800 border border-blue-300",
-    user: "bg-gray-100 text-gray-800 border border-gray-300",
+    admin: "bg-purple-100 dark:bg-purple-900/30 text-purple-800 dark:text-purple-300 border border-purple-300 dark:border-purple-800",
+    manager: "bg-blue-100 dark:bg-blue-900/30 text-blue-800 dark:text-blue-300 border border-blue-300 dark:border-blue-800",
+    user: "bg-gray-100 dark:bg-zinc-800/50 text-gray-800 dark:text-zinc-400 border border-gray-300 dark:border-zinc-700",
   };
 
   const isValidEmail = (email) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
@@ -219,8 +219,8 @@ const AdminUsers = () => {
     <div className="p-6 space-y-6">
       <div className="flex justify-between items-center">
         <div>
-          <h1 className="text-3xl font-bold text-gray-900">User Management</h1>
-          <p className="text-gray-600">Manage system users and permissions</p>
+          <h1 className="text-3xl font-bold text-foreground">User Management</h1>
+          <p className="text-muted-foreground">Manage system users and permissions</p>
         </div>
       </div>
 
@@ -230,7 +230,7 @@ const AdminUsers = () => {
           placeholder="Manager email"
           value={newManagerEmail}
           onChange={(e) => setNewManagerEmail(e.target.value)}
-          className="max-w-md"
+          className="max-w-md bg-background"
         />
         <Button
           onClick={createManager}
@@ -240,7 +240,7 @@ const AdminUsers = () => {
         </Button>
       </div>
 
-      <div className="rounded-md border max-w-7xl">
+      <div className="rounded-md border border-border max-w-7xl bg-card">
         <Table>
           <TableHeader>
             <TableRow>
@@ -255,14 +255,14 @@ const AdminUsers = () => {
           <TableBody>
             {users.map((u) => (
               <TableRow key={u._id}>
-                <TableCell className="font-medium">{u.name}</TableCell>
-                <TableCell>{u.email}</TableCell>
+                <TableCell className="font-medium text-foreground">{u.name}</TableCell>
+                <TableCell className="text-muted-foreground">{u.email}</TableCell>
                 <TableCell>
                   <Badge className={roleColorMap[u.role] || roleColorMap.user}>
                     {u.role.charAt(0).toUpperCase() + u.role.slice(1)}
                   </Badge>
                 </TableCell>
-                <TableCell>{formatDate(u.createdAt)}</TableCell>
+                <TableCell className="text-muted-foreground">{formatDate(u.createdAt)}</TableCell>
                 <TableCell>
                   <Badge className={statusColorMap[u.isBlocked]}>
                     {u.isBlocked ? "Blocked" : "Active"}
@@ -275,7 +275,7 @@ const AdminUsers = () => {
                       size="sm"
                       onClick={() => unblockUser(u._id)}
                       disabled={actionLoading === `unblock-${u._id}`}
-                      className="hover:bg-green-100 text-green-700 border-green-300"
+                      className="hover:bg-green-100 dark:hover:bg-green-900/30 text-green-700 dark:text-green-400 border-green-300 dark:border-green-800"
                     >
                       {actionLoading === `unblock-${u._id}`
                         ? "Processing..."
@@ -287,7 +287,7 @@ const AdminUsers = () => {
                       size="sm"
                       onClick={() => blockUser(u._id)}
                       disabled={actionLoading === `block-${u._id}`}
-                      className="bg-amber-50 hover:bg-amber-100 text-amber-700 border-amber-300 hover:text-amber-800"
+                      className="bg-amber-50 dark:bg-amber-900/10 hover:bg-amber-100 dark:hover:bg-amber-900/30 text-amber-700 dark:text-amber-400 border-amber-300 dark:border-amber-800"
                     >
                       {actionLoading === `block-${u._id}`
                         ? "Processing..."

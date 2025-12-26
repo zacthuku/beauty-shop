@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { useAuth } from "../context/AuthContext";
 import { useCart } from "../context/CartContext";
 import { useProducts } from "../context/ProductsContext";
+import ThemeToggle from "./ThemeToggle";
 
 const Header = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -75,6 +76,8 @@ const Header = () => {
 
           {/* Actions */}
           <div className="flex items-center space-x-4">
+            <ThemeToggle />
+            
             {/* Cart */}
             <Link
               to="/cart"

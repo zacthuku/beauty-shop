@@ -79,19 +79,19 @@ const AdminProducts = () => {
   });
 
   const categoryColorMap = {
-    makeup: "bg-blue-100 text-blue-800",
-    haircare: "bg-pink-100 text-pink-800",
-    skincare: "bg-yellow-100 text-yellow-800",
+    makeup: "bg-blue-100 dark:bg-blue-900/30 text-blue-800 dark:text-blue-300",
+    haircare: "bg-pink-100 dark:bg-pink-900/30 text-pink-800 dark:text-pink-300",
+    skincare: "bg-yellow-100 dark:bg-yellow-900/30 text-yellow-800 dark:text-yellow-300",
   };
 
   const stockColorMap = {
-    true: "bg-green-100 text-green-800 border border-green-300",
-    false: "bg-red-100 text-red-800 border border-red-300",
+    true: "bg-green-100 dark:bg-green-900/30 text-green-800 dark:text-green-300 border border-green-300 dark:border-green-800",
+    false: "bg-red-100 dark:bg-red-900/30 text-red-800 dark:text-red-300 border border-red-300 dark:border-red-800",
   };
 
   const statusColorMap = {
-    true: "bg-blue-100 text-blue-800 border border-blue-300",
-    false: "bg-zinc-200 text-zinc-700 border border-zinc-400",
+    true: "bg-blue-100 dark:bg-blue-900/30 text-blue-800 dark:text-blue-300 border border-blue-300 dark:border-blue-800",
+    false: "bg-zinc-200 dark:bg-zinc-800/50 text-zinc-700 dark:text-zinc-400 border border-zinc-400 dark:border-zinc-700",
   };
 
   const normalizedCategories = categories.map((cat) =>
@@ -300,10 +300,10 @@ const AdminProducts = () => {
     <div className="space-y-6">
       <div className="flex justify-between items-center">
         <div>
-          <h1 className="text-3xl font-bold text-gray-900">
+          <h1 className="text-3xl font-bold text-foreground">
             Products Management
           </h1>
-          <p className="text-gray-600">Manage your product catalog</p>
+          <p className="text-muted-foreground">Manage your product catalog</p>
         </div>
         <Button onClick={() => setIsCreateDialogOpen(true)}>
           <Plus className="h-4 w-4 mr-2" />
@@ -318,18 +318,18 @@ const AdminProducts = () => {
         <CardContent>
           <div className="flex gap-4">
             <div className="flex-1 relative">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
               <Input
                 placeholder="Search products..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                className="pl-10"
+                className="pl-10 bg-background"
               />
             </div>
             <select
               value={selectedCategory}
               onChange={(e) => setSelectedCategory(e.target.value)}
-              className="px-3 py-2 border rounded-md"
+              className="px-3 py-2 border border-border rounded-md bg-background text-foreground"
             >
               <option value="all">All Categories</option>
               {normalizedCategories.map((category) => (
@@ -370,8 +370,8 @@ const AdminProducts = () => {
                         className="w-12 h-12 rounded-md object-cover"
                       />
                       <div>
-                        <div className="font-medium">{product.name}</div>
-                        <div className="text-sm text-gray-500 truncate max-w-xs">
+                        <div className="font-medium text-foreground">{product.name}</div>
+                        <div className="text-sm text-muted-foreground truncate max-w-xs">
                           {product.description}
                         </div>
                       </div>
@@ -417,7 +417,7 @@ const AdminProducts = () => {
                       </Button>
                       <Button
                         onClick={() => handleDeleteClick(product)}
-                        className="bg-red-100 text-red-700 hover:bg-red-200 border border-red-300 rounded px-3 py-1 text-sm font-semibold flex items-center"
+                        className="bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-300 hover:bg-red-200 dark:hover:bg-red-900/50 border border-red-300 dark:border-red-800 rounded px-3 py-1 text-sm font-semibold flex items-center"
                       >
                         <Trash2 className="w-4 h-4 mr-1" />
                         Delete
@@ -436,17 +436,17 @@ const AdminProducts = () => {
         open={isDeleteDialogOpen}
         onOpenChange={setIsDeleteDialogOpen}
       >
-        <AlertDialogContent>
+        <AlertDialogContent className="bg-card dark:bg-card border border-border">
           <AlertDialogHeader>
-            <AlertDialogTitle>Are you sure?</AlertDialogTitle>
-            <AlertDialogDescription>
+            <AlertDialogTitle className="text-foreground">Are you sure?</AlertDialogTitle>
+            <AlertDialogDescription className="text-muted-foreground">
               This action cannot be undone. This will permanently delete{" "}
-              <span className="font-semibold">{productToDelete?.name}</span>{" "}
+              <span className="font-semibold text-foreground">{productToDelete?.name}</span>{" "}
               from your Inventory.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogCancel className="bg-background text-foreground border-border hover:bg-muted">Cancel</AlertDialogCancel>
             <AlertDialogAction
               onClick={handleDeleteConfirm}
               className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
@@ -459,16 +459,16 @@ const AdminProducts = () => {
 
       {/* Edit Product Dialog */}
       <Dialog open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen}>
-        <DialogContent>
+        <DialogContent className="bg-card dark:bg-card border border-border">
           <DialogHeader>
-            <DialogTitle>Edit Product</DialogTitle>
-            <DialogDescription>
+            <DialogTitle className="text-foreground">Edit Product</DialogTitle>
+            <DialogDescription className="text-muted-foreground">
               Update the product details below.
             </DialogDescription>
           </DialogHeader>
           <form onSubmit={handleEditSubmit} className="space-y-4">
             <div className="space-y-2">
-              <Label htmlFor="edit-name">Name</Label>
+              <Label htmlFor="edit-name" className="text-foreground">Name</Label>
               <Input
                 id="edit-name"
                 value={editFormData.name}
@@ -476,10 +476,11 @@ const AdminProducts = () => {
                   setEditFormData({ ...editFormData, name: e.target.value })
                 }
                 required
+                className="bg-background"
               />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="edit-description">Description</Label>
+              <Label htmlFor="edit-description" className="text-foreground">Description</Label>
               <Input
                 id="edit-description"
                 value={editFormData.description}
@@ -489,10 +490,11 @@ const AdminProducts = () => {
                     description: e.target.value,
                   })
                 }
+                className="bg-background"
               />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="edit-price">Price</Label>
+              <Label htmlFor="edit-price" className="text-foreground">Price</Label>
               <Input
                 id="edit-price"
                 type="number"
@@ -506,10 +508,11 @@ const AdminProducts = () => {
                 required
                 min="0"
                 step="0.01"
+                className="bg-background"
               />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="edit-stock">In Stock</Label>
+              <Label htmlFor="edit-stock" className="text-foreground">In Stock</Label>
               <Select
                 value={editFormData.in_stock ? "yes" : "no"}
                 onValueChange={(value) =>
@@ -519,7 +522,7 @@ const AdminProducts = () => {
                   })
                 }
               >
-                <SelectTrigger>
+                <SelectTrigger className="bg-background">
                   <SelectValue placeholder="Select stock status" />
                 </SelectTrigger>
                 <SelectContent>
@@ -529,7 +532,7 @@ const AdminProducts = () => {
               </Select>
             </div>
             <div className="space-y-2">
-              <Label htmlFor="edit-category">Category</Label>
+              <Label htmlFor="edit-category" className="text-foreground">Category</Label>
               <Select
                 value={editFormData.category}
                 onValueChange={(value) =>
@@ -537,7 +540,7 @@ const AdminProducts = () => {
                 }
                 required
               >
-                <SelectTrigger>
+                <SelectTrigger className="bg-background">
                   <SelectValue placeholder="Select a category" />
                 </SelectTrigger>
                 <SelectContent>
@@ -550,13 +553,14 @@ const AdminProducts = () => {
               </Select>
             </div>
             <div className="space-y-2">
-              <Label htmlFor="edit-image">Image URL</Label>
+              <Label htmlFor="edit-image" className="text-foreground">Image URL</Label>
               <Input
                 id="edit-image"
                 value={editFormData.image}
                 onChange={(e) =>
                   setEditFormData({ ...editFormData, image: e.target.value })
                 }
+                className="bg-background"
               />
             </div>
             <DialogFooter>
@@ -568,16 +572,16 @@ const AdminProducts = () => {
 
       {/* Create Product Dialog */}
       <Dialog open={isCreateDialogOpen} onOpenChange={setIsCreateDialogOpen}>
-        <DialogContent>
+        <DialogContent className="bg-card dark:bg-card border border-border">
           <DialogHeader>
-            <DialogTitle>Create New Product</DialogTitle>
-            <DialogDescription>
+            <DialogTitle className="text-foreground">Create New Product</DialogTitle>
+            <DialogDescription className="text-muted-foreground">
               Fill in the details for the new product.
             </DialogDescription>
           </DialogHeader>
           <form onSubmit={handleCreateSubmit} className="space-y-4">
             <div className="space-y-2">
-              <Label htmlFor="create-name">Name</Label>
+              <Label htmlFor="create-name" className="text-foreground">Name</Label>
               <Input
                 id="create-name"
                 value={createFormData.name}
@@ -585,10 +589,11 @@ const AdminProducts = () => {
                   setCreateFormData({ ...createFormData, name: e.target.value })
                 }
                 required
+                className="bg-background"
               />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="create-description">Description</Label>
+              <Label htmlFor="create-description" className="text-foreground">Description</Label>
               <Input
                 id="create-description"
                 value={createFormData.description}
@@ -598,10 +603,11 @@ const AdminProducts = () => {
                     description: e.target.value,
                   })
                 }
+                className="bg-background"
               />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="create-price">Price</Label>
+              <Label htmlFor="create-price" className="text-foreground">Price</Label>
               <Input
                 id="create-price"
                 type="number"
@@ -615,10 +621,11 @@ const AdminProducts = () => {
                 required
                 min="0"
                 step="0.01"
+                className="bg-background"
               />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="create-category">Category</Label>
+              <Label htmlFor="create-category" className="text-foreground">Category</Label>
               <Select
                 value={createFormData.category}
                 onValueChange={(value) =>
@@ -626,7 +633,7 @@ const AdminProducts = () => {
                 }
                 required
               >
-                <SelectTrigger>
+                <SelectTrigger className="bg-background">
                   <SelectValue placeholder="Select a category" />
                 </SelectTrigger>
                 <SelectContent>
@@ -639,7 +646,7 @@ const AdminProducts = () => {
               </Select>
             </div>
             <div className="space-y-2">
-              <Label htmlFor="create-image">Image URL</Label>
+              <Label htmlFor="create-image" className="text-foreground">Image URL</Label>
               <Input
                 id="create-image"
                 value={createFormData.image}
@@ -649,6 +656,7 @@ const AdminProducts = () => {
                     image: e.target.value,
                   })
                 }
+                className="bg-background"
               />
             </div>
             <DialogFooter>

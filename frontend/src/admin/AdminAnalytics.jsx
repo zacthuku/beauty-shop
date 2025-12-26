@@ -217,8 +217,8 @@ const AdminAnalytics = () => {
         <CardContent className="p-6">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-sm font-medium text-gray-600">{title}</p>
-              <p className="text-2xl font-bold">{formattedCurrent}</p>
+              <p className="text-sm font-medium text-muted-foreground">{title}</p>
+              <p className="text-2xl font-bold text-foreground">{formattedCurrent}</p>
               <div className="flex items-center mt-2">
                 {isPositive ? (
                   <TrendingUp className="h-4 w-4 text-green-600 mr-1" />
@@ -232,19 +232,19 @@ const AdminAnalytics = () => {
                 >
                   {Math.abs(growth).toFixed(1)}%
                 </span>
-                <span className="text-sm text-gray-500 ml-1">
+                <span className="text-sm text-muted-foreground ml-1">
                   vs previous period
                 </span>
               </div>
             </div>
             <div
               className={`p-3 rounded-full ${
-                isPositive ? "bg-green-100" : "bg-red-100"
+                isPositive ? "bg-green-100 dark:bg-green-900/30" : "bg-red-100 dark:bg-red-900/30"
               }`}
             >
               <Icon
                 className={`h-6 w-6 ${
-                  isPositive ? "text-green-600" : "text-red-600"
+                  isPositive ? "text-green-600 dark:text-green-400" : "text-red-600 dark:text-red-400"
                 }`}
               />
             </div>
@@ -266,13 +266,13 @@ const AdminAnalytics = () => {
     <div className="space-y-6">
       <div className="flex justify-between items-center">
         <div>
-          <h1 className="text-3xl font-bold text-gray-900">Analytics</h1>
-          <p className="text-gray-600">Track your business performance</p>
+          <h1 className="text-3xl font-bold text-foreground">Analytics</h1>
+          <p className="text-muted-foreground">Track your business performance</p>
         </div>
         <select
           value={timeRange}
           onChange={(e) => setTimeRange(e.target.value)}
-          className="px-3 py-2 border rounded-md"
+          className="px-3 py-2 border border-border rounded-md bg-background text-foreground"
         >
           <option value="7d">Last 7 days</option>
           <option value="30d">Last 30 days</option>
@@ -330,7 +330,10 @@ const AdminAnalytics = () => {
                 <CartesianGrid strokeDasharray="3 3" />
                 <XAxis dataKey="date" />
                 <YAxis />
-                <Tooltip />
+                <Tooltip 
+                  contentStyle={{ backgroundColor: 'var(--card)', borderColor: 'var(--border)' }}
+                  itemStyle={{ color: 'var(--foreground)' }}
+                />
                 <Line
                   type="monotone"
                   dataKey="revenue"
@@ -356,7 +359,10 @@ const AdminAnalytics = () => {
                 <CartesianGrid strokeDasharray="3 3" />
                 <XAxis dataKey="date" />
                 <YAxis />
-                <Tooltip />
+                <Tooltip 
+                  contentStyle={{ backgroundColor: 'var(--card)', borderColor: 'var(--border)' }}
+                  itemStyle={{ color: 'var(--foreground)' }}
+                />
                 <Bar dataKey="orders" fill="#82ca9d" />
               </BarChart>
             </ResponsiveContainer>
@@ -393,7 +399,10 @@ const AdminAnalytics = () => {
                     />
                   ))}
                 </Pie>
-                <Tooltip />
+                <Tooltip 
+                  contentStyle={{ backgroundColor: 'var(--card)', borderColor: 'var(--border)' }}
+                  itemStyle={{ color: 'var(--foreground)' }}
+                />
               </PieChart>
             </ResponsiveContainer>
           </CardContent>
@@ -413,18 +422,18 @@ const AdminAnalytics = () => {
                   className="flex items-center justify-between"
                 >
                   <div className="flex items-center space-x-3">
-                    <div className="w-8 h-8 bg-gray-200 rounded-full flex items-center justify-center">
+                    <div className="w-8 h-8 bg-muted rounded-full flex items-center justify-center">
                       <span className="text-sm font-medium">{index + 1}</span>
                     </div>
                     <div>
-                      <p className="font-medium">{product.name}</p>
-                      <p className="text-sm text-gray-500">
+                      <p className="font-medium text-foreground">{product.name}</p>
+                      <p className="text-sm text-muted-foreground">
                         {product.sales} sales
                       </p>
                     </div>
                   </div>
                   <div className="text-right">
-                    <p className="font-medium">
+                    <p className="font-medium text-foreground">
                       kes {product.revenue.toFixed(2)}
                     </p>
                   </div>
