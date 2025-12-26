@@ -33,6 +33,8 @@ const ProductDetail = () => {
     const foundProduct = getProductById(id);
     if (foundProduct) {
       setProduct(foundProduct);
+      // Scroll to top when product changes
+      window.scrollTo(0, 0);
     } else {
       navigate("/products");
     }
