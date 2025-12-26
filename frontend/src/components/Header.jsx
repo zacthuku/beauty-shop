@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { useAuth } from "../context/AuthContext";
 import { useCart } from "../context/CartContext";
 import { useProducts } from "../context/ProductsContext";
+import ThemeToggle from "./ThemeToggle";
 
 const Header = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -16,6 +17,7 @@ const Header = () => {
 
   const handleLogout = () => {
     logout();
+    setIsMenuOpen(false);
     navigate("/");
   };
 
@@ -46,7 +48,7 @@ const Header = () => {
           </Link>
 
           {/* Desktop Navigation */}
-          <nav className="hidden md:flex items-center space-x-8">
+          <nav className="hidden lg:flex items-center space-x-8">
             <Link
               to="/products"
               className={`font-medium transition-colors ${
@@ -74,6 +76,8 @@ const Header = () => {
 
           {/* Actions */}
           <div className="flex items-center space-x-4">
+            <ThemeToggle />
+            
             {/* Cart */}
             <Link
               to="/cart"
@@ -88,56 +92,58 @@ const Header = () => {
             </Link>
 
             {/* User Menu */}
-            {user ? (
-              <div className="relative group">
-                <Button variant="ghost" className="flex items-center space-x-2">
-                  <User className="h-5 w-5" />
-                  <span className="hidden md:inline">{user.username}</span>
-                </Button>
-                <div className="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg py-1 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200">
-                  <Link
-                    to="/profile"
-                    className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
-                  >
-                    Profile
-                  </Link>
-                  <Link
-                    to="/orders"
-                    className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
-                  >
-                    Order History
-                  </Link>
-                  <button
-                    onClick={handleLogout}
-                    className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
-                  >
-                    Sign Out
-                  </button>
+            <div className="hidden lg:flex items-center space-x-4">
+              {user ? (
+                <div className="relative group">
+                  <Button variant="ghost" className="flex items-center space-x-2">
+                    <User className="h-5 w-5" />
+                    <span>{user.username}</span>
+                  </Button>
+                  <div className="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg py-1 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 border border-gray-100">
+                    <Link
+                      to="/profile"
+                      className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                    >
+                      Profile
+                    </Link>
+                    <Link
+                      to="/orders"
+                      className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                    >
+                      Order History
+                    </Link>
+                    <button
+                      onClick={handleLogout}
+                      className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                    >
+                      Sign Out
+                    </button>
+                  </div>
                 </div>
-              </div>
-            ) : (
-              <div className="flex items-center space-x-2 ">
-                <Link to="/login">
-                  <Button variant="ghost" size="sm" className="cursor-pointer">
-                    Sign In
-                  </Button>
-                </Link>
-                <Link to="/register">
-                  <Button
-                    size="sm"
-                    className="bg-red-500 hover:bg-pink-600 cursor-pointer"
-                  >
-                    Sign Up
-                  </Button>
-                </Link>
-              </div>
-            )}
+              ) : (
+                <div className="flex items-center space-x-2">
+                  <Link to="/login">
+                    <Button variant="ghost" size="sm" className="cursor-pointer">
+                      Sign In
+                    </Button>
+                  </Link>
+                  <Link to="/register">
+                    <Button
+                      size="sm"
+                      className="bg-red-500 hover:bg-pink-600 cursor-pointer"
+                    >
+                      Sign Up
+                    </Button>
+                  </Link>
+                </div>
+              )}
+            </div>
 
             {/* Mobile Menu Toggle */}
             <Button
               variant="ghost"
               size="sm"
-              className="md:hidden"
+              className="lg:hidden"
               onClick={() => setIsMenuOpen(!isMenuOpen)}
             >
               {isMenuOpen ? (
@@ -151,18 +157,26 @@ const Header = () => {
 
         {/* Mobile Menu */}
         {isMenuOpen && (
-          <div className="md:hidden border-t border-gray-200 py-4">
-            <nav className="flex flex-col space-y-4">
+          <div className="lg:hidden border-t border-gray-200 py-4 bg-white animate-in slide-in-from-top-5 duration-200">
+            <nav className="flex flex-col space-y-4 px-2">
               <Link
                 to="/"
-                className="font-medium text-gray-700 hover:text-rose-600"
+                className={`font-medium px-4 py-2 rounded-md ${
+                  isActivePage("/") 
+                    ? "bg-rose-50 text-rose-600" 
+                    : "text-gray-700 hover:bg-gray-50"
+                }`}
                 onClick={() => setIsMenuOpen(false)}
               >
                 Home
               </Link>
               <Link
                 to="/products"
-                className="font-medium text-gray-700 hover:text-rose-600"
+                className={`font-medium px-4 py-2 rounded-md ${
+                  isActivePage("/products")
+                    ? "bg-rose-50 text-rose-600"
+                    : "text-gray-700 hover:bg-gray-50"
+                }`}
                 onClick={() => setIsMenuOpen(false)}
               >
                 All Products
@@ -171,12 +185,59 @@ const Header = () => {
                 <Link
                   key={category.name}
                   to={`/products/${category.name}`}
-                  className="font-medium text-gray-700 hover:text-rose-600"
+                  className={`font-medium px-4 py-2 rounded-md ${
+                    isActivePage(`/products/${category.name}`)
+                      ? "bg-rose-50 text-rose-600"
+                      : "text-gray-700 hover:bg-gray-50"
+                  }`}
                   onClick={() => setIsMenuOpen(false)}
                 >
                   {category.label}
                 </Link>
               ))}
+
+              <div className="border-t border-gray-100 my-2 pt-2">
+                {user ? (
+                  <>
+                    <div className="px-4 py-2 text-sm text-gray-500 font-medium">
+                      Account ({user.username})
+                    </div>
+                    <Link
+                      to="/profile"
+                      className="block px-4 py-2 text-gray-700 hover:bg-gray-50 rounded-md"
+                      onClick={() => setIsMenuOpen(false)}
+                    >
+                      Profile
+                    </Link>
+                    <Link
+                      to="/orders"
+                      className="block px-4 py-2 text-gray-700 hover:bg-gray-50 rounded-md"
+                      onClick={() => setIsMenuOpen(false)}
+                    >
+                      Order History
+                    </Link>
+                    <button
+                      onClick={handleLogout}
+                      className="block w-full text-left px-4 py-2 text-red-600 hover:bg-red-50 rounded-md font-medium"
+                    >
+                      Sign Out
+                    </button>
+                  </>
+                ) : (
+                  <div className="grid grid-cols-2 gap-4 px-4 pt-2">
+                    <Link to="/login" onClick={() => setIsMenuOpen(false)}>
+                      <Button variant="outline" className="w-full justify-center">
+                        Sign In
+                      </Button>
+                    </Link>
+                    <Link to="/register" onClick={() => setIsMenuOpen(false)}>
+                      <Button className="w-full bg-rose-500 hover:bg-rose-600 justify-center">
+                        Sign Up
+                      </Button>
+                    </Link>
+                  </div>
+                )}
+              </div>
             </nav>
           </div>
         )}

@@ -19,6 +19,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { useAuth } from "../context/AuthContext";
 import { toast } from "sonner";
+import ThemeToggle from "@/components/ThemeToggle";
 
 const AdminSidebar = ({ isCollapsed, onToggle }) => {
   const location = useLocation();
@@ -47,18 +48,18 @@ const AdminSidebar = ({ isCollapsed, onToggle }) => {
 
   return (
     <div
-      className={`bg-white border-r border-gray-200 text-gray-900 h-screen flex flex-col transition-all duration-300 shadow-sm ${
+      className={`bg-background border-r border-border text-foreground h-screen flex flex-col transition-all duration-300 shadow-sm ${
         isCollapsed ? "w-16" : "w-64"
       }`}
     >
       {/* Header */}
-      <div className="p-4 border-b border-gray-200">
+      <div className="p-4 border-b border-border">
         <div className="flex items-center space-x-3">
           <Shield className="h-8 w-8 text-rose-500" />
           {!isCollapsed && (
             <div>
-              <h2 className="font-bold text-lg text-gray-900">Admin Panel</h2>
-              <p className="text-xs text-gray-500">
+              <h2 className="font-bold text-lg text-foreground">Admin Panel</h2>
+              <p className="text-xs text-muted-foreground">
                 {user?.username || user?.name}
               </p>
             </div>
@@ -77,8 +78,8 @@ const AdminSidebar = ({ isCollapsed, onToggle }) => {
                 to={item.href}
                 className={`flex items-center px-3 py-3 text-sm font-medium rounded-lg transition-colors ${
                   isActive(item.href)
-                    ? "bg-rose-50 text-rose-700 border border-rose-200"
-                    : "text-gray-700 hover:bg-gray-50 hover:text-gray-900"
+                    ? "bg-rose-50 dark:bg-rose-950/30 text-rose-700 dark:text-rose-300 border border-rose-200 dark:border-rose-800"
+                    : "text-muted-foreground hover:bg-muted hover:text-foreground"
                 }`}
               >
                 <Icon className={`h-5 w-5 ${isCollapsed ? "" : "mr-3"}`} />
@@ -90,7 +91,7 @@ const AdminSidebar = ({ isCollapsed, onToggle }) => {
       </nav>
 
       {/* Footer */}
-      <div className="p-4 border-t border-gray-200">
+      <div className="p-4 border-t border-border">
         <Button
           onClick={() => {
             logout();
@@ -98,7 +99,7 @@ const AdminSidebar = ({ isCollapsed, onToggle }) => {
             navigate("/");
           }}
           variant="ghost"
-          className={`w-full text-gray-700 hover:text-gray-900 hover:bg-gray-50 ${
+          className={`w-full text-muted-foreground hover:text-foreground hover:bg-muted ${
             isCollapsed ? "px-2" : "justify-start"
           }`}
         >
@@ -117,10 +118,10 @@ const AdminLayout = ({ children }) => {
 
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gray-50">
+      <div className="min-h-screen flex items-center justify-center bg-background">
         <div className="text-center">
-          <div className="w-8 h-8 border-2 border-gray-200 border-t-gray-500 rounded-full animate-spin mx-auto mb-4"></div>
-          <p className="text-gray-600">Verifying admin privileges...</p>
+          <div className="w-8 h-8 border-2 border-muted border-t-foreground rounded-full animate-spin mx-auto mb-4"></div>
+          <p className="text-muted-foreground">Verifying admin privileges...</p>
         </div>
       </div>
     );
@@ -136,30 +137,33 @@ const AdminLayout = ({ children }) => {
   }
 
   return (
-    <div className="flex h-screen bg-gray-50">
+    <div className="flex h-screen bg-muted/20 dark:bg-background">
       <AdminSidebar
         isCollapsed={sidebarCollapsed}
         onToggle={() => setSidebarCollapsed(!sidebarCollapsed)}
       />
 
       <div className="flex-1 flex flex-col overflow-hidden">
-        <header className="bg-white shadow-sm border-b border-gray-200 px-6 py-4">
+        <header className="bg-background shadow-sm border-b border-border px-6 py-4">
           <div className="flex items-center justify-between">
             <Button
               variant="ghost"
               size="sm"
               onClick={() => setSidebarCollapsed(!sidebarCollapsed)}
-              className="text-gray-600 hover:text-gray-900 hover:bg-gray-100"
+              className="text-muted-foreground hover:text-foreground hover:bg-muted"
             >
               <Menu className="h-5 w-5" />
             </Button>
-            <div className="text-sm text-gray-700">
-              Logged in as: {user.username || user.name} ({user.role})
+            <div className="flex items-center gap-4">
+              <ThemeToggle />
+              <div className="text-sm text-muted-foreground">
+                Logged in as: {user.username || user.name} ({user.role})
+              </div>
             </div>
           </div>
         </header>
 
-        <main className="flex-1 overflow-auto p-6 bg-gray-50">
+        <main className="flex-1 overflow-auto p-6 bg-muted/20 dark:bg-background">
           <Outlet />
         </main>
       </div>

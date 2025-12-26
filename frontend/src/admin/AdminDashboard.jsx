@@ -197,39 +197,39 @@ const AdminDashboard = () => {
       value: stats.totalProducts,
       icon: Package,
       description: "Active products in catalog",
-      color: "text-blue-600",
+      color: "text-blue-600 dark:text-blue-400",
     },
     {
       title: "Total Orders",
       value: stats.totalOrders,
       icon: ShoppingCart,
       description: "Orders received",
-      color: "text-green-600",
+      color: "text-green-600 dark:text-green-400",
     },
     {
       title: "Total Users",
       value: loadingUsers ? "..." : stats.totalUsers,
       icon: Users,
       description: "Registered customers",
-      color: "text-purple-600",
+      color: "text-purple-600 dark:text-purple-400",
     },
     {
       title: "Revenue",
       value: `Kes ${stats.totalRevenue.toFixed(2)}`,
       icon: DollarSign,
       description: "Total revenue generated",
-      color: "text-emerald-600",
+      color: "text-emerald-600 dark:text-emerald-400",
     },
   ];
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-muted/20 dark:bg-background transition-colors duration-300">
       {/* Header */}
-      <div className="bg-white border-b">
+      <div className="bg-background border-b border-border">
         <div className="container mx-auto px-4 py-8">
           <div>
-            <h1 className="text-3xl font-bold text-gray-900 mb-2">Dashboard</h1>
-            <p className="text-gray-600">Welcome to your admin control panel</p>
+            <h1 className="text-3xl font-bold text-foreground mb-2">Dashboard</h1>
+            <p className="text-muted-foreground">Welcome to your admin control panel</p>
           </div>
         </div>
       </div>
@@ -243,18 +243,18 @@ const AdminDashboard = () => {
             return (
               <div
                 key={index}
-                className="bg-white rounded-lg p-6 shadow-sm border"
+                className="bg-card rounded-lg p-6 shadow-sm border border-border"
               >
                 <div className="flex items-center justify-between mb-2">
-                  <h3 className="text-sm font-medium text-gray-700">
+                  <h3 className="text-sm font-medium text-muted-foreground">
                     {stat.title}
                   </h3>
                   <Icon className={`h-4 w-4 ${stat.color}`} />
                 </div>
-                <div className="text-2xl font-bold text-gray-900 mb-1">
+                <div className="text-2xl font-bold text-foreground mb-1">
                   {stat.value}
                 </div>
-                <p className="text-xs text-gray-600">{stat.description}</p>
+                <p className="text-xs text-muted-foreground">{stat.description}</p>
               </div>
             );
           })}
@@ -263,15 +263,15 @@ const AdminDashboard = () => {
         {/* Top Products & Recent Orders */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
           {/* Top Products */}
-          <div className="bg-white rounded-lg shadow-sm border">
-            <div className="p-6 border-b">
+          <div className="bg-card rounded-lg shadow-sm border border-border">
+            <div className="p-6 border-b border-border">
               <div className="flex items-center space-x-2 mb-2">
-                <TrendingUp className="h-5 w-5 text-gray-900" />
-                <h2 className="text-lg font-semibold text-gray-900">
+                <TrendingUp className="h-5 w-5 text-foreground" />
+                <h2 className="text-lg font-semibold text-foreground">
                   Top Products
                 </h2>
               </div>
-              <p className="text-sm text-gray-600">
+              <p className="text-sm text-muted-foreground">
                 Latest products in catalog
               </p>
             </div>
@@ -283,7 +283,7 @@ const AdminDashboard = () => {
                       key={product.id}
                       className="flex items-center space-x-4"
                     >
-                      <div className="flex-shrink-0 w-12 h-12 bg-gray-100 rounded-lg overflow-hidden">
+                      <div className="flex-shrink-0 w-12 h-12 bg-muted rounded-lg overflow-hidden">
                         <img
                           src={
                             product.image_url ||
@@ -295,10 +295,10 @@ const AdminDashboard = () => {
                         />
                       </div>
                       <div className="flex-1 min-w-0">
-                        <p className="text-sm font-medium text-gray-900 truncate">
+                        <p className="text-sm font-medium text-foreground truncate">
                           {product.name}
                         </p>
-                        <div className="flex items-center space-x-4 text-xs text-gray-600">
+                        <div className="flex items-center space-x-4 text-xs text-muted-foreground">
                           <span className="flex items-center">
                             <ShoppingCart className="h-3 w-3 mr-1" />
                             {product.sales} sales
@@ -309,13 +309,13 @@ const AdminDashboard = () => {
                           </span>
                         </div>
                       </div>
-                      <div className="text-sm font-medium text-gray-900">
+                      <div className="text-sm font-medium text-foreground">
                         kes {parseFloat(product.price).toFixed(2)}
                       </div>
                     </div>
                   ))
                 ) : (
-                  <p className="text-sm text-gray-600 text-center py-4">
+                  <p className="text-sm text-muted-foreground text-center py-4">
                     No products found
                   </p>
                 )}
@@ -324,15 +324,15 @@ const AdminDashboard = () => {
           </div>
 
           {/* Recent Orders */}
-          <div className="bg-white rounded-lg shadow-sm border">
-            <div className="p-6 border-b">
+          <div className="bg-card rounded-lg shadow-sm border border-border">
+            <div className="p-6 border-b border-border">
               <div className="flex items-center space-x-2 mb-2">
-                <ShoppingCart className="h-5 w-5 text-gray-900" />
-                <h2 className="text-lg font-semibold text-gray-900">
+                <ShoppingCart className="h-5 w-5 text-foreground" />
+                <h2 className="text-lg font-semibold text-foreground">
                   Recent Orders
                 </h2>
               </div>
-              <p className="text-sm text-gray-600">Latest customer orders</p>
+              <p className="text-sm text-muted-foreground">Latest customer orders</p>
             </div>
             <div className="p-6">
               <div className="space-y-4">
@@ -343,19 +343,19 @@ const AdminDashboard = () => {
                       className="flex items-center justify-between"
                     >
                       <div>
-                        <p className="text-sm font-medium text-gray-900">
+                        <p className="text-sm font-medium text-foreground">
                           Order #{order.id}
                         </p>
-                        <p className="text-xs text-gray-600">
+                        <p className="text-xs text-muted-foreground">
                           {order.customerName} •{" "}
                           {new Date(order.createdAt).toLocaleDateString()}
                         </p>
                       </div>
                       <div className="text-right">
-                        <p className="text-sm font-medium text-gray-900">
+                        <p className="text-sm font-medium text-foreground">
                           kes {order.total.toFixed(2)}
                         </p>
-                        <p className="text-xs text-gray-600">
+                        <p className="text-xs text-muted-foreground">
                           {Array.isArray(order.items) ? order.items.length : 1}{" "}
                           items
                         </p>
@@ -363,7 +363,7 @@ const AdminDashboard = () => {
                     </div>
                   ))
                 ) : (
-                  <p className="text-sm text-gray-600 text-center py-4">
+                  <p className="text-sm text-muted-foreground text-center py-4">
                     No orders yet
                   </p>
                 )}

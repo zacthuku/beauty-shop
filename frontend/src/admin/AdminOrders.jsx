@@ -44,13 +44,13 @@ const AdminOrders = () => {
 
   const getStatusBadge = (status) => {
     const statusConfig = {
-      pending: { variant: "secondary", icon: Clock, color: "text-yellow-600" },
-      processing: { variant: "default", icon: Package, color: "text-blue-600" },
-      shipped: { variant: "default", icon: Truck, color: "text-purple-600" },
+      pending: { variant: "secondary", icon: Clock, color: "text-yellow-600 dark:text-yellow-400" },
+      processing: { variant: "default", icon: Package, color: "text-blue-600 dark:text-blue-400" },
+      shipped: { variant: "default", icon: Truck, color: "text-purple-600 dark:text-purple-400" },
       delivered: {
         variant: "default",
         icon: CheckCircle,
-        color: "text-green-600",
+        color: "text-green-600 dark:text-green-400",
       },
     };
 
@@ -84,20 +84,20 @@ const AdminOrders = () => {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-3xl font-bold text-gray-900">Orders Management</h1>
-        <p className="text-gray-600">Track and manage customer orders</p>
+        <h1 className="text-3xl font-bold text-foreground">Orders Management</h1>
+        <p className="text-muted-foreground">Track and manage customer orders</p>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
         <Card>
           <CardContent className="p-6">
             <div className="flex items-center">
-              <div className="p-2 bg-yellow-100 rounded-full">
-                <Clock className="h-4 w-4 text-yellow-600" />
+              <div className="p-2 bg-yellow-100 dark:bg-yellow-900/30 rounded-full">
+                <Clock className="h-4 w-4 text-yellow-600 dark:text-yellow-400" />
               </div>
               <div className="ml-4">
-                <p className="text-sm font-medium text-gray-600">Pending</p>
-                <p className="text-2xl font-bold">{counts.pending}</p>
+                <p className="text-sm font-medium text-muted-foreground">Pending</p>
+                <p className="text-2xl font-bold text-foreground">{counts.pending}</p>
               </div>
             </div>
           </CardContent>
@@ -106,12 +106,12 @@ const AdminOrders = () => {
         <Card>
           <CardContent className="p-6">
             <div className="flex items-center">
-              <div className="p-2 bg-blue-100 rounded-full">
-                <Package className="h-4 w-4 text-blue-600" />
+              <div className="p-2 bg-blue-100 dark:bg-blue-900/30 rounded-full">
+                <Package className="h-4 w-4 text-blue-600 dark:text-blue-400" />
               </div>
               <div className="ml-4">
-                <p className="text-sm font-medium text-gray-600">Processing</p>
-                <p className="text-2xl font-bold">{counts.processing}</p>
+                <p className="text-sm font-medium text-muted-foreground">Processing</p>
+                <p className="text-2xl font-bold text-foreground">{counts.processing}</p>
               </div>
             </div>
           </CardContent>
@@ -120,12 +120,12 @@ const AdminOrders = () => {
         <Card>
           <CardContent className="p-6">
             <div className="flex items-center">
-              <div className="p-2 bg-purple-100 rounded-full">
-                <Truck className="h-4 w-4 text-purple-600" />
+              <div className="p-2 bg-purple-100 dark:bg-purple-900/30 rounded-full">
+                <Truck className="h-4 w-4 text-purple-600 dark:text-purple-400" />
               </div>
               <div className="ml-4">
-                <p className="text-sm font-medium text-gray-600">Shipped</p>
-                <p className="text-2xl font-bold">{counts.shipped}</p>
+                <p className="text-sm font-medium text-muted-foreground">Shipped</p>
+                <p className="text-2xl font-bold text-foreground">{counts.shipped}</p>
               </div>
             </div>
           </CardContent>
@@ -134,12 +134,12 @@ const AdminOrders = () => {
         <Card>
           <CardContent className="p-6">
             <div className="flex items-center">
-              <div className="p-2 bg-green-100 rounded-full">
-                <CheckCircle className="h-4 w-4 text-green-600" />
+              <div className="p-2 bg-green-100 dark:bg-green-900/30 rounded-full">
+                <CheckCircle className="h-4 w-4 text-green-600 dark:text-green-400" />
               </div>
               <div className="ml-4">
-                <p className="text-sm font-medium text-gray-600">Delivered</p>
-                <p className="text-2xl font-bold">{counts.delivered}</p>
+                <p className="text-sm font-medium text-muted-foreground">Delivered</p>
+                <p className="text-2xl font-bold text-foreground">{counts.delivered}</p>
               </div>
             </div>
           </CardContent>
@@ -154,7 +154,7 @@ const AdminOrders = () => {
               <CardDescription>Manage and track order status</CardDescription>
             </div>
             <Select value={statusFilter} onValueChange={setStatusFilter}>
-              <SelectTrigger className="w-40">
+              <SelectTrigger className="w-40 bg-background text-foreground border-border">
                 <SelectValue placeholder="Filter by status" />
               </SelectTrigger>
               <SelectContent>
@@ -216,7 +216,7 @@ const AdminOrders = () => {
                           handleStatusUpdate(order.id, value)
                         }
                       >
-                        <SelectTrigger className="w-28 h-8">
+                        <SelectTrigger className="w-28 h-8 bg-background border-border">
                           <SelectValue />
                         </SelectTrigger>
                         <SelectContent>
