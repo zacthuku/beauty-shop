@@ -19,6 +19,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { useAuth } from "../context/AuthContext";
 import { toast } from "sonner";
+import ThemeToggle from "@/components/ThemeToggle";
 
 const AdminSidebar = ({ isCollapsed, onToggle }) => {
   const location = useLocation();
@@ -153,8 +154,11 @@ const AdminLayout = ({ children }) => {
             >
               <Menu className="h-5 w-5" />
             </Button>
-            <div className="text-sm text-muted-foreground">
-              Logged in as: {user.username || user.name} ({user.role})
+            <div className="flex items-center gap-4">
+              <ThemeToggle />
+              <div className="text-sm text-muted-foreground">
+                Logged in as: {user.username || user.name} ({user.role})
+              </div>
             </div>
           </div>
         </header>
