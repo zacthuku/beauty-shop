@@ -1,5 +1,5 @@
 from models import db, Category, Product, User, Order, OrderItem
-from main import app
+from app import app
 from werkzeug.security import generate_password_hash
 from random import randint, sample
 from datetime import datetime, timedelta
