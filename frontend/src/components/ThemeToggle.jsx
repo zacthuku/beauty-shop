@@ -4,8 +4,7 @@ import { Button } from "@/components/ui/button";
 
 export default function ThemeToggle() {
   const [theme, setTheme] = useState(
-    localStorage.getItem("theme") || 
-    (window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light")
+    localStorage.getItem("theme") || "light"
   );
 
   useEffect(() => {
