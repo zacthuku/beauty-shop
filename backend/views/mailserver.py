@@ -1,4 +1,6 @@
 from flask_mail import Mail, Message
+from threading import Thread
+from flask import current_app
 
 mail = Mail()
 
@@ -12,6 +14,13 @@ def email(app):
     app.config['MAIL_DEFAULT_SENDER'] = 'zacthuku7@gmail.com'
     
     mail.init_app(app)
+
+def send_async_email(app, msg):
+    with app.app_context():
+        try:
+            mail.send(msg)
+        except Exception as e:
+            print(f"Failed to send email: {e}")
 
 def send_email(name, email):
     subject = "Welcome to The Beauty"
@@ -72,7 +81,8 @@ def send_email(name, email):
         body=text_body
     )
     
-    mail.send(msg)
+    app = current_app._get_current_object()
+    Thread(target=send_async_email, args=(app, msg)).start()
 
 def send_reset_email(email, reset_url):
     subject = "Reset Your Password - The Beauty"
@@ -136,7 +146,8 @@ def send_reset_email(email, reset_url):
         body=text_body
     )
     
-    mail.send(msg)
+    app = current_app._get_current_object()
+    Thread(target=send_async_email, args=(app, msg)).start()
 
 def send_order_confirmation_email(name, email, order):     
     subject = f"Order Confirmation - #{order['id']} | The Beauty"      
@@ -230,7 +241,8 @@ The Beauty Team 💖"""
         body=text_body     
     )      
 
-    mail.send(msg)
+    app = current_app._get_current_object()
+    Thread(target=send_async_email, args=(app, msg)).start()
 
 def send_manager_invite_email(name, email, is_existing_user=False, password=None):
     subject = "You've Been Added as a Manager - The Beauty"
@@ -308,4 +320,5 @@ The Beauty Team 💖
         body=text_body
     )
 
-    mail.send(msg)
+    app = current_app._get_current_object()
+    Thread(target=send_async_email, args=(app, msg)).start()

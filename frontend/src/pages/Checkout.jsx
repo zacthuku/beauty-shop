@@ -99,7 +99,7 @@ const Checkout = () => {
         Math.random() * 1000
       )}`;
 
-      const res = await fetch(`${API_BASE_URL}/orders/checkout`, {
+      const res = await fetch(`${API_BASE_URL}orders/checkout`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

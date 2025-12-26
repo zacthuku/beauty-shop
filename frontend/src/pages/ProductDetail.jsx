@@ -33,6 +33,8 @@ const ProductDetail = () => {
     const foundProduct = getProductById(id);
     if (foundProduct) {
       setProduct(foundProduct);
+      // Scroll to top when product changes
+      window.scrollTo(0, 0);
     } else {
       navigate("/products");
     }
@@ -116,7 +118,7 @@ const ProductDetail = () => {
         <div className="grid lg:grid-cols-2 gap-12">
           {/* Product Images */}
           <div className="space-y-4">
-            <div className="aspect-square bg-gray-50 rounded-2xl overflow-hidden">
+            <div className="aspect-[4/3] bg-gray-50 rounded-2xl overflow-hidden max-w-lg mx-auto">
               <img
                 src={productImages[selectedImage]}
                 alt={product.name}

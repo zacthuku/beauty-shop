@@ -8,9 +8,18 @@ export const ProductsProvider = ({ children }) => {
   const [categories, setCategories] = useState([]);
   const [loading, setLoading] = useState(true);
 
-  const fetchProducts = async () => {
+  const fetchProducts = async (params = {}) => {
     try {
-      const res = await fetch(`${API_BASE_URL}/products`);
+      const queryParams = new URLSearchParams();
+      if (params.search) queryParams.append('search', params.search);
+      if (params.category && params.category !== 'all') queryParams.append('category', params.category);
+      if (params.sort) queryParams.append('sort', params.sort);
+      
+      const url = queryParams.toString() 
+        ? `${API_BASE_URL}/products?${queryParams}`
+        : `${API_BASE_URL}/products`;
+        
+      const res = await fetch(url);
       if (!res.ok) throw new Error("Network response was not ok");
       const data = await res.json();
       setProducts(data);

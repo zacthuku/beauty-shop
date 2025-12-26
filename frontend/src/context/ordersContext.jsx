@@ -190,7 +190,7 @@ export const OrdersProvider = ({ children }) => {
       setError(null);
 
       const token = localStorage.getItem("token");
-      const response = await fetch(`${API_BASE_URL}/orders/checkout`, {
+      const response = await fetch(`${API_BASE_URL}orders/checkout`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
