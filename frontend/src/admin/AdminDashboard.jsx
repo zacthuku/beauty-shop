@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { useOrders } from "../context/ordersContext";
 import { useProducts } from "../context/ProductsContext";
+import { useAuth } from "../context/AuthContext";
 
 const API_BASE_URL = `${import.meta.env.VITE_SERVER_URL}/users`;
 
@@ -107,6 +108,7 @@ const DollarSign = ({ className }) => (
 );
 
 const AdminDashboard = () => {
+  const { user } = useAuth();
   const { orders, getOrderCounts } = useOrders();
   const { products } = useProducts();
   const [stats, setStats] = useState({
@@ -220,7 +222,7 @@ const AdminDashboard = () => {
       description: "Total revenue generated",
       color: "text-emerald-600 dark:text-emerald-400",
     },
-  ];
+  ].filter((card) => user?.role !== "manager" || card.title !== "Total Users");
 
   return (
     <div className="min-h-screen bg-muted/20 dark:bg-background transition-colors duration-300">
